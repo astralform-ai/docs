@@ -38,12 +38,22 @@
               "dashboard/mcp-servers",
               "dashboard/platform-tools"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "Claude Code Plugin",
+        "groups": [
           {
-            "group": "Claude Code Plugin",
+            "group": "Getting Started",
             "pages": [
               "plugin/installation",
-              "plugin/authentication",
+              "plugin/authentication"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
               "plugin/commands",
               "plugin/mcp-tools"
             ]
