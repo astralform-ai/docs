@@ -67,21 +67,7 @@
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Dashboard",
-          "href": "https://astralform.ai",
-          "icon": "browser"
-        },
-        {
-          "anchor": "GitHub",
-          "href": "https://github.com/astralform-ai",
-          "icon": "github"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
@@ -118,6 +104,14 @@
     "indexHiddenPages": false
   },
   "api": {
-    "baseUrl": "https://api.astralform.ai"
+    "baseUrl": "https://api.astralform.ai",
+    "auth": {
+      "method": "key",
+      "name": "X-API-Key",
+      "inputPrefix": "af_live_"
+    },
+    "playground": {
+      "mode": "simple"
+    }
   }
 }
