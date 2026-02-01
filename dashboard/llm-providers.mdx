@@ -1,0 +1,130 @@
+---
+title: "LLM Providers"
+description: "Configure OpenAI, Anthropic, Groq, or Ollama as your AI model provider for Astralform projects."
+---
+
+## Supported Providers
+
+Astralform supports multiple LLM providers:
+
+| Provider | Models | Best For |
+|----------|--------|----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini | General purpose, vision |
+| **Anthropic** | Claude Sonnet 4, Claude Haiku | Long context, reasoning |
+| **Groq** | Llama 3, Mixtral | Fast inference |
+| **Ollama** | Any local model | Self-hosted, privacy |
+
+## Configuration
+
+1. Go to **Project Settings > LLM Configuration**
+2. Select your provider
+3. Enter the provider API key
+4. Choose a model
+5. Click **Save**
+
+## OpenAI
+
+```json
+{
+  "provider": "openai",
+  "api_key": "sk-...",
+  "model": "gpt-4o"
+}
+```
+
+**Available Models:**
+- `gpt-4o` - Most capable
+- `gpt-4o-mini` - Faster, cheaper
+- `gpt-4-turbo` - Large context window
+
+## Anthropic
+
+```json
+{
+  "provider": "anthropic",
+  "api_key": "sk-ant-...",
+  "model": "claude-sonnet-4-20250514"
+}
+```
+
+**Available Models:**
+- `claude-sonnet-4-20250514` - Best balance
+- `claude-haiku-3-5-20241022` - Fast and efficient
+
+## Groq
+
+```json
+{
+  "provider": "groq",
+  "api_key": "gsk_...",
+  "model": "llama-3.3-70b-versatile"
+}
+```
+
+**Available Models:**
+- `llama-3.3-70b-versatile` - Most capable
+- `llama-3.1-8b-instant` - Fastest
+- `mixtral-8x7b-32768` - Good balance
+
+## Ollama (Self-Hosted)
+
+For local models:
+
+```json
+{
+  "provider": "ollama",
+  "base_url": "http://localhost:11434",
+  "model": "llama3.2"
+}
+```
+
+<Note>
+  Ollama requires the model to be running on your server. No API key needed.
+</Note>
+
+## Model Parameters
+
+Fine-tune model behavior:
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `temperature` | Randomness (0-2) | 0.7 |
+| `max_tokens` | Maximum response length | 4096 |
+| `top_p` | Nucleus sampling | 1.0 |
+
+## Fallback Configuration
+
+Configure a fallback provider for reliability:
+
+```json
+{
+  "primary": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514"
+  },
+  "fallback": {
+    "provider": "openai",
+    "model": "gpt-4o"
+  }
+}
+```
+
+## Cost Optimization
+
+Tips for reducing costs:
+
+1. Use smaller models for simple tasks
+2. Set appropriate `max_tokens` limits
+3. Use Groq for high-volume, simple queries
+4. Consider Ollama for development
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
+    Add server-side tools
+  </Card>
+  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
+    Enable built-in tools
+  </Card>
+</CardGroup>

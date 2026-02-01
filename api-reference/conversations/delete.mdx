@@ -1,0 +1,77 @@
+---
+title: "Delete Conversation"
+description: "Permanently delete a conversation and all its messages from the system."
+api: "DELETE /v1/conversations/:id"
+---
+
+## Endpoint
+
+```
+DELETE https://api.astralform.ai/v1/conversations/{conversation_id}
+```
+
+## Request
+
+### Headers
+
+```
+X-API-Key: af_live_xxxxxxxxxxxx
+```
+
+### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `conversation_id` | string | The conversation ID to delete |
+
+## Response
+
+**204 No Content**
+
+A successful deletion returns no content.
+
+## Example
+
+### cURL
+
+```bash
+curl -X DELETE https://api.astralform.ai/v1/conversations/conv_abc123 \
+  -H "X-API-Key: af_live_xxxxxxxxxxxx"
+```
+
+### Swift
+
+```swift
+try await client.deleteConversation(id: "conv_abc123")
+print("Conversation deleted")
+```
+
+## Error Responses
+
+**404 Not Found**
+```json
+{
+  "error": {
+    "code": "conversation_not_found",
+    "message": "Conversation conv_abc123 was not found"
+  }
+}
+```
+
+**401 Unauthorized**
+```json
+{
+  "error": {
+    "code": "invalid_api_key",
+    "message": "The API key provided is invalid"
+  }
+}
+```
+
+## Notes
+
+<Warning>
+  Deletion is permanent and cannot be undone. All messages in the conversation will be lost.
+</Warning>
+
+Consider implementing soft-delete in your app if you need to recover deleted conversations.

@@ -1,97 +1,62 @@
 ---
 title: "Introduction"
-description: "Welcome to the new home for your documentation"
+description: "Astralform is an AI agent platform that lets you add conversational AI with tool-calling capabilities to your iOS apps in minutes."
 ---
 
-## Setting up
+## What is Astralform?
 
-Get your documentation site up and running in minutes.
+Astralform is an AI agent platform for mobile apps. It provides:
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+- **iOS SDK** - Native Swift SDK for seamless integration
+- **Multi-provider LLM support** - OpenAI, Anthropic, Groq, Ollama
+- **Tool calling** - Server-side and client-side MCP tools
+- **Streaming responses** - Real-time SSE-based chat streaming
+- **Conversation persistence** - Automatic message history management
 
-## Make it yours
+## Architecture
 
-Design a docs site that looks great and empowers your users.
+```
+iOS App                      Astralform Backend              LLM Provider
+   │                                │                              │
+   │──── SSE /v1/chat/stream ──────►│                              │
+   │                                │───── LangGraph agent ───────►│
+   │                                │                              │
+   │◄─── streaming response ────────│◄──── AI response ───────────│
+   │                                │                              │
+   │◄─── tool_use event ────────────│  (client tool requested)     │
+   │                                │                              │
+   │──── POST /v1/tool-result ─────►│                              │
+   │                                │───── continue agent ────────►│
+```
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+## Quick Links
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get your first AI chat working in 5 minutes
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="iOS SDK" icon="apple" href="/ios-sdk/installation">
+    Install and configure the Swift SDK
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Dashboard" icon="browser" href="/dashboard/projects">
+    Manage projects, API keys, and tools
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Full API documentation
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Tool Execution Layers
 
-Everything you need to create world-class documentation.
+Astralform supports three layers of tool execution:
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+| Layer | Location | Who Configures | Example Tools |
+|-------|----------|----------------|---------------|
+| **Platform Tools** | Backend | App developer | Tavily search |
+| **Server MCP** | Backend | App developer | Database, Slack |
+| **Client MCP** | iOS Device | End user | Calendar, Contacts |
 
-## Need inspiration?
+## Getting Help
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+- [GitHub Issues](https://github.com/astralform-ai/astralform/issues) - Report bugs
+- [Email Support](mailto:support@astralform.ai) - Contact us

@@ -1,0 +1,67 @@
+---
+title: "Projects"
+description: "Create and manage Astralform projects to organize your AI agents, API keys, and tool configurations."
+---
+
+## Overview
+
+Projects are the top-level organizational unit in Astralform. Each project has:
+
+- Its own API keys
+- LLM provider configuration
+- MCP server connections
+- Platform tool settings
+- Conversation history
+
+## Creating a Project
+
+1. Go to [astralform.ai](https://astralform.ai)
+2. Click **New Project** in the sidebar
+3. Enter a project name
+4. Click **Create**
+
+## Project Settings
+
+Access project settings by clicking the gear icon next to your project name.
+
+### General
+
+- **Project Name** - Display name for the project
+- **Project ID** - Unique identifier (read-only)
+
+### Danger Zone
+
+- **Delete Project** - Permanently removes the project and all associated data
+
+<Warning>
+  Deleting a project cannot be undone. All conversations, API keys, and configurations will be lost.
+</Warning>
+
+## Multiple Projects
+
+Use separate projects for:
+
+- **Development vs Production** - Different API keys and configurations
+- **Different Apps** - Each app gets its own project
+- **Testing** - Isolated environment for experiments
+
+## API Access
+
+Each project exposes the same API endpoints, authenticated by project-specific API keys:
+
+```bash
+# All requests require the X-API-Key header
+curl -X GET https://api.astralform.ai/v1/conversations \
+  -H "X-API-Key: your-project-api-key"
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Keys" icon="key" href="/dashboard/api-keys">
+    Generate and manage API keys
+  </Card>
+  <Card title="LLM Providers" icon="brain" href="/dashboard/llm-providers">
+    Configure AI model providers
+  </Card>
+</CardGroup>

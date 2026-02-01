@@ -1,0 +1,101 @@
+---
+title: "Get Conversation"
+description: "Retrieve a specific conversation with its complete message history."
+api: "GET /v1/conversations/:id"
+---
+
+## Endpoint
+
+```
+GET https://api.astralform.ai/v1/conversations/{conversation_id}
+```
+
+## Request
+
+### Headers
+
+```
+X-API-Key: af_live_xxxxxxxxxxxx
+```
+
+### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `conversation_id` | string | The conversation ID |
+
+## Response
+
+```json
+{
+  "data": {
+    "id": "conv_abc123",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:35:00Z",
+    "messages": [
+      {
+        "id": "msg_001",
+        "role": "user",
+        "content": "What's the weather like today?",
+        "created_at": "2024-01-15T10:30:00Z"
+      },
+      {
+        "id": "msg_002",
+        "role": "assistant",
+        "content": "Based on your location, it's currently 65°F and sunny in San Francisco.",
+        "created_at": "2024-01-15T10:30:05Z"
+      }
+    ]
+  }
+}
+```
+
+### Message Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique message identifier |
+| `role` | string | "user" or "assistant" |
+| `content` | string | Message content |
+| `created_at` | string | ISO 8601 timestamp |
+
+## Example
+
+### cURL
+
+```bash
+curl -X GET https://api.astralform.ai/v1/conversations/conv_abc123 \
+  -H "X-API-Key: af_live_xxxxxxxxxxxx"
+```
+
+### Swift
+
+```swift
+let conversation = try await client.getConversation(id: "conv_abc123")
+
+for message in conversation.messages {
+    print("[\(message.role)]: \(message.content)")
+}
+```
+
+## Error Responses
+
+**404 Not Found**
+```json
+{
+  "error": {
+    "code": "conversation_not_found",
+    "message": "Conversation conv_abc123 was not found"
+  }
+}
+```
+
+**401 Unauthorized**
+```json
+{
+  "error": {
+    "code": "invalid_api_key",
+    "message": "The API key provided is invalid"
+  }
+}
+```

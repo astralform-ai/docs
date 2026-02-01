@@ -1,0 +1,126 @@
+---
+title: "Chat Stream"
+description: "Stream AI responses in real-time using Server-Sent Events (SSE) for responsive chat experiences."
+api: "POST /v1/chat/stream"
+---
+
+## Endpoint
+
+```
+POST https://api.astralform.ai/v1/chat/stream
+```
+
+## Request
+
+### Headers
+
+```
+X-API-Key: af_live_xxxxxxxxxxxx
+Content-Type: application/json
+```
+
+### Body
+
+```json
+{
+  "conversation_id": "conv_abc123",
+  "message": "What's the weather like today?",
+  "client_tools": [
+    {
+      "name": "get_location",
+      "description": "Get user's current GPS location",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `conversation_id` | string | Yes | Conversation to send message to |
+| `message` | string | Yes | User's message content |
+| `client_tools` | array | No | Available client-side tools |
+
+## Response
+
+Returns a Server-Sent Events (SSE) stream.
+
+### Event Types
+
+**content_block_delta**
+```
+event: content_block_delta
+data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}
+```
+
+**tool_use**
+```
+event: tool_use
+data: {"type":"tool_use","id":"tool_123","name":"get_location","input":{}}
+```
+
+**message_stop**
+```
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+**error**
+```
+event: error
+data: {"type":"error","message":"Rate limit exceeded"}
+```
+
+## Example
+
+### cURL
+
+```bash
+curl -N -X POST https://api.astralform.ai/v1/chat/stream \
+  -H "X-API-Key: af_live_xxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "conversation_id": "conv_abc123",
+    "message": "Hello, how are you?"
+  }'
+```
+
+### Swift
+
+```swift
+for try await event in client.streamChat(
+    conversationId: "conv_abc123",
+    message: "Hello, how are you?"
+) {
+    switch event {
+    case .contentBlock(let text):
+        print(text, terminator: "")
+    case .toolUse(let tool):
+        // Handle tool call
+        break
+    case .messageStop:
+        print("\n[Done]")
+    case .error(let error):
+        print("Error: \(error)")
+    }
+}
+```
+
+## Handling Tool Calls
+
+When the AI needs to use a client tool, you'll receive a `tool_use` event. Execute the tool locally and submit the result:
+
+```swift
+case .toolUse(let tool):
+    let result = await executeLocalTool(tool)
+    try await client.submitToolResult(
+        conversationId: conversationId,
+        toolCallId: tool.id,
+        result: result
+    )
+```
+
+See [Tool Result](/api-reference/chat/tool-result) for the response format.

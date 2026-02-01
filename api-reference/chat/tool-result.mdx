@@ -1,0 +1,109 @@
+---
+title: "Tool Result"
+description: "Submit the result of a client-side tool execution to continue the AI conversation flow."
+api: "POST /v1/tool-result"
+---
+
+## Endpoint
+
+```
+POST https://api.astralform.ai/v1/tool-result
+```
+
+## Overview
+
+When the AI requests a client-side tool (via a `tool_use` event), your app executes the tool locally and submits the result using this endpoint. The AI then continues processing with the tool's output.
+
+## Request
+
+### Headers
+
+```
+X-API-Key: af_live_xxxxxxxxxxxx
+Content-Type: application/json
+```
+
+### Body
+
+```json
+{
+  "conversation_id": "conv_abc123",
+  "tool_call_id": "tool_xyz789",
+  "result": "The user's location is San Francisco, CA (37.7749, -122.4194)"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `conversation_id` | string | Yes | The conversation ID |
+| `tool_call_id` | string | Yes | The tool call ID from the `tool_use` event |
+| `result` | string | Yes | The result of the tool execution |
+
+## Response
+
+Returns a new SSE stream continuing the conversation.
+
+```
+event: content_block_delta
+data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Based on your location in San Francisco..."}}
+
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+## Example
+
+### cURL
+
+```bash
+curl -N -X POST https://api.astralform.ai/v1/tool-result \
+  -H "X-API-Key: af_live_xxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "conversation_id": "conv_abc123",
+    "tool_call_id": "tool_xyz789",
+    "result": "Calendar events for today:\n- 9:00 AM: Team standup\n- 2:00 PM: Client meeting"
+  }'
+```
+
+### Swift
+
+```swift
+// After receiving a tool_use event
+case .toolUse(let tool):
+    // Execute the tool locally
+    let result = await executeClientTool(tool)
+
+    // Submit the result
+    try await client.submitToolResult(
+        conversationId: conversationId,
+        toolCallId: tool.id,
+        result: result
+    )
+```
+
+## Error Handling
+
+If tool execution fails, submit an error result:
+
+```json
+{
+  "conversation_id": "conv_abc123",
+  "tool_call_id": "tool_xyz789",
+  "result": "Error: Calendar access was denied by the user"
+}
+```
+
+The AI will acknowledge the error and continue appropriately.
+
+## Flow Diagram
+
+```
+1. User sends message
+2. AI determines tool is needed
+3. Backend sends tool_use event
+4. Your app executes tool locally
+5. Your app calls POST /v1/tool-result
+6. AI continues with tool output
+7. Backend streams remaining response
+```

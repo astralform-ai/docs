@@ -1,80 +1,96 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Get Astralform working in your iOS app in under 5 minutes with this step-by-step guide."
 ---
 
-## Get started in three steps
+## Prerequisites
 
-Get your documentation site running locally and make your first customization.
+- Xcode 15+
+- iOS 16+ deployment target
+- An Astralform account at [astralform.ai](https://astralform.ai)
 
-### Step 1: Set up your local environment
+## Step 1: Create a Project
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+1. Go to [astralform.ai](https://astralform.ai) and sign in
+2. Click **New Project**
+3. Enter a project name and click **Create**
+4. Copy your **API Key** from the project settings
 
-### Step 2: Deploy your changes
+## Step 2: Install the SDK
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+Add Astralform to your Xcode project using Swift Package Manager:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+1. In Xcode, go to **File > Add Package Dependencies**
+2. Enter the repository URL:
+   ```
+   https://github.com/astralform-ai/Astralform-iOS-SDK
+   ```
+3. Select the latest version and click **Add Package**
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+## Step 3: Configure the Client
 
-### Step 3: Go live
+Initialize the Astralform client with your API key:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+```swift
+import Astralform
 
-## Next steps
+let client = AstralformClient(
+    baseURL: URL(string: "https://api.astralform.ai")!,
+    apiKey: "your-api-key"
+)
+```
 
-Now that you have your docs running, explore these key features:
+<Warning>
+  Never hardcode API keys in production. Use environment variables or secure storage.
+</Warning>
+
+## Step 4: Send Your First Message
+
+Create a conversation and send a message:
+
+```swift
+// Create a new conversation
+let conversation = try await client.createConversation()
+
+// Send a message and stream the response
+for try await event in client.streamChat(
+    conversationId: conversation.id,
+    message: "Hello! What can you help me with?"
+) {
+    switch event {
+    case .contentBlock(let text):
+        print(text, terminator: "")
+    case .messageStop:
+        print("\n[Done]")
+    case .toolUse(let tool):
+        // Handle client-side tool calls if needed
+        break
+    }
+}
+```
+
+## Step 5: Configure LLM Provider
+
+In your dashboard, configure which LLM provider to use:
+
+1. Go to **Project Settings > LLM Configuration**
+2. Select a provider (OpenAI, Anthropic, Groq, or Ollama)
+3. Enter your provider API key
+4. Choose the model (e.g., `gpt-4o`, `claude-sonnet-4-20250514`)
+
+## Next Steps
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Client Tools" icon="wrench" href="/ios-sdk/client-tools">
+    Add device capabilities like Calendar and Contacts
+  </Card>
+  <Card title="Server MCP" icon="server" href="/dashboard/mcp-servers">
+    Configure backend MCP servers
+  </Card>
+  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
+    Enable built-in tools like web search
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference/introduction">
+    Explore the full API
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

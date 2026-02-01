@@ -1,0 +1,151 @@
+---
+title: "Conversations"
+description: "Create, manage, and stream AI conversations using the Astralform iOS SDK with real-time Server-Sent Events."
+---
+
+## Creating a Conversation
+
+Start a new conversation:
+
+```swift
+let conversation = try await client.createConversation()
+print("Created conversation: \(conversation.id)")
+```
+
+## Streaming Chat
+
+Send a message and receive streaming responses:
+
+```swift
+for try await event in client.streamChat(
+    conversationId: conversation.id,
+    message: "What's the weather like today?"
+) {
+    switch event {
+    case .contentBlock(let text):
+        // Append text to your UI
+        print(text, terminator: "")
+
+    case .toolUse(let tool):
+        // Handle client-side tool calls
+        print("Tool requested: \(tool.name)")
+
+    case .messageStop:
+        // Message complete
+        print("\n[Done]")
+
+    case .error(let error):
+        print("Error: \(error)")
+    }
+}
+```
+
+## Event Types
+
+| Event | Description |
+|-------|-------------|
+| `contentBlock` | Text content from the AI response |
+| `toolUse` | Client-side tool call request |
+| `messageStop` | End of message stream |
+| `error` | Error during streaming |
+
+## Listing Conversations
+
+Get all conversations:
+
+```swift
+let conversations = try await client.listConversations()
+
+for conv in conversations {
+    print("\(conv.id): \(conv.createdAt)")
+}
+```
+
+## Getting Conversation History
+
+Retrieve messages from a conversation:
+
+```swift
+let messages = try await client.getConversation(id: conversation.id)
+
+for message in messages {
+    print("[\(message.role)]: \(message.content)")
+}
+```
+
+## Deleting a Conversation
+
+Remove a conversation and its messages:
+
+```swift
+try await client.deleteConversation(id: conversation.id)
+```
+
+## SwiftUI Integration
+
+Example chat view:
+
+```swift
+struct ChatView: View {
+    @State private var messages: [Message] = []
+    @State private var input = ""
+    @State private var isLoading = false
+
+    let client: AstralformClient
+    let conversationId: String
+
+    var body: some View {
+        VStack {
+            ScrollView {
+                ForEach(messages) { message in
+                    MessageBubble(message: message)
+                }
+            }
+
+            HStack {
+                TextField("Message", text: $input)
+                Button("Send") {
+                    Task { await sendMessage() }
+                }
+                .disabled(isLoading)
+            }
+            .padding()
+        }
+    }
+
+    func sendMessage() async {
+        let userMessage = input
+        input = ""
+        isLoading = true
+
+        messages.append(Message(role: .user, content: userMessage))
+        var assistantContent = ""
+
+        do {
+            for try await event in client.streamChat(
+                conversationId: conversationId,
+                message: userMessage
+            ) {
+                switch event {
+                case .contentBlock(let text):
+                    assistantContent += text
+                case .messageStop:
+                    messages.append(Message(role: .assistant, content: assistantContent))
+                default:
+                    break
+                }
+            }
+        } catch {
+            print("Error: \(error)")
+        }
+
+        isLoading = false
+    }
+}
+```
+
+## Next Steps
+
+<Card title="Client Tools" icon="wrench" href="/ios-sdk/client-tools">
+  Add device capabilities like Calendar and Contacts to your AI
+</Card>

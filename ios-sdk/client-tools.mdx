@@ -1,0 +1,199 @@
+---
+title: "Client Tools"
+description: "Enable client-side MCP tools to give your AI access to device capabilities like Calendar, Contacts, and Photos on iOS."
+---
+
+## Overview
+
+Client tools run on the iOS device and give the AI access to local capabilities. When the AI needs device data, it sends a `tool_use` event, your app executes the tool locally, and sends the result back.
+
+## Architecture
+
+```
+AI: "I need to check the user's calendar"
+    ↓
+Backend sends tool_use event
+    ↓
+iOS SDK receives tool request
+    ↓
+Your app executes tool locally
+    ↓
+Result sent via POST /v1/tool-result
+    ↓
+AI continues with the data
+```
+
+## Handling Tool Requests
+
+```swift
+for try await event in client.streamChat(
+    conversationId: conversationId,
+    message: "What's on my calendar today?"
+) {
+    switch event {
+    case .toolUse(let tool):
+        let result = await executeClientTool(tool)
+        try await client.submitToolResult(
+            conversationId: conversationId,
+            toolCallId: tool.id,
+            result: result
+        )
+
+    case .contentBlock(let text):
+        print(text, terminator: "")
+
+    default:
+        break
+    }
+}
+```
+
+## Example: Calendar Tool
+
+```swift
+import EventKit
+
+func executeClientTool(_ tool: ToolCall) async -> String {
+    switch tool.name {
+    case "get_calendar_events":
+        return await getCalendarEvents(tool.input)
+    case "get_contacts":
+        return await getContacts(tool.input)
+    default:
+        return "Unknown tool: \(tool.name)"
+    }
+}
+
+func getCalendarEvents(_ input: [String: Any]) async -> String {
+    let store = EKEventStore()
+
+    // Request permission
+    guard try? await store.requestFullAccessToEvents() == true else {
+        return "Calendar access denied"
+    }
+
+    // Get today's events
+    let calendar = Calendar.current
+    let start = calendar.startOfDay(for: Date())
+    let end = calendar.date(byAdding: .day, value: 1, to: start)!
+
+    let predicate = store.predicateForEvents(
+        withStart: start,
+        end: end,
+        calendars: nil
+    )
+
+    let events = store.events(matching: predicate)
+
+    let formatted = events.map { event in
+        "\(event.title ?? "Untitled"): \(event.startDate.formatted())"
+    }.joined(separator: "\n")
+
+    return formatted.isEmpty ? "No events today" : formatted
+}
+```
+
+## Registering Available Tools
+
+Tell the backend which client tools are available:
+
+```swift
+let tools: [[String: Any]] = [
+    [
+        "name": "get_calendar_events",
+        "description": "Get events from the user's calendar",
+        "input_schema": [
+            "type": "object",
+            "properties": [
+                "date": ["type": "string", "description": "Date in YYYY-MM-DD format"]
+            ]
+        ]
+    ],
+    [
+        "name": "get_contacts",
+        "description": "Search the user's contacts",
+        "input_schema": [
+            "type": "object",
+            "properties": [
+                "query": ["type": "string", "description": "Name to search for"]
+            ]
+        ]
+    ]
+]
+
+// Include in chat request
+for try await event in client.streamChat(
+    conversationId: conversationId,
+    message: message,
+    clientTools: tools
+) {
+    // ...
+}
+```
+
+## Privacy Considerations
+
+<Warning>
+  Always request user permission before accessing sensitive data. Show clear explanations of why access is needed.
+</Warning>
+
+- Request permissions at the moment they're needed, not at app launch
+- Provide fallback behavior when permissions are denied
+- Document which device capabilities your app uses in your privacy policy
+
+## Built-in Tool Schemas
+
+Common client tool schemas you can use:
+
+### Calendar Events
+```json
+{
+  "name": "get_calendar_events",
+  "description": "Get events from the user's calendar",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "start_date": {"type": "string"},
+      "end_date": {"type": "string"}
+    }
+  }
+}
+```
+
+### Contacts
+```json
+{
+  "name": "search_contacts",
+  "description": "Search user's contacts by name",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string"}
+    },
+    "required": ["query"]
+  }
+}
+```
+
+### Location
+```json
+{
+  "name": "get_current_location",
+  "description": "Get user's current GPS location",
+  "input_schema": {
+    "type": "object",
+    "properties": {}
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Server MCP" icon="server" href="/dashboard/mcp-servers">
+    Add server-side tools for database access and more
+  </Card>
+  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
+    Enable built-in tools like web search
+  </Card>
+</CardGroup>

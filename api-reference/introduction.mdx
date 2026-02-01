@@ -1,33 +1,104 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: "API Reference"
+description: "Complete reference documentation for the Astralform REST API, including authentication, endpoints, and response formats."
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Base URL
 
-## Welcome
+All API requests should be made to:
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+```
+https://api.astralform.ai/v1
+```
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+For self-hosted deployments, use your server's URL.
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All requests require an API key in the `X-API-Key` header:
+
+```bash
+curl -X GET https://api.astralform.ai/v1/conversations \
+  -H "X-API-Key: af_live_xxxxxxxxxxxx"
+```
+
+Get your API key from the [dashboard](https://astralform.ai).
+
+## Content Type
+
+All requests should include:
+
+```
+Content-Type: application/json
+```
+
+## Response Format
+
+Successful responses return JSON:
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
+{
+  "data": { ... },
+  "meta": {
+    "request_id": "req_123abc"
   }
-]
+}
 ```
+
+Error responses:
+
+```json
+{
+  "error": {
+    "code": "invalid_api_key",
+    "message": "The API key provided is invalid"
+  }
+}
+```
+
+## HTTP Status Codes
+
+| Code | Description |
+|------|-------------|
+| 200 | Success |
+| 201 | Created |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 404 | Not Found |
+| 429 | Rate Limited |
+| 500 | Server Error |
+
+## Rate Limits
+
+Default limits per API key:
+
+| Plan | Requests/min |
+|------|-------------|
+| Free | 60 |
+| Pro | 300 |
+| Enterprise | Custom |
+
+Rate limit headers are included in responses:
+
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 55
+X-RateLimit-Reset: 1609459200
+```
+
+## Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Chat Stream" icon="comments" href="/api-reference/chat/stream">
+    POST /v1/chat/stream
+  </Card>
+  <Card title="Tool Result" icon="wrench" href="/api-reference/chat/tool-result">
+    POST /v1/tool-result
+  </Card>
+  <Card title="List Conversations" icon="list" href="/api-reference/conversations/list">
+    GET /v1/conversations
+  </Card>
+  <Card title="Get Conversation" icon="eye" href="/api-reference/conversations/get">
+    GET /v1/conversations/:id
+  </Card>
+</CardGroup>

@@ -1,0 +1,98 @@
+---
+title: "API Keys"
+description: "Generate, rotate, and manage API keys for authenticating your iOS app with the Astralform backend."
+---
+
+## Overview
+
+API keys authenticate requests from your iOS app to Astralform. Each project can have multiple API keys for different environments or purposes.
+
+## Generating an API Key
+
+1. Open your project in the dashboard
+2. Go to **Settings > API Keys**
+3. Click **Generate New Key**
+4. Copy the key immediately - it won't be shown again
+
+<Warning>
+  API keys are shown only once when created. Store them securely.
+</Warning>
+
+## Key Format
+
+API keys follow this format:
+```
+af_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- `af_` - Astralform prefix
+- `live_` - Environment (live or test)
+- `xxxx...` - Random identifier
+
+## Using API Keys
+
+Include the key in all API requests:
+
+```swift
+let client = AstralformClient(
+    baseURL: URL(string: "https://api.astralform.ai")!,
+    apiKey: "af_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+)
+```
+
+Or in raw HTTP requests:
+
+```bash
+curl -X POST https://api.astralform.ai/v1/chat/stream \
+  -H "X-API-Key: af_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"conversation_id": "...", "message": "Hello"}'
+```
+
+## Rotating Keys
+
+To rotate a key without downtime:
+
+1. Generate a new key
+2. Update your app to use the new key
+3. Deploy the updated app
+4. Delete the old key
+
+## Revoking Keys
+
+If a key is compromised:
+
+1. Go to **Settings > API Keys**
+2. Find the compromised key
+3. Click **Revoke**
+4. Generate a new key and update your app
+
+## Best Practices
+
+| Do | Don't |
+|----|-------|
+| Store keys in secure storage (Keychain) | Hardcode keys in source code |
+| Use different keys per environment | Share keys across projects |
+| Rotate keys regularly | Commit keys to version control |
+| Revoke unused keys | Leave old keys active |
+
+## Rate Limits
+
+API keys have the following default limits:
+
+| Plan | Requests/min | Requests/day |
+|------|-------------|--------------|
+| Free | 60 | 1,000 |
+| Pro | 300 | 50,000 |
+| Enterprise | Custom | Custom |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="LLM Providers" icon="brain" href="/dashboard/llm-providers">
+    Configure which AI models to use
+  </Card>
+  <Card title="iOS SDK" icon="apple" href="/ios-sdk/configuration">
+    Configure the SDK with your key
+  </Card>
+</CardGroup>

@@ -1,0 +1,101 @@
+---
+title: "Configuration"
+description: "Configure the Astralform iOS SDK client with your API key, base URL, and optional settings for customized behavior."
+---
+
+## Basic Configuration
+
+Initialize the client with your API key:
+
+```swift
+import Astralform
+
+let client = AstralformClient(
+    baseURL: URL(string: "https://api.astralform.ai")!,
+    apiKey: "your-api-key"
+)
+```
+
+## Configuration Options
+
+### Custom Base URL
+
+For self-hosted deployments:
+
+```swift
+let client = AstralformClient(
+    baseURL: URL(string: "https://your-server.com")!,
+    apiKey: "your-api-key"
+)
+```
+
+### Request Timeout
+
+Configure the default timeout for API requests:
+
+```swift
+let client = AstralformClient(
+    baseURL: URL(string: "https://api.astralform.ai")!,
+    apiKey: "your-api-key",
+    timeout: 60 // seconds
+)
+```
+
+## Secure API Key Storage
+
+<Warning>
+  Never hardcode API keys in your source code or commit them to version control.
+</Warning>
+
+### Using Keychain
+
+```swift
+import Security
+
+func storeAPIKey(_ key: String) {
+    let data = key.data(using: .utf8)!
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrService as String: "com.yourapp.astralform",
+        kSecAttrAccount as String: "api-key",
+        kSecValueData as String: data
+    ]
+    SecItemAdd(query as CFDictionary, nil)
+}
+
+func retrieveAPIKey() -> String? {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrService as String: "com.yourapp.astralform",
+        kSecAttrAccount as String: "api-key",
+        kSecReturnData as String: true
+    ]
+    var result: AnyObject?
+    SecItemCopyMatching(query as CFDictionary, &result)
+    guard let data = result as? Data else { return nil }
+    return String(data: data, encoding: .utf8)
+}
+```
+
+### Using Environment Variables (Debug)
+
+For development, use Xcode's scheme environment variables:
+
+1. Edit your scheme (**Product > Scheme > Edit Scheme**)
+2. Go to **Run > Arguments > Environment Variables**
+3. Add `ASTRALFORM_API_KEY` with your key
+
+```swift
+let apiKey = ProcessInfo.processInfo.environment["ASTRALFORM_API_KEY"] ?? ""
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Conversations" icon="comments" href="/ios-sdk/conversations">
+    Create and manage chat conversations
+  </Card>
+  <Card title="Client Tools" icon="wrench" href="/ios-sdk/client-tools">
+    Add device capabilities
+  </Card>
+</CardGroup>

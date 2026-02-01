@@ -1,0 +1,141 @@
+---
+title: "MCP Servers"
+description: "Connect Model Context Protocol (MCP) servers to give your AI access to databases, APIs, and external services."
+---
+
+## Overview
+
+MCP (Model Context Protocol) servers provide tools that run on the backend. Unlike client tools that run on the iOS device, MCP tools run server-side with access to databases, APIs, and other services.
+
+## Adding an MCP Server
+
+1. Go to **Project Settings > MCP Servers**
+2. Click **Add Server**
+3. Enter the server configuration
+4. Click **Save**
+
+## Configuration Format
+
+```json
+{
+  "name": "postgres",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-postgres"],
+  "env": {
+    "DATABASE_URL": "postgresql://user:pass@localhost:5432/db"
+  }
+}
+```
+
+## Supported Server Types
+
+### Database Servers
+
+**PostgreSQL**
+```json
+{
+  "name": "postgres",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-postgres"],
+  "env": {
+    "DATABASE_URL": "postgresql://..."
+  }
+}
+```
+
+**SQLite**
+```json
+{
+  "name": "sqlite",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "/data/app.db"]
+}
+```
+
+### API Servers
+
+**GitHub**
+```json
+{
+  "name": "github",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_TOKEN": "ghp_..."
+  }
+}
+```
+
+**Slack**
+```json
+{
+  "name": "slack",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-slack"],
+  "env": {
+    "SLACK_BOT_TOKEN": "xoxb-..."
+  }
+}
+```
+
+## Environment Variables
+
+Store sensitive values securely:
+
+1. Go to **Project Settings > Secrets**
+2. Add environment variables
+3. Reference them in MCP config: `$SECRET_NAME`
+
+```json
+{
+  "name": "postgres",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-postgres"],
+  "env": {
+    "DATABASE_URL": "$POSTGRES_URL"
+  }
+}
+```
+
+## Tool Discovery
+
+After adding an MCP server, its tools are automatically available to the AI. View discovered tools in **Project Settings > MCP Servers > Tools**.
+
+Example tools from a PostgreSQL server:
+- `query` - Run SQL queries
+- `list_tables` - List all tables
+- `describe_table` - Get table schema
+
+## Best Practices
+
+| Do | Don't |
+|----|-------|
+| Use secrets for credentials | Hardcode passwords in config |
+| Limit database permissions | Give full admin access |
+| Test locally first | Deploy untested servers |
+| Monitor tool usage | Ignore usage patterns |
+
+## Troubleshooting
+
+### Server Not Connecting
+
+1. Check that the command exists and is executable
+2. Verify environment variables are set correctly
+3. Check server logs in **Project Settings > Logs**
+
+### Tools Not Appearing
+
+1. Wait 30 seconds for tool discovery
+2. Refresh the MCP Servers page
+3. Check the server's tool definitions
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
+    Enable built-in tools like web search
+  </Card>
+  <Card title="Client Tools" icon="mobile" href="/ios-sdk/client-tools">
+    Add device-side tools
+  </Card>
+</CardGroup>

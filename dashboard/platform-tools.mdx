@@ -1,0 +1,98 @@
+---
+title: "Platform Tools"
+description: "Enable built-in platform tools like Tavily web search to enhance your AI agent's capabilities without additional setup."
+---
+
+## Overview
+
+Platform tools are pre-built capabilities that run on Astralform's backend. Enable them with a single click - no MCP server configuration needed.
+
+## Available Tools
+
+### Tavily Search
+
+Web search powered by Tavily AI.
+
+**Capabilities:**
+- Real-time web search
+- News search
+- Answer extraction
+
+**Configuration:**
+1. Go to **Project Settings > Platform Tools**
+2. Enable **Tavily Search**
+3. Enter your Tavily API key (get one at [tavily.com](https://tavily.com))
+
+**Example Usage:**
+```
+User: What's the latest news about AI?
+AI: [Uses tavily_search tool]
+    Here are the latest AI news headlines...
+```
+
+## Enabling Platform Tools
+
+1. Go to **Project Settings > Platform Tools**
+2. Find the tool you want to enable
+3. Toggle it **On**
+4. Enter any required API keys
+5. Click **Save**
+
+## Tool Behavior
+
+Platform tools are automatically invoked by the AI when relevant. You don't need to explicitly request them.
+
+### How the AI Decides
+
+1. User asks a question
+2. AI analyzes if tools would help
+3. If web search is needed, AI calls `tavily_search`
+4. Results are incorporated into the response
+
+### Controlling Tool Usage
+
+You can guide tool usage through system prompts:
+
+```
+Always search the web for current information when asked about:
+- News and events
+- Prices and availability
+- Weather and forecasts
+```
+
+## API Key Management
+
+Platform tool API keys are stored securely and never exposed to clients.
+
+**To update a key:**
+1. Go to **Project Settings > Platform Tools**
+2. Click the edit icon next to the tool
+3. Enter the new API key
+4. Click **Save**
+
+## Cost Considerations
+
+| Tool | Cost Model |
+|------|------------|
+| Tavily Search | Per search query |
+
+Monitor usage in **Project Settings > Analytics**.
+
+## Comparison: Platform vs MCP vs Client Tools
+
+| Type | Runs On | Managed By | Example |
+|------|---------|------------|---------|
+| Platform | Astralform | Astralform | Web search |
+| MCP | Your Server | You | Database queries |
+| Client | iOS Device | Your App | Calendar access |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
+    Add custom server-side tools
+  </Card>
+  <Card title="Client Tools" icon="mobile" href="/ios-sdk/client-tools">
+    Add device capabilities
+  </Card>
+</CardGroup>
