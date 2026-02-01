@@ -76,8 +76,9 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:support@astralform.ai"
+        "label": "GitHub",
+        "href": "https://github.com/astralform-ai",
+        "icon": "github"
       }
     ],
     "primary": {
