@@ -64,6 +64,20 @@
               "api-reference/conversations/get",
               "api-reference/conversations/delete"
             ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "api-reference/tools/list",
+              "api-reference/tools/mcp"
+            ]
+          },
+          {
+            "group": "Status",
+            "pages": [
+              "api-reference/status/health",
+              "api-reference/status/project"
+            ]
           }
         ]
       }

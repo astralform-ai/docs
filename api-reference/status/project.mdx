@@ -1,0 +1,71 @@
+---
+title: "Project Status"
+description: "Check if a project is ready for chat with a configured LLM provider."
+api: "GET https://api.astralform.ai/v1/project/status"
+---
+
+## Overview
+
+Check if the project has a valid LLM configuration before starting a chat. iOS clients should call this on app launch to show appropriate UI when no LLM is configured.
+
+## Response
+
+<ResponseField name="is_ready" type="boolean">
+  Whether the project is ready for chat.
+</ResponseField>
+
+<ResponseField name="llm_configured" type="boolean">
+  Whether an LLM provider has been configured in the dashboard.
+</ResponseField>
+
+<ResponseField name="llm_provider" type="string">
+  The configured LLM provider (e.g., `"openai"`, `"anthropic"`, `"groq"`).
+</ResponseField>
+
+<ResponseField name="llm_model" type="string">
+  The configured model name (e.g., `"gpt-4o"`, `"claude-sonnet-4-20250514"`).
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable status message.
+</ResponseField>
+
+<ResponseExample>
+```json Ready
+{
+  "is_ready": true,
+  "llm_configured": true,
+  "llm_provider": "openai",
+  "llm_model": "gpt-4o",
+  "message": "Project is ready for chat."
+}
+```
+
+```json Not Configured
+{
+  "is_ready": false,
+  "llm_configured": false,
+  "llm_provider": null,
+  "llm_model": null,
+  "message": "No LLM configured. Please configure an LLM provider in the dashboard."
+}
+```
+</ResponseExample>
+
+## Example
+
+<CodeGroup>
+```swift Swift
+let status = try await client.getProjectStatus()
+
+if !status.isReady {
+    // Show setup required UI
+    showConfigurationRequired()
+}
+```
+
+```bash cURL
+curl https://api.astralform.ai/v1/project/status \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+</CodeGroup>

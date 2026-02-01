@@ -1,0 +1,33 @@
+---
+title: "Health Check"
+description: "Check if the Astralform API server is running and healthy."
+api: "GET https://api.astralform.ai/v1/health"
+---
+
+## Overview
+
+Simple health check endpoint to verify the API server is running. No authentication required.
+
+## Response
+
+<ResponseField name="status" type="string">
+  Server status. Always `"ok"` when healthy.
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  API server version (e.g., `"0.1.0"`).
+</ResponseField>
+
+<ResponseField name="ollama_connected" type="boolean">
+  Whether Ollama (local LLM) is reachable. May be `false` if using cloud providers only.
+</ResponseField>
+
+<ResponseExample>
+```json
+{
+  "status": "ok",
+  "version": "0.1.0",
+  "ollama_connected": false
+}
+```
+</ResponseExample>

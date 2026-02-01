@@ -1,0 +1,63 @@
+---
+title: "List Platform Tools"
+description: "Get platform tools enabled for this project (e.g., web search)."
+api: "GET https://api.astralform.ai/v1/tools"
+---
+
+## Overview
+
+Returns platform tools that the developer has enabled in the dashboard. Use this to show toggleable tool icons in your chat UI.
+
+## Response
+
+Returns an array of available tools.
+
+<ResponseField name="name" type="string">
+  Tool identifier used in chat requests.
+</ResponseField>
+
+<ResponseField name="display_name" type="string">
+  Human-readable name for UI display.
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  What the tool does.
+</ResponseField>
+
+<ResponseField name="icon" type="string">
+  SF Symbol name for iOS (e.g., `"globe"`, `"magnifyingglass"`).
+</ResponseField>
+
+<ResponseExample>
+```json
+[
+  {
+    "name": "tavily_search",
+    "display_name": "Web Search",
+    "description": "Search the web for current information",
+    "icon": "globe"
+  }
+]
+```
+</ResponseExample>
+
+## Example
+
+<CodeGroup>
+```swift Swift
+let tools = try await client.getAvailableTools()
+
+for tool in tools {
+    // Show tool toggle in UI
+    ToolToggle(
+        name: tool.displayName,
+        icon: Image(systemName: tool.icon)
+    )
+}
+```
+
+```bash cURL
+curl https://api.astralform.ai/v1/tools \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+</CodeGroup>

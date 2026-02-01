@@ -1,0 +1,67 @@
+---
+title: "List MCP Tools"
+description: "Get server-side MCP tools configured for this project."
+api: "GET https://api.astralform.ai/v1/mcp-tools"
+---
+
+## Overview
+
+Returns tools from MCP servers that the developer has configured in the dashboard. These run server-side (unlike client MCP tools which run on the device).
+
+## Response
+
+Returns an array of MCP tools.
+
+<ResponseField name="name" type="string">
+  Tool identifier (prefixed with server name, e.g., `"github__create_issue"`).
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  What the tool does.
+</ResponseField>
+
+<ResponseField name="server_name" type="string">
+  Which MCP server provides this tool.
+</ResponseField>
+
+<ResponseExample>
+```json
+[
+  {
+    "name": "github__create_issue",
+    "description": "Create a new issue in a GitHub repository",
+    "server_name": "github"
+  },
+  {
+    "name": "github__list_repos",
+    "description": "List repositories for the authenticated user",
+    "server_name": "github"
+  },
+  {
+    "name": "slack__send_message",
+    "description": "Send a message to a Slack channel",
+    "server_name": "slack"
+  }
+]
+```
+</ResponseExample>
+
+## Example
+
+<CodeGroup>
+```swift Swift
+let mcpTools = try await client.getMCPTools()
+
+// Group by server
+let grouped = Dictionary(grouping: mcpTools) { $0.serverName }
+
+for (server, tools) in grouped {
+    print("\(server): \(tools.count) tools")
+}
+```
+
+```bash cURL
+curl https://api.astralform.ai/v1/mcp-tools \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+</CodeGroup>
