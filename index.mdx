@@ -15,19 +15,9 @@ Astralform is an AI agent platform for mobile apps. It provides:
 
 ## Architecture
 
-```
-iOS App                      Astralform Backend              LLM Provider
-   │                                │                              │
-   │──── SSE /v1/chat/stream ──────►│                              │
-   │                                │───── LangGraph agent ───────►│
-   │                                │                              │
-   │◄─── streaming response ────────│◄──── AI response ───────────│
-   │                                │                              │
-   │◄─── tool_use event ────────────│  (client tool requested)     │
-   │                                │                              │
-   │──── POST /v1/tool-result ─────►│                              │
-   │                                │───── continue agent ────────►│
-```
+<Frame>
+  <img src="/images/architecture.svg" alt="Astralform Architecture" />
+</Frame>
 
 ## Quick Links
 

@@ -9,19 +9,9 @@ Client tools run on the iOS device and give the AI access to local capabilities.
 
 ## Architecture
 
-```
-AI: "I need to check the user's calendar"
-    ↓
-Backend sends tool_use event
-    ↓
-iOS SDK receives tool request
-    ↓
-Your app executes tool locally
-    ↓
-Result sent via POST /v1/tool-result
-    ↓
-AI continues with the data
-```
+<Frame>
+  <img src="/images/tool-flow.svg" alt="Client Tool Execution Flow" />
+</Frame>
 
 ## Handling Tool Requests
 
