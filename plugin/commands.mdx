@@ -1,0 +1,95 @@
+---
+title: "Commands"
+description: "Slash commands available in the Astralform Claude Code plugin."
+---
+
+## Overview
+
+Slash commands provide quick access to common operations. Type `/` in Claude Code to see available commands.
+
+## Available Commands
+
+### /astralform-login
+
+Authenticate with your Astralform account using device authorization flow.
+
+```
+/astralform-login
+```
+
+### /astralform-projects
+
+List all your projects with their status and configuration.
+
+```
+/astralform-projects
+```
+
+Shows:
+- Project name and ID
+- LLM provider configured
+- Number of API keys
+- MCP servers enabled
+
+### /astralform-create-project
+
+Create a new project interactively.
+
+```
+/astralform-create-project
+```
+
+Prompts for:
+- Project name
+- LLM provider selection
+- API key generation
+
+<Warning>
+  The encryption key is shown **only once** at creation. Save it securely - you'll need it for client-side MCP tools.
+</Warning>
+
+### /astralform-setup
+
+Interactive setup wizard for configuring a project completely.
+
+```
+/astralform-setup
+```
+
+Walks through:
+1. Creating or selecting a project
+2. Configuring LLM provider
+3. Adding MCP servers
+4. Enabling platform tools
+5. Generating API key
+
+### /astralform-analytics
+
+View usage analytics for a project.
+
+```
+/astralform-analytics
+```
+
+Shows:
+- Total conversations
+- Messages sent
+- Token usage by model
+- Tool invocations
+
+## Natural Language
+
+You can also use natural language - the plugin's skills will trigger automatically:
+
+| Say | Triggers |
+|-----|----------|
+| "Create an Astralform project" | Project creation flow |
+| "Add Astralform to my iOS app" | iOS SDK setup skill |
+| "Configure OpenAI for my project" | LLM configuration |
+| "Add GitHub MCP server" | MCP server setup |
+
+## Next Steps
+
+<Card title="MCP Tools" icon="wrench" href="/plugin/mcp-tools">
+  See all 30+ MCP tools for programmatic access
+</Card>

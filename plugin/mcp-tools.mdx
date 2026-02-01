@@ -1,0 +1,115 @@
+---
+title: "MCP Tools"
+description: "Complete reference for Astralform MCP tools available in Claude Code."
+---
+
+## Overview
+
+The plugin exposes 30+ MCP tools that Claude can use to manage your Astralform projects. These are invoked automatically when you ask Claude to perform Astralform operations.
+
+## Authentication
+
+| Tool | Description |
+|------|-------------|
+| `astralform_whoami` | Get current developer profile |
+| `astralform_device_code` | Start device authorization flow |
+| `astralform_device_token` | Exchange device code for access token |
+
+## Projects
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_projects` | List all your projects |
+| `astralform_get_project` | Get project details by ID |
+| `astralform_create_project` | Create a new project |
+| `astralform_update_project` | Update project name |
+| `astralform_delete_project` | Delete a project |
+
+### Example: Create Project
+
+```
+Create a new Astralform project called "My AI Assistant"
+```
+
+Claude will call `astralform_create_project` and return the project ID and encryption key.
+
+## API Keys
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_api_keys` | List API keys (prefix only for security) |
+| `astralform_create_api_key` | Generate a new API key |
+| `astralform_revoke_api_key` | Revoke an existing key |
+
+<Warning>
+  Full API keys are shown **only once** at creation. Store them securely.
+</Warning>
+
+## LLM Configuration
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_llm_providers` | List available providers (OpenAI, Anthropic, Groq, Ollama) |
+| `astralform_get_llm_config` | Get current LLM configuration |
+| `astralform_set_llm_config` | Set LLM provider and model |
+| `astralform_delete_llm_config` | Remove LLM configuration |
+
+### Example: Configure LLM
+
+```
+Set up Claude claude-sonnet-4-20250514 for my project
+```
+
+Claude will call `astralform_set_llm_config` with the appropriate provider and model.
+
+## MCP Servers
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_mcp_templates` | List available MCP server templates |
+| `astralform_list_mcp_servers` | List project's configured MCP servers |
+| `astralform_add_mcp_server` | Add an MCP server to project |
+| `astralform_toggle_mcp_server` | Enable/disable an MCP server |
+| `astralform_delete_mcp_server` | Remove an MCP server |
+
+### Example: Add GitHub MCP
+
+```
+Add GitHub MCP server to my project with token ghp_xxx
+```
+
+## Platform Tools
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_platform_tools` | List available platform tools |
+| `astralform_get_project_tools` | Get project's tool configuration |
+| `astralform_update_project_tool` | Enable/configure a platform tool |
+
+### Example: Enable Web Search
+
+```
+Enable Tavily web search for my project
+```
+
+## Analytics
+
+| Tool | Description |
+|------|-------------|
+| `astralform_get_analytics` | Get detailed usage analytics |
+| `astralform_get_stats` | Get aggregate statistics |
+
+## Documentation
+
+| Tool | Description |
+|------|-------------|
+| `astralform_search_docs` | Search Astralform documentation |
+| `astralform_get_doc` | Get full documentation page |
+
+### Example: Search Docs
+
+```
+How do I handle client tools in Astralform?
+```
+
+Claude will search the docs and provide relevant information.

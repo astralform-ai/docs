@@ -1,0 +1,80 @@
+---
+title: "Installation"
+description: "Install the Astralform plugin for Claude Code to manage projects directly from your terminal."
+---
+
+## Overview
+
+The Astralform plugin lets you manage AI agent projects directly from Claude Code - create projects, configure LLMs, add MCP servers, and integrate the iOS SDK without leaving your terminal.
+
+## Prerequisites
+
+- [Claude Code CLI](https://claude.ai/code) installed
+- Node.js 18+
+- Astralform account ([sign up](https://astralform.ai))
+
+## Install the Plugin
+
+```bash
+# Clone the plugin
+git clone https://github.com/astralform-ai/plugins.git ~/.claude/plugins/astralform
+
+# Build the MCP server
+cd ~/.claude/plugins/astralform/mcp-server
+npm install
+npm run build
+```
+
+## Enable the Plugin
+
+Add to your Claude Code settings (`~/.claude/settings.json`):
+
+```json
+{
+  "plugins": [
+    "~/.claude/plugins/astralform"
+  ]
+}
+```
+
+Or enable via Claude Code:
+
+```
+/plugins enable ~/.claude/plugins/astralform
+```
+
+## Verify Installation
+
+```
+/astralform-login
+```
+
+You should see a device code and URL to authenticate.
+
+## What's Included
+
+<CardGroup cols={2}>
+  <Card title="Slash Commands" icon="terminal">
+    `/astralform-login`, `/astralform-projects`, `/astralform-setup`
+  </Card>
+  <Card title="MCP Tools" icon="wrench">
+    30+ tools for project, LLM, and MCP management
+  </Card>
+  <Card title="Skills" icon="sparkles">
+    Auto-triggered help for iOS SDK setup and best practices
+  </Card>
+  <Card title="Documentation" icon="book">
+    Search and retrieve docs without leaving Claude Code
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/plugin/authentication">
+    Log in to your Astralform account
+  </Card>
+  <Card title="Commands" icon="terminal" href="/plugin/commands">
+    Learn the available slash commands
+  </Card>
+</CardGroup>
