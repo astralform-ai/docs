@@ -15,33 +15,25 @@ The Astralform plugin lets you manage AI agent projects directly from Claude Cod
 
 ## Install the Plugin
 
-```bash
-# Clone the plugin
-git clone https://github.com/astralform-ai/plugins.git ~/.claude/plugins/astralform
+<Tabs>
+  <Tab title="Standard Install (Recommended)">
+    First, add the Astralform marketplace to Claude Code:
+    ```
+    /plugin marketplace add https://github.com/astralform-ai/astralform-plugins
+    ```
 
-# Build the MCP server
-cd ~/.claude/plugins/astralform/mcp-server
-npm install
-npm run build
-```
-
-## Enable the Plugin
-
-Add to your Claude Code settings (`~/.claude/settings.json`):
-
-```json
-{
-  "plugins": [
-    "~/.claude/plugins/astralform"
-  ]
-}
-```
-
-Or enable via Claude Code:
-
-```
-/plugins enable ~/.claude/plugins/astralform
-```
+    Then install the plugin:
+    ```
+    /plugin install astralform
+    ```
+  </Tab>
+  <Tab title="Direct Install">
+    If the marketplace is already added, install directly:
+    ```
+    /plugin install astralform@astralform-plugins
+    ```
+  </Tab>
+</Tabs>
 
 ## Verify Installation
 
