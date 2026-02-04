@@ -106,8 +106,8 @@
     ]
   },
   "logo": {
-    "light": "/logo/astralform_full_logo.jpg",
-    "dark": "/logo/astralform_full_logo.jpg"
+    "light": "/logo/astralform_logo.jpg",
+    "dark": "/logo/astralform_logo.jpg"
   },
   "navbar": {
     "links": [
