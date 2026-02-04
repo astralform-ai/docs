@@ -1,11 +1,17 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "quill",
   "name": "Astralform",
+  "appearance": {
+    "default": "dark"
+  },
   "colors": {
-    "primary": "#667eea",
-    "light": "#818cf8",
-    "dark": "#764ba2"
+    "primary": "#ffffff",
+    "light": "#a1a1aa",
+    "dark": "#18181b",
+    "background": {
+      "dark": "#09090b"
+    }
   },
   "favicon": "/favicon.svg",
   "navigation": {

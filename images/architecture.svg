@@ -1,98 +1,98 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400">
   <defs>
-    <linearGradient id="purple-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea"/>
-      <stop offset="100%" style="stop-color:#764ba2"/>
+    <linearGradient id="zinc-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#52525b"/>
+      <stop offset="100%" style="stop-color:#3f3f46"/>
     </linearGradient>
-    <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3b82f6"/>
-      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    <linearGradient id="white-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e4e4e7"/>
     </linearGradient>
-    <linearGradient id="green-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#10b981"/>
-      <stop offset="100%" style="stop-color:#059669"/>
+    <linearGradient id="accent-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#71717a"/>
+      <stop offset="100%" style="stop-color:#52525b"/>
     </linearGradient>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.15"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
     </filter>
-    <marker id="arrow-purple" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#667eea"/>
+    <marker id="arrow-white" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#ffffff"/>
     </marker>
-    <marker id="arrow-green" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
-      <polygon points="0 0, 12 4, 0 8" fill="#10b981"/>
+    <marker id="arrow-zinc" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#a1a1aa"/>
     </marker>
   </defs>
 
   <!-- Background -->
-  <rect width="900" height="400" fill="#0f172a"/>
+  <rect width="900" height="400" fill="#09090b"/>
 
-  <!-- iOS App Box -->
-  <rect x="40" y="40" width="200" height="320" rx="12" fill="#1e293b" filter="url(#shadow)"/>
-  <rect x="40" y="40" width="200" height="50" rx="12" fill="url(#purple-gradient)"/>
-  <rect x="40" y="78" width="200" height="12" fill="#1e293b"/>
-  <text x="140" y="72" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">iOS App</text>
+  <!-- Client App Box -->
+  <rect x="40" y="40" width="200" height="320" rx="12" fill="#18181b" stroke="#27272a" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="40" y="40" width="200" height="50" rx="12" fill="#27272a"/>
+  <rect x="40" y="78" width="200" height="12" fill="#18181b"/>
+  <text x="140" y="72" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">Client App</text>
 
-  <!-- iOS Content -->
-  <rect x="65" y="110" width="150" height="45" rx="8" fill="#334155"/>
-  <text x="140" y="138" font-family="system-ui" font-size="13" fill="#e2e8f0" text-anchor="middle">Swift SDK</text>
+  <!-- Client Content -->
+  <rect x="65" y="110" width="150" height="45" rx="8" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="140" y="138" font-family="system-ui" font-size="13" fill="#fafafa" text-anchor="middle">Astralform SDK</text>
 
-  <rect x="65" y="170" width="150" height="45" rx="8" fill="#334155"/>
-  <text x="140" y="198" font-family="system-ui" font-size="13" fill="#e2e8f0" text-anchor="middle">Client MCP Tools</text>
+  <rect x="65" y="170" width="150" height="45" rx="8" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="140" y="198" font-family="system-ui" font-size="13" fill="#fafafa" text-anchor="middle">Client MCP Tools</text>
 
-  <text x="140" y="245" font-family="system-ui" font-size="11" fill="#64748b" text-anchor="middle">Calendar, Contacts,</text>
-  <text x="140" y="260" font-family="system-ui" font-size="11" fill="#64748b" text-anchor="middle">Photos, Location</text>
+  <text x="140" y="245" font-family="system-ui" font-size="11" fill="#71717a" text-anchor="middle">Calendar, Contacts,</text>
+  <text x="140" y="260" font-family="system-ui" font-size="11" fill="#71717a" text-anchor="middle">Photos, Location</text>
 
   <!-- Astralform Backend Box -->
-  <rect x="350" y="40" width="200" height="320" rx="12" fill="#1e293b" filter="url(#shadow)"/>
-  <rect x="350" y="40" width="200" height="50" rx="12" fill="url(#blue-gradient)"/>
-  <rect x="350" y="78" width="200" height="12" fill="#1e293b"/>
-  <text x="450" y="72" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">Backend</text>
+  <rect x="350" y="40" width="200" height="320" rx="12" fill="#18181b" stroke="#27272a" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="350" y="40" width="200" height="50" rx="12" fill="#ffffff"/>
+  <rect x="350" y="78" width="200" height="12" fill="#18181b"/>
+  <text x="450" y="72" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="#09090b" text-anchor="middle">Astralform</text>
 
   <!-- Backend Content -->
-  <rect x="375" y="110" width="150" height="40" rx="6" fill="#334155"/>
-  <text x="450" y="135" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">FastAPI + SSE</text>
+  <rect x="375" y="110" width="150" height="40" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="450" y="135" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">FastAPI + SSE</text>
 
-  <rect x="375" y="165" width="150" height="40" rx="6" fill="#334155"/>
-  <text x="450" y="190" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">LangGraph Agent</text>
+  <rect x="375" y="165" width="150" height="40" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="450" y="190" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">LangGraph Agent</text>
 
-  <rect x="375" y="220" width="150" height="40" rx="6" fill="#334155"/>
-  <text x="450" y="245" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">Server MCP Tools</text>
+  <rect x="375" y="220" width="150" height="40" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="450" y="245" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">Server MCP Tools</text>
 
-  <rect x="375" y="275" width="150" height="40" rx="6" fill="#334155"/>
-  <text x="450" y="300" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">PostgreSQL</text>
+  <rect x="375" y="275" width="150" height="40" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="450" y="300" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">PostgreSQL</text>
 
   <!-- LLM Provider Box -->
-  <rect x="660" y="40" width="200" height="320" rx="12" fill="#1e293b" filter="url(#shadow)"/>
-  <rect x="660" y="40" width="200" height="50" rx="12" fill="url(#green-gradient)"/>
-  <rect x="660" y="78" width="200" height="12" fill="#1e293b"/>
+  <rect x="660" y="40" width="200" height="320" rx="12" fill="#18181b" stroke="#27272a" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="660" y="40" width="200" height="50" rx="12" fill="#3f3f46"/>
+  <rect x="660" y="78" width="200" height="12" fill="#18181b"/>
   <text x="760" y="72" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">LLM Provider</text>
 
   <!-- LLM Content -->
-  <rect x="685" y="110" width="150" height="35" rx="6" fill="#334155"/>
-  <text x="760" y="133" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">OpenAI</text>
+  <rect x="685" y="110" width="150" height="35" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="760" y="133" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">OpenAI</text>
 
-  <rect x="685" y="155" width="150" height="35" rx="6" fill="#334155"/>
-  <text x="760" y="178" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">Anthropic</text>
+  <rect x="685" y="155" width="150" height="35" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="760" y="178" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">Anthropic</text>
 
-  <rect x="685" y="200" width="150" height="35" rx="6" fill="#334155"/>
-  <text x="760" y="223" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">Groq</text>
+  <rect x="685" y="200" width="150" height="35" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="760" y="223" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">Groq</text>
 
-  <rect x="685" y="245" width="150" height="35" rx="6" fill="#334155"/>
-  <text x="760" y="268" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">Ollama</text>
+  <rect x="685" y="245" width="150" height="35" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="760" y="268" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">Ollama</text>
 
   <!-- Connection Arrows -->
-  <!-- iOS to Backend -->
-  <line x1="240" y1="180" x2="345" y2="180" stroke="#667eea" stroke-width="3" marker-end="url(#arrow-purple)"/>
-  <line x1="345" y1="220" x2="240" y2="220" stroke="#a78bfa" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#arrow-purple)" transform="rotate(180 292.5 220)"/>
+  <!-- Client to Backend -->
+  <line x1="240" y1="180" x2="345" y2="180" stroke="#ffffff" stroke-width="2" marker-end="url(#arrow-white)"/>
+  <line x1="345" y1="220" x2="240" y2="220" stroke="#71717a" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#arrow-zinc)" transform="rotate(180 292.5 220)"/>
 
   <!-- Backend to LLM -->
-  <line x1="550" y1="180" x2="655" y2="180" stroke="#10b981" stroke-width="3" marker-end="url(#arrow-green)"/>
-  <line x1="655" y1="220" x2="550" y2="220" stroke="#6ee7b7" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#arrow-green)" transform="rotate(180 602.5 220)"/>
+  <line x1="550" y1="180" x2="655" y2="180" stroke="#ffffff" stroke-width="2" marker-end="url(#arrow-white)"/>
+  <line x1="655" y1="220" x2="550" y2="220" stroke="#71717a" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#arrow-zinc)" transform="rotate(180 602.5 220)"/>
 
   <!-- Labels for arrows -->
-  <text x="292" y="168" font-family="system-ui" font-size="11" fill="#a5b4fc" text-anchor="middle">SSE Stream</text>
-  <text x="292" y="242" font-family="system-ui" font-size="11" fill="#c4b5fd" text-anchor="middle">Events</text>
+  <text x="292" y="168" font-family="system-ui" font-size="11" fill="#a1a1aa" text-anchor="middle">SSE Stream</text>
+  <text x="292" y="242" font-family="system-ui" font-size="11" fill="#71717a" text-anchor="middle">Events</text>
 
-  <text x="602" y="168" font-family="system-ui" font-size="11" fill="#6ee7b7" text-anchor="middle">API Call</text>
-  <text x="602" y="242" font-family="system-ui" font-size="11" fill="#86efac" text-anchor="middle">Response</text>
+  <text x="602" y="168" font-family="system-ui" font-size="11" fill="#a1a1aa" text-anchor="middle">API Call</text>
+  <text x="602" y="242" font-family="system-ui" font-size="11" fill="#71717a" text-anchor="middle">Response</text>
 </svg>
