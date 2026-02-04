@@ -1,75 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" width="700" height="500">
   <defs>
-    <linearGradient id="purple-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#667eea"/>
-      <stop offset="100%" style="stop-color:#764ba2"/>
-    </linearGradient>
-    <marker id="arr-right" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#667eea"/>
+    <marker id="arr-white" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ffffff"/>
     </marker>
-    <marker id="arr-right-light" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
-    </marker>
-    <marker id="arr-right-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#10b981"/>
+    <marker id="arr-zinc" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a1a1aa"/>
     </marker>
   </defs>
 
   <!-- Background -->
-  <rect width="700" height="500" fill="#0f172a"/>
+  <rect width="700" height="500" fill="#09090b"/>
 
   <!-- Column Headers -->
-  <rect x="60" y="25" width="120" height="40" rx="8" fill="url(#purple-grad)"/>
-  <text x="120" y="51" font-family="system-ui" font-size="14" font-weight="600" fill="white" text-anchor="middle">iOS App</text>
+  <rect x="60" y="25" width="120" height="40" rx="8" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="120" y="51" font-family="system-ui" font-size="14" font-weight="600" fill="#fafafa" text-anchor="middle">Client App</text>
 
-  <rect x="290" y="25" width="120" height="40" rx="8" fill="#3b82f6"/>
-  <text x="350" y="51" font-family="system-ui" font-size="14" font-weight="600" fill="white" text-anchor="middle">Backend</text>
+  <rect x="290" y="25" width="120" height="40" rx="8" fill="#ffffff"/>
+  <text x="350" y="51" font-family="system-ui" font-size="14" font-weight="600" fill="#09090b" text-anchor="middle">Astralform</text>
 
-  <rect x="520" y="25" width="120" height="40" rx="8" fill="#10b981"/>
-  <text x="580" y="51" font-family="system-ui" font-size="14" font-weight="600" fill="white" text-anchor="middle">LLM</text>
+  <rect x="520" y="25" width="120" height="40" rx="8" fill="#3f3f46"/>
+  <text x="580" y="51" font-family="system-ui" font-size="14" font-weight="600" fill="#fafafa" text-anchor="middle">LLM</text>
 
   <!-- Vertical Lifelines -->
-  <line x1="120" y1="75" x2="120" y2="470" stroke="#334155" stroke-width="2" stroke-dasharray="4,4"/>
-  <line x1="350" y1="75" x2="350" y2="470" stroke="#334155" stroke-width="2" stroke-dasharray="4,4"/>
-  <line x1="580" y1="75" x2="580" y2="470" stroke="#334155" stroke-width="2" stroke-dasharray="4,4"/>
+  <line x1="120" y1="75" x2="120" y2="470" stroke="#27272a" stroke-width="2" stroke-dasharray="4,4"/>
+  <line x1="350" y1="75" x2="350" y2="470" stroke="#27272a" stroke-width="2" stroke-dasharray="4,4"/>
+  <line x1="580" y1="75" x2="580" y2="470" stroke="#27272a" stroke-width="2" stroke-dasharray="4,4"/>
 
   <!-- Step 1: User sends message -->
-  <line x1="125" y1="110" x2="345" y2="110" stroke="#667eea" stroke-width="2" marker-end="url(#arr-right)"/>
-  <rect x="165" y="92" width="140" height="24" rx="4" fill="#1e293b"/>
-  <text x="235" y="109" font-family="monospace" font-size="11" fill="#e2e8f0" text-anchor="middle">POST /v1/chat/stream</text>
+  <line x1="125" y1="110" x2="345" y2="110" stroke="#ffffff" stroke-width="2" marker-end="url(#arr-white)"/>
+  <rect x="165" y="92" width="140" height="24" rx="4" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+  <text x="235" y="109" font-family="monospace" font-size="11" fill="#fafafa" text-anchor="middle">POST /v1/chat/stream</text>
 
   <!-- Step 2: Backend calls LLM -->
-  <line x1="355" y1="155" x2="575" y2="155" stroke="#10b981" stroke-width="2" marker-end="url(#arr-right-green)"/>
-  <rect x="420" y="137" width="100" height="24" rx="4" fill="#1e293b"/>
-  <text x="470" y="154" font-family="system-ui" font-size="11" fill="#e2e8f0" text-anchor="middle">LangGraph</text>
+  <line x1="355" y1="155" x2="575" y2="155" stroke="#ffffff" stroke-width="2" marker-end="url(#arr-white)"/>
+  <rect x="420" y="137" width="100" height="24" rx="4" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+  <text x="470" y="154" font-family="system-ui" font-size="11" fill="#fafafa" text-anchor="middle">LangGraph</text>
 
   <!-- Step 3: LLM requests tool -->
-  <line x1="575" y1="200" x2="355" y2="200" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-right-light)"/>
-  <rect x="420" y="182" width="100" height="24" rx="4" fill="#1e293b"/>
-  <text x="470" y="199" font-family="system-ui" font-size="11" fill="#e2e8f0" text-anchor="middle">tool_use</text>
+  <line x1="575" y1="200" x2="355" y2="200" stroke="#71717a" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-zinc)"/>
+  <rect x="420" y="182" width="100" height="24" rx="4" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+  <text x="470" y="199" font-family="system-ui" font-size="11" fill="#a1a1aa" text-anchor="middle">tool_use</text>
 
-  <!-- Step 4: Backend sends tool request to iOS -->
-  <line x1="345" y1="245" x2="125" y2="245" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-right-light)"/>
-  <rect x="175" y="227" width="120" height="24" rx="4" fill="#1e293b"/>
-  <text x="235" y="244" font-family="system-ui" font-size="11" fill="#e2e8f0" text-anchor="middle">event: tool_use</text>
+  <!-- Step 4: Backend sends tool request to Client -->
+  <line x1="345" y1="245" x2="125" y2="245" stroke="#71717a" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-zinc)"/>
+  <rect x="175" y="227" width="120" height="24" rx="4" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+  <text x="235" y="244" font-family="system-ui" font-size="11" fill="#a1a1aa" text-anchor="middle">event: tool_use</text>
 
-  <!-- Step 5: iOS executes tool locally -->
-  <rect x="60" y="275" width="120" height="45" rx="6" fill="#334155" stroke="#667eea" stroke-width="1"/>
-  <text x="120" y="295" font-family="system-ui" font-size="12" fill="#e2e8f0" text-anchor="middle">Execute tool</text>
-  <text x="120" y="310" font-family="system-ui" font-size="10" fill="#64748b" text-anchor="middle">(on device)</text>
+  <!-- Step 5: Client executes tool locally -->
+  <rect x="60" y="275" width="120" height="45" rx="6" fill="#18181b" stroke="#3f3f46" stroke-width="1"/>
+  <text x="120" y="295" font-family="system-ui" font-size="12" fill="#fafafa" text-anchor="middle">Execute tool</text>
+  <text x="120" y="310" font-family="system-ui" font-size="10" fill="#71717a" text-anchor="middle">(on device)</text>
 
-  <!-- Step 6: iOS sends result back -->
-  <line x1="125" y1="350" x2="345" y2="350" stroke="#667eea" stroke-width="2" marker-end="url(#arr-right)"/>
-  <rect x="165" y="332" width="140" height="24" rx="4" fill="#1e293b"/>
-  <text x="235" y="349" font-family="monospace" font-size="11" fill="#e2e8f0" text-anchor="middle">POST /v1/tool-result</text>
+  <!-- Step 6: Client sends result back -->
+  <line x1="125" y1="350" x2="345" y2="350" stroke="#ffffff" stroke-width="2" marker-end="url(#arr-white)"/>
+  <rect x="165" y="332" width="140" height="24" rx="4" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+  <text x="235" y="349" font-family="monospace" font-size="11" fill="#fafafa" text-anchor="middle">POST /v1/tool-result</text>
 
   <!-- Step 7: Backend continues with LLM -->
-  <line x1="355" y1="395" x2="575" y2="395" stroke="#10b981" stroke-width="2" marker-end="url(#arr-right-green)"/>
-  <rect x="420" y="377" width="100" height="24" rx="4" fill="#1e293b"/>
-  <text x="470" y="394" font-family="system-ui" font-size="11" fill="#e2e8f0" text-anchor="middle">continue</text>
+  <line x1="355" y1="395" x2="575" y2="395" stroke="#ffffff" stroke-width="2" marker-end="url(#arr-white)"/>
+  <rect x="420" y="377" width="100" height="24" rx="4" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+  <text x="470" y="394" font-family="system-ui" font-size="11" fill="#fafafa" text-anchor="middle">continue</text>
 
   <!-- Step 8: Final response -->
-  <line x1="575" y1="440" x2="125" y2="440" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-right-light)"/>
-  <rect x="290" y="422" width="120" height="24" rx="4" fill="#1e293b"/>
-  <text x="350" y="439" font-family="system-ui" font-size="11" fill="#e2e8f0" text-anchor="middle">message_stop</text>
+  <line x1="575" y1="440" x2="125" y2="440" stroke="#71717a" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-zinc)"/>
+  <rect x="290" y="422" width="120" height="24" rx="4" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+  <text x="350" y="439" font-family="system-ui" font-size="11" fill="#a1a1aa" text-anchor="middle">message_stop</text>
 </svg>
