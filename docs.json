@@ -39,7 +39,8 @@
               "dashboard/api-keys",
               "dashboard/llm-providers",
               "dashboard/mcp-servers",
-              "dashboard/platform-tools"
+              "dashboard/platform-tools",
+              "dashboard/skills"
             ]
           }
         ]
@@ -92,6 +93,12 @@
             "pages": [
               "api-reference/tools/list",
               "api-reference/tools/mcp"
+            ]
+          },
+          {
+            "group": "Skills",
+            "pages": [
+              "api-reference/skills/list"
             ]
           },
           {

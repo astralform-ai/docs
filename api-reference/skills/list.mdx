@@ -1,0 +1,84 @@
+---
+title: "List Skills"
+api: "GET /v1/skills"
+description: "Get enabled skills for the project."
+---
+
+Returns metadata for all enabled skills configured for this project. The agent uses this to know which skills are available.
+
+## Authentication
+
+<ParamField header="X-API-Key" type="string" required>
+  Project API key (e.g., `sk_live_...` or `sk_test_...`)
+</ParamField>
+
+## Response
+
+<ResponseField name="skills" type="array">
+  Array of skill objects
+  <Expandable title="Skill object">
+    <ResponseField name="name" type="string">
+      Skill identifier (from SKILL.md frontmatter)
+    </ResponseField>
+    <ResponseField name="display_name" type="string">
+      Human-readable name (optional)
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Short description shown to agent
+    </ResponseField>
+    <ResponseField name="version" type="string">
+      Skill version (optional)
+    </ResponseField>
+    <ResponseField name="author" type="string">
+      Skill author (optional)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.astralform.ai/v1/skills \
+  -H "X-API-Key: sk_live_your_api_key"
+```
+
+```swift Swift
+let skills = try await astralform.getSkills()
+for skill in skills {
+    print("\(skill.name): \(skill.description)")
+}
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+[
+  {
+    "name": "pdf-processing",
+    "display_name": "PDF Processing",
+    "description": "Extracts text and tables from PDF files, fills PDF forms, and merges multiple PDFs.",
+    "version": "1.0.0",
+    "author": "Astralform"
+  },
+  {
+    "name": "data-analysis",
+    "display_name": "Data Analysis",
+    "description": "Analyzes datasets, generates charts, and creates summary reports.",
+    "version": "2.1.0",
+    "author": null
+  }
+]
+```
+
+```json 401
+{
+  "detail": "Invalid or missing API key"
+}
+```
+</ResponseExample>
+
+## Usage Notes
+
+- Only **enabled** skills are returned
+- Descriptions are kept short (~100 tokens) for efficient context usage
+- The agent automatically activates skills when user requests match
+- Full skill content is loaded only when activated (progressive disclosure)

@@ -1,0 +1,157 @@
+---
+title: "Skills"
+description: "Add specialized capabilities to your AI agent using the agentskills.io specification."
+---
+
+## Overview
+
+Skills give your AI agent specialized knowledge and workflows. They follow the open [agentskills.io](https://agentskills.io) specification using SKILL.md files with YAML frontmatter.
+
+When a user's request matches a skill's purpose, the agent automatically activates it to get detailed instructions.
+
+## Adding a Skill
+
+1. Go to **Project Settings > Skills**
+2. Click **Add Skill**
+3. Choose a source:
+   - **Custom** - Write SKILL.md content directly
+   - **URL** - Import from a GitHub raw URL
+
+## SKILL.md Format
+
+```yaml
+---
+name: pdf-processing
+description: Extracts text and tables from PDF files, fills PDF forms, and merges multiple PDFs.
+metadata:
+  version: "1.0.0"
+  author: "Astralform"
+---
+
+# PDF Processing
+
+Instructions for the AI agent on how to handle PDF files...
+
+## Extracting Text
+
+1. First, check if the file is a valid PDF
+2. Use the appropriate extraction method based on content type
+...
+```
+
+### Required Fields
+
+| Field | Description |
+|-------|-------------|
+| `name` | Unique identifier (lowercase, hyphens allowed) |
+| `description` | Short description shown to the agent (~100 tokens) |
+
+### Optional Fields
+
+| Field | Description |
+|-------|-------------|
+| `metadata.version` | Semantic version (e.g., "1.0.0") |
+| `metadata.author` | Skill author name |
+
+## How Skills Work
+
+1. **Discovery** - At agent startup, skill metadata (name + description) is loaded
+2. **System Prompt** - Available skills are listed in the agent's context
+3. **Activation** - Agent calls `activate_skill` when a request matches
+4. **Instructions** - Full SKILL.md content is provided to the agent
+
+```
+User: "Extract the tables from this PDF"
+
+Agent: [Sees pdf-processing skill matches]
+       [Calls activate_skill("pdf-processing")]
+       [Receives full instructions]
+       [Follows the skill's workflow]
+```
+
+## Managing Skills
+
+### Enable/Disable
+
+Toggle skills on/off without deleting them:
+
+1. Go to **Project Settings > Skills**
+2. Click the toggle next to a skill
+
+Disabled skills are not shown to the agent.
+
+### Refresh URL Skills
+
+For skills imported from URLs:
+
+1. Click **Refresh** to re-fetch the latest content
+2. Review changes in the skill editor
+3. Content updates automatically
+
+### Delete
+
+1. Click the **Delete** button
+2. Confirm deletion
+
+<Warning>
+  Deleting a skill removes it permanently. Consider disabling instead.
+</Warning>
+
+## Best Practices
+
+| Do | Don't |
+|----|-------|
+| Write clear, actionable instructions | Include irrelevant background |
+| Keep descriptions under 100 tokens | Write essay-length descriptions |
+| Use step-by-step workflows | Assume agent knows procedures |
+| Test skills with real requests | Deploy untested skills |
+
+## Example Skills
+
+### Customer Support
+
+```yaml
+---
+name: support-agent
+description: Handles customer inquiries, processes refunds, and escalates issues following company policies.
+---
+
+# Customer Support
+
+## Greeting
+Always greet the customer warmly and ask how you can help.
+
+## Common Issues
+- Password reset: Guide through self-service portal
+- Billing questions: Check account status first
+- Refund requests: Follow the refund policy below
+...
+```
+
+### Code Review
+
+```yaml
+---
+name: code-review
+description: Reviews code for bugs, security issues, and style violations using project guidelines.
+---
+
+# Code Review Guidelines
+
+## Security Checks
+1. Check for SQL injection vulnerabilities
+2. Verify input sanitization
+3. Review authentication logic
+...
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
+    Connect external tools and databases
+  </Card>
+  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
+    Enable built-in tools like web search
+  </Card>
+</CardGroup>
