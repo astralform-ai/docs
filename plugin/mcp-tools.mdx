@@ -5,7 +5,7 @@ description: "Complete reference for Astralform MCP tools available in Claude Co
 
 ## Overview
 
-The plugin exposes 35+ MCP tools that Claude can use to manage your Astralform projects. These are invoked automatically when you ask Claude to perform Astralform operations.
+The plugin exposes 45+ MCP tools that Claude can use to manage your Astralform projects. These are invoked automatically when you ask Claude to perform Astralform operations.
 
 ## Authentication
 
@@ -118,6 +118,35 @@ Claude will call `astralform_create_skill` with appropriate SKILL.md content.
 ```
 Import the PDF processing skill from https://raw.githubusercontent.com/example/skills/main/pdf/SKILL.md
 ```
+
+## Agents
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_agents` | List agents configured for a project |
+| `astralform_get_agent` | Get agent details including resource assignments |
+| `astralform_create_agent` | Create a new agent with name, LLM, and resources |
+| `astralform_update_agent` | Update an agent's configuration or resources |
+| `astralform_delete_agent` | Delete an agent (cannot delete default) |
+| `astralform_toggle_agent` | Enable/disable an agent |
+| `astralform_get_orchestration` | Get orchestration config (single/supervisor) |
+| `astralform_set_orchestration` | Set orchestration pattern for multi-agent routing |
+
+### Example: Create an Agent
+
+```
+Create a support agent for my project that handles customer inquiries, assign it the customer-faq skill
+```
+
+Claude will call `astralform_create_agent` with the name, description, and skill assignments.
+
+### Example: Set Up Supervisor
+
+```
+Set my project to supervisor orchestration with the router agent as supervisor
+```
+
+Claude will call `astralform_set_orchestration` with the supervisor pattern and agent ID.
 
 ## Analytics
 
