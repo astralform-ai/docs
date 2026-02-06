@@ -19,8 +19,8 @@ Web search powered by Tavily AI.
 - Answer extraction
 
 **Configuration:**
-1. Go to **Project Settings > Platform Tools**
-2. Enable **Tavily Search**
+1. Go to **Agents** and click an agent
+2. On the **Tools** tab, enable **Tavily Search**
 3. Enter your Tavily API key (get one at [tavily.com](https://tavily.com))
 
 **Example Usage:**
@@ -32,11 +32,17 @@ AI: [Uses tavily_search tool]
 
 ## Enabling Platform Tools
 
-1. Go to **Project Settings > Platform Tools**
-2. Find the tool you want to enable
+Platform tools are enabled and assigned per agent:
+
+1. Go to **Agents** and click an agent
+2. On the **Tools** tab, find the tool you want to enable
 3. Toggle it **On**
 4. Enter any required API keys
 5. Click **Save**
+
+For the Main Agent, all platform tools are auto-assigned. Named agents get only the tools you explicitly assign.
+
+See [Agents](/dashboard/agents) for more on resource assignment.
 
 ## Tool Behavior
 
@@ -65,8 +71,8 @@ Always search the web for current information when asked about:
 Platform tool API keys are stored securely and never exposed to clients.
 
 **To update a key:**
-1. Go to **Project Settings > Platform Tools**
-2. Click the edit icon next to the tool
+1. Go to **Agents** and click any agent
+2. On the **Tools** tab, click the edit icon next to the tool
 3. Enter the new API key
 4. Click **Save**
 
@@ -76,7 +82,7 @@ Platform tool API keys are stored securely and never exposed to clients.
 |------|------------|
 | Tavily Search | Per search query |
 
-Monitor usage in **Project Settings > Analytics**.
+Monitor usage in **Analytics**.
 
 ## Comparison: Platform vs MCP vs Client Tools
 
@@ -89,10 +95,10 @@ Monitor usage in **Project Settings > Analytics**.
 ## Next Steps
 
 <CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Assign tools to specific agents
+  </Card>
   <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
     Add custom server-side tools
-  </Card>
-  <Card title="Client Tools" icon="mobile" href="/ios-sdk/client-tools">
-    Add device capabilities
   </Card>
 </CardGroup>

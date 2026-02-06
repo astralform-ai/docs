@@ -16,11 +16,17 @@ Astralform supports multiple LLM providers:
 
 ## Configuration
 
-1. Go to **Project Settings > LLM Configuration**
-2. Select your provider
+LLM providers are configured per agent through the agent detail page:
+
+1. Go to **Agents** and click an agent
+2. On the **Model** tab, select your provider
 3. Enter the provider API key
 4. Choose a model
 5. Click **Save**
+
+Each agent can have its own LLM provider and model. If a named agent has no LLM configured, it inherits from the Main Agent.
+
+See [Agents](/dashboard/agents) for more on agent configuration.
 
 ## OpenAI
 
@@ -121,10 +127,10 @@ Tips for reducing costs:
 ## Next Steps
 
 <CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Configure agents with LLM, skills, and tools
+  </Card>
   <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
     Add server-side tools
-  </Card>
-  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
-    Enable built-in tools
   </Card>
 </CardGroup>

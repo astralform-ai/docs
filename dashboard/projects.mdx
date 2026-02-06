@@ -8,9 +8,7 @@ description: "Create and manage Astralform projects to organize your AI agents, 
 Projects are the top-level organizational unit in Astralform. Each project has:
 
 - Its own API keys
-- LLM provider configuration
-- MCP server connections
-- Platform tool settings
+- Agents (each with LLM, skills, MCP servers, and tools)
 - Conversation history
 
 ## Creating a Project
@@ -61,7 +59,7 @@ curl -X GET https://api.astralform.ai/v1/conversations \
   <Card title="API Keys" icon="key" href="/dashboard/api-keys">
     Generate and manage API keys
   </Card>
-  <Card title="LLM Providers" icon="brain" href="/dashboard/llm-providers">
-    Configure AI model providers
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Configure agents with LLM, skills, and tools
   </Card>
 </CardGroup>

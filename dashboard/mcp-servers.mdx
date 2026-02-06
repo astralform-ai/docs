@@ -9,10 +9,16 @@ MCP (Model Context Protocol) servers provide tools that run on the backend. Unli
 
 ## Adding an MCP Server
 
-1. Go to **Project Settings > MCP Servers**
-2. Click **Add Server**
+MCP servers are added and assigned through the agent detail page:
+
+1. Go to **Agents** and click an agent
+2. On the **MCP** tab, click **Add New Server**
 3. Enter the server configuration
 4. Click **Save**
+
+The server is added to the project pool and assigned to the agent. Other agents can then assign the same server from their MCP tab.
+
+See [Agents](/dashboard/agents) for more on resource assignment.
 
 ## Configuration Format
 
@@ -99,7 +105,7 @@ Store sensitive values securely:
 
 ## Tool Discovery
 
-After adding an MCP server, its tools are automatically available to the AI. View discovered tools in **Project Settings > MCP Servers > Tools**.
+After adding an MCP server, its tools are automatically available to agents it's assigned to.
 
 Example tools from a PostgreSQL server:
 - `query` - Run SQL queries
@@ -132,8 +138,8 @@ Example tools from a PostgreSQL server:
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
-    Enable built-in tools like web search
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Assign MCP servers to specific agents
   </Card>
   <Card title="Client Tools" icon="mobile" href="/ios-sdk/client-tools">
     Add device-side tools

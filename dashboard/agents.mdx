@@ -1,17 +1,77 @@
 ---
 title: "Agents"
-description: "Create specialized AI agents with independent skills, tools, and LLM configurations."
+description: "Configure your AI through agents — each with its own LLM, skills, MCP servers, and tools."
 ---
 
 ## Overview
 
-Agents let you split your AI into specialized roles. Each agent can have its own LLM, system prompt, skills, MCP servers, and platform tools. A supervisor agent routes user messages to the right specialist automatically.
+Agents are the central building block in Astralform. Every project has a **Main Agent** that handles all requests by default. You can create additional specialized agents and use a supervisor to route messages automatically.
 
-Without agents configured, your project uses a single default agent with all resources.
+All configuration — LLM provider, skills, MCP servers, and platform tools — is managed through agent detail pages.
+
+## Main Agent
+
+Every project starts with a **Main Agent**. It auto-inherits all project resources (skills, MCP servers, tools), so single-agent setups require no extra configuration.
+
+- The Main Agent cannot be deleted
+- New resources added to the project are automatically available to the Main Agent
+- When no `agent_name` is specified in a chat request, the Main Agent handles it
+
+## Agent Detail Page
+
+Click any agent from the agents list to open its detail page. Configuration is organized into four tabs:
+
+### Model Tab
+
+Configure the LLM provider and model for this agent.
+
+1. Go to **Agents** and click an agent
+2. On the **Model** tab, select a provider (OpenAI, Anthropic, Groq, Ollama)
+3. Choose a model and enter the provider API key
+4. Click **Save**
+
+If no LLM is configured on a named agent, it inherits the project's LLM settings from the Main Agent.
+
+See [LLM Providers](/dashboard/llm-providers) for provider details and available models.
+
+### Skills Tab
+
+Assign skills so the agent has access to specialized capabilities.
+
+1. On the **Skills** tab, see assigned and available skills
+2. Click **Assign** to add a skill, or **Unassign** to remove one
+3. Click **Add New Skill** to create a skill and assign it in one step
+
+For the Main Agent, all project skills are auto-assigned.
+
+See [Skills](/dashboard/skills) for the SKILL.md format and best practices.
+
+### MCP Tab
+
+Assign MCP servers so the agent can use external tools and databases.
+
+1. On the **MCP** tab, see assigned and available servers
+2. Click **Assign** or **Unassign** to manage assignments
+3. Click **Add New Server** to create and assign a server
+
+For the Main Agent, all project MCP servers are auto-assigned.
+
+See [MCP Servers](/dashboard/mcp-servers) for server configuration and examples.
+
+### Tools Tab
+
+Assign platform tools (e.g., web search) to the agent.
+
+1. On the **Tools** tab, see assigned and available tools
+2. Toggle tools on or off for this agent
+
+For the Main Agent, all project tools are auto-assigned.
+
+See [Platform Tools](/dashboard/platform-tools) for available tools.
 
 ## Creating an Agent
 
-1. Go to **Project Settings > Agents**
+1. Go to **Agents**
 2. Click **Add Agent**
 3. Fill in the details:
 
@@ -22,54 +82,7 @@ Without agents configured, your project uses a single default agent with all res
 | Description | No | What this agent specializes in (used for supervisor routing) |
 | System Prompt | No | Custom instructions for this agent |
 
-4. Optionally configure an agent-specific LLM (falls back to project LLM if not set)
-5. Click **Create**
-
-## Assigning Resources
-
-Each agent gets its own subset of project resources:
-
-### Skills
-
-Assign specific skills to an agent so it only has access to relevant capabilities.
-
-1. Edit the agent
-2. Select skills from the project's skill pool
-3. Save changes
-
-### MCP Servers
-
-Assign MCP servers so the agent only uses relevant external tools.
-
-1. Edit the agent
-2. Select MCP servers from the project pool
-3. Save changes
-
-### Platform Tools
-
-Assign platform tools (e.g., web search) per agent.
-
-1. Edit the agent
-2. Select tools from available platform tools
-3. Save changes
-
-## Agent-Specific LLM
-
-Each agent can override the project's LLM configuration:
-
-1. Edit the agent
-2. Set **LLM Provider** and **Model** (e.g., OpenAI / gpt-4o)
-3. Add the provider API key if using a different provider than the project
-4. Save changes
-
-If no LLM is configured on the agent, it inherits the project's LLM settings.
-
-## Default Agent
-
-Every project can have one **default agent**. When no `agent_name` is specified in a chat request, the default agent handles it.
-
-- The default agent cannot be deleted
-- You can change which agent is default by editing agent settings
+4. Click **Create**, then configure the agent via its detail page
 
 ## Orchestration
 
@@ -77,13 +90,13 @@ Orchestration controls how multiple agents work together.
 
 ### Single (Default)
 
-Only the default agent handles all requests. Other agents can be addressed directly by name via the SDK.
+Only the Main Agent handles all requests. Other agents can be addressed directly by name via the SDK.
 
 ### Supervisor
 
 A supervisor agent automatically routes user messages to the best specialist:
 
-1. Go to **Project Settings > Agents**
+1. Go to **Agents**
 2. In the **Orchestration** section, select **Supervisor**
 3. Pick a supervisor agent from the dropdown
 4. Save
@@ -103,20 +116,14 @@ The supervisor uses agent descriptions to decide routing, so write clear descrip
 
 ### Enable/Disable
 
-Toggle agents on/off without deleting them:
-
-1. Go to **Project Settings > Agents**
-2. Click the toggle next to an agent
-
-Disabled agents are excluded from routing and cannot be addressed by name.
+Toggle agents on/off without deleting them. Disabled agents are excluded from routing and cannot be addressed by name.
 
 ### Delete
 
-1. Click **Delete** on the agent card
-2. Confirm deletion
+Click **Delete** on an agent card and confirm.
 
 <Warning>
-  The default agent cannot be deleted. Deleting an agent removes all its resource assignments.
+  The Main Agent cannot be deleted. Deleting an agent removes all its resource assignments.
 </Warning>
 
 ## SDK Integration
@@ -149,10 +156,10 @@ See the [Agents API](/api-reference/agents/list) for details.
 ## Next Steps
 
 <CardGroup cols={2}>
+  <Card title="LLM Providers" icon="microchip" href="/dashboard/llm-providers">
+    Learn about supported LLM providers and models
+  </Card>
   <Card title="Skills" icon="sparkles" href="/dashboard/skills">
     Add specialized capabilities to agents
-  </Card>
-  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
-    Connect external tools and databases
   </Card>
 </CardGroup>

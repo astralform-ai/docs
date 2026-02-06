@@ -11,11 +11,17 @@ When a user's request matches a skill's purpose, the agent automatically activat
 
 ## Adding a Skill
 
-1. Go to **Project Settings > Skills**
-2. Click **Add Skill**
+Skills are added through the agent detail page:
+
+1. Go to **Agents** and click an agent
+2. On the **Skills** tab, click **Add New Skill**
 3. Choose a source:
    - **Custom** - Write SKILL.md content directly
    - **URL** - Import from a GitHub raw URL
+
+The skill is added to the project pool and assigned to the agent. Other agents can then assign the same skill from their Skills tab.
+
+See [Agents](/dashboard/agents) for more on resource assignment.
 
 ## SKILL.md Format
 
@@ -73,12 +79,7 @@ Agent: [Sees pdf-processing skill matches]
 
 ### Enable/Disable
 
-Toggle skills on/off without deleting them:
-
-1. Go to **Project Settings > Skills**
-2. Click the toggle next to a skill
-
-Disabled skills are not shown to the agent.
+Toggle skills on/off without deleting them. Disabled skills are not shown to agents.
 
 ### Refresh URL Skills
 
@@ -148,10 +149,10 @@ description: Reviews code for bugs, security issues, and style violations using 
 ## Next Steps
 
 <CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Assign skills to specific agents
+  </Card>
   <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
     Connect external tools and databases
-  </Card>
-  <Card title="Platform Tools" icon="puzzle" href="/dashboard/platform-tools">
-    Enable built-in tools like web search
   </Card>
 </CardGroup>

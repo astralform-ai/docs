@@ -37,11 +37,11 @@
             "pages": [
               "dashboard/projects",
               "dashboard/api-keys",
+              "dashboard/agents",
               "dashboard/llm-providers",
               "dashboard/mcp-servers",
               "dashboard/platform-tools",
-              "dashboard/skills",
-              "dashboard/agents"
+              "dashboard/skills"
             ]
           }
         ]
