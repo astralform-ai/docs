@@ -1,0 +1,83 @@
+---
+title: "List Agents"
+api: "GET /v1/agents"
+description: "Get available agents for the project."
+---
+
+Returns enabled agents configured for this project. SDKs use this to discover available agents and route messages to specific ones.
+
+## Authentication
+
+<ParamField header="X-API-Key" type="string" required>
+  Project API key (e.g., `sk_live_...` or `sk_test_...`)
+</ParamField>
+
+## Response
+
+<ResponseField name="agents" type="array">
+  Array of agent objects
+  <Expandable title="Agent object">
+    <ResponseField name="name" type="string">
+      Agent identifier (lowercase with hyphens)
+    </ResponseField>
+    <ResponseField name="display_name" type="string">
+      Human-readable name (optional)
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      What this agent specializes in (optional)
+    </ResponseField>
+    <ResponseField name="is_default" type="boolean">
+      Whether this is the project's default agent
+    </ResponseField>
+    <ResponseField name="is_enabled" type="boolean">
+      Whether the agent is currently enabled
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.astralform.ai/v1/agents \
+  -H "X-API-Key: sk_live_your_api_key"
+```
+
+```swift Swift
+let agents = try await astralform.getAgents()
+for agent in agents {
+    print("\(agent.name): \(agent.description ?? "")")
+}
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+[
+  {
+    "name": "support-agent",
+    "display_name": "Customer Support",
+    "description": "Handles customer inquiries, refunds, and account issues.",
+    "is_default": true,
+    "is_enabled": true
+  },
+  {
+    "name": "code-reviewer",
+    "display_name": "Code Reviewer",
+    "description": "Reviews code for bugs, security issues, and best practices.",
+    "is_default": false,
+    "is_enabled": true
+  }
+]
+```
+
+```json 401
+{
+  "detail": "Invalid or missing API key"
+}
+```
+</ResponseExample>
+
+## Usage Notes
+
+- Only **enabled** agents are returned
+- Use `agent_name` in [Chat Stream](/api-reference/chat/stream) to route to a specific agent
+- If no `agent_name` is provided, the default agent (or supervisor) handles the request

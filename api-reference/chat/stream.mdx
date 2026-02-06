@@ -43,6 +43,7 @@ Content-Type: application/json
 | `conversation_id` | string | Yes | Conversation to send message to |
 | `message` | string | Yes | User's message content |
 | `client_tools` | array | No | Available client-side tools |
+| `agent_name` | string | No | Route to a specific agent (bypasses supervisor) |
 
 ## Response
 
@@ -61,6 +62,26 @@ data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}
 event: tool_use
 data: {"type":"tool_use","id":"tool_123","name":"get_location","input":{}}
 ```
+
+**message_start**
+```
+event: message_start
+data: {"type":"message_start","message_id":"msg_123","conversation_id":"conv_abc","agent_name":"support-agent","agent_display_name":"Customer Support"}
+```
+
+The `agent_name` and `agent_display_name` fields are included when an agent handles the response.
+
+**agent_start** / **agent_end**
+```
+event: agent_start
+data: {"type":"agent_start","agent_name":"support-agent","agent_display_name":"Customer Support"}
+```
+```
+event: agent_end
+data: {"type":"agent_end","agent_name":"support-agent"}
+```
+
+Emitted when a specific agent begins and finishes handling a request. Useful for showing agent attribution in the UI.
 
 **message_stop**
 ```

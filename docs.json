@@ -40,7 +40,8 @@
               "dashboard/llm-providers",
               "dashboard/mcp-servers",
               "dashboard/platform-tools",
-              "dashboard/skills"
+              "dashboard/skills",
+              "dashboard/agents"
             ]
           }
         ]
@@ -99,6 +100,12 @@
             "group": "Skills",
             "pages": [
               "api-reference/skills/list"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "api-reference/agents/list"
             ]
           },
           {

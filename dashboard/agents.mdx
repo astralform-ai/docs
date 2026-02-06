@@ -1,0 +1,158 @@
+---
+title: "Agents"
+description: "Create specialized AI agents with independent skills, tools, and LLM configurations."
+---
+
+## Overview
+
+Agents let you split your AI into specialized roles. Each agent can have its own LLM, system prompt, skills, MCP servers, and platform tools. A supervisor agent routes user messages to the right specialist automatically.
+
+Without agents configured, your project uses a single default agent with all resources.
+
+## Creating an Agent
+
+1. Go to **Project Settings > Agents**
+2. Click **Add Agent**
+3. Fill in the details:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| Name | Yes | Unique identifier (lowercase, hyphens allowed, e.g., `support-agent`) |
+| Display Name | No | Human-readable name shown in UI |
+| Description | No | What this agent specializes in (used for supervisor routing) |
+| System Prompt | No | Custom instructions for this agent |
+
+4. Optionally configure an agent-specific LLM (falls back to project LLM if not set)
+5. Click **Create**
+
+## Assigning Resources
+
+Each agent gets its own subset of project resources:
+
+### Skills
+
+Assign specific skills to an agent so it only has access to relevant capabilities.
+
+1. Edit the agent
+2. Select skills from the project's skill pool
+3. Save changes
+
+### MCP Servers
+
+Assign MCP servers so the agent only uses relevant external tools.
+
+1. Edit the agent
+2. Select MCP servers from the project pool
+3. Save changes
+
+### Platform Tools
+
+Assign platform tools (e.g., web search) per agent.
+
+1. Edit the agent
+2. Select tools from available platform tools
+3. Save changes
+
+## Agent-Specific LLM
+
+Each agent can override the project's LLM configuration:
+
+1. Edit the agent
+2. Set **LLM Provider** and **Model** (e.g., OpenAI / gpt-4o)
+3. Add the provider API key if using a different provider than the project
+4. Save changes
+
+If no LLM is configured on the agent, it inherits the project's LLM settings.
+
+## Default Agent
+
+Every project can have one **default agent**. When no `agent_name` is specified in a chat request, the default agent handles it.
+
+- The default agent cannot be deleted
+- You can change which agent is default by editing agent settings
+
+## Orchestration
+
+Orchestration controls how multiple agents work together.
+
+### Single (Default)
+
+Only the default agent handles all requests. Other agents can be addressed directly by name via the SDK.
+
+### Supervisor
+
+A supervisor agent automatically routes user messages to the best specialist:
+
+1. Go to **Project Settings > Agents**
+2. In the **Orchestration** section, select **Supervisor**
+3. Pick a supervisor agent from the dropdown
+4. Save
+
+```
+User: "Help me with my billing issue"
+
+Supervisor: [Analyzes request]
+            [Routes to support-agent]
+
+support-agent: "I'd be happy to help with your billing..."
+```
+
+The supervisor uses agent descriptions to decide routing, so write clear descriptions for each agent.
+
+## Managing Agents
+
+### Enable/Disable
+
+Toggle agents on/off without deleting them:
+
+1. Go to **Project Settings > Agents**
+2. Click the toggle next to an agent
+
+Disabled agents are excluded from routing and cannot be addressed by name.
+
+### Delete
+
+1. Click **Delete** on the agent card
+2. Confirm deletion
+
+<Warning>
+  The default agent cannot be deleted. Deleting an agent removes all its resource assignments.
+</Warning>
+
+## SDK Integration
+
+SDKs can discover available agents and route messages to specific ones:
+
+```swift
+// List available agents
+let agents = try await astralform.getAgents()
+
+// Send to a specific agent
+try await client.streamChat(
+    conversationId: "conv_123",
+    message: "Review this code",
+    agentName: "code-reviewer"
+)
+```
+
+See the [Agents API](/api-reference/agents/list) for details.
+
+## Best Practices
+
+| Do | Don't |
+|----|-------|
+| Write clear agent descriptions for routing | Leave descriptions empty |
+| Assign only relevant resources to each agent | Give every agent all resources |
+| Use supervisor for 3+ specialized agents | Use supervisor for a single agent |
+| Test routing with different message types | Assume routing works without testing |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Skills" icon="sparkles" href="/dashboard/skills">
+    Add specialized capabilities to agents
+  </Card>
+  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
+    Connect external tools and databases
+  </Card>
+</CardGroup>
