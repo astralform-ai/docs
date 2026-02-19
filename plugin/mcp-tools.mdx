@@ -148,6 +148,33 @@ Set my project to supervisor orchestration with the router agent as supervisor
 
 Claude will call `astralform_set_orchestration` with the supervisor pattern and agent ID.
 
+## Connectors
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_connectors` | List available connectors (Slack, Notion, GitHub) |
+| `astralform_get_connector` | Get connector details by slug |
+| `astralform_list_project_connectors` | List connectors enabled for a project |
+| `astralform_enable_connector` | Enable a connector with credentials |
+| `astralform_update_project_connector` | Update connector configuration |
+| `astralform_disable_connector` | Remove a connector (revokes user tokens) |
+
+### Example: Enable Slack
+
+```
+Enable Slack connector for my project with client ID xxx and client secret yyy
+```
+
+Claude will call `astralform_enable_connector` with the OAuth credentials.
+
+### Example: List Connectors
+
+```
+What connectors are available for Astralform?
+```
+
+Claude will call `astralform_list_connectors` and show the catalog with tool counts.
+
 ## Analytics
 
 | Tool | Description |

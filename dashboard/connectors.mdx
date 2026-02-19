@@ -1,0 +1,193 @@
+---
+title: "Connectors"
+description: "Integrate OAuth and API key services (Slack, Notion, GitHub) so your agents can access external tools on behalf of end users."
+---
+
+## Overview
+
+Connectors let you integrate third-party services into your AI agents. Unlike MCP servers (which run server-side with your credentials), connectors support **end-user authentication** - each user connects their own account via OAuth or API key.
+
+| Feature | MCP Servers | Connectors |
+|---------|-------------|------------|
+| Auth model | Developer credentials | End-user OAuth/API keys |
+| Runs on | Backend (stdio/SSE) | Backend (API proxy) |
+| Use case | Databases, internal APIs | User-facing services (Slack, Notion) |
+| Setup | Command + env vars | OAuth app or API key |
+
+## Connector Types
+
+### OAuth Connectors
+
+OAuth connectors (Slack, Notion, GitHub) require you to create a dedicated OAuth app with the service provider. End users then authenticate through the standard OAuth flow.
+
+**Setup requirements:**
+- OAuth Client ID
+- OAuth Client Secret
+- Redirect URI configured in the provider's app settings
+
+### API Key Connectors
+
+API key connectors use a single API key for all requests. The key is encrypted and stored securely.
+
+**Setup requirements:**
+- Service API key
+
+### Remote MCP Connectors
+
+Remote MCP connectors connect to external MCP servers over HTTP. No additional credentials are needed beyond the server URL.
+
+## Available Connectors
+
+| Connector | Type | Category | Tools |
+|-----------|------|----------|-------|
+| Slack | OAuth | Communication | `slack_list_channels`, `slack_send_message`, `slack_search_messages` |
+| Notion | OAuth | Productivity | `notion_search`, `notion_get_page`, `notion_create_page` |
+| GitHub | OAuth | Development | `github_list_repos`, `github_search_issues` |
+
+## Enabling a Connector
+
+### Via Dashboard
+
+1. Go to **Project Settings > Connectors**
+2. Click **Enable** on a connector
+3. Enter the required credentials
+4. Configure auth settings (allow end-user auth, require auth)
+5. Click **Save**
+
+### Via Claude Code Plugin
+
+```
+/astralform-enable-connector
+```
+
+Or use natural language:
+
+```
+Enable Slack connector for my project
+```
+
+### Via MCP Tool
+
+```
+astralform_enable_connector with project_id, connector_slug="slack",
+  oauth_client_id="...", oauth_client_secret="..."
+```
+
+## Setting Up OAuth Apps
+
+### Slack
+
+1. Go to [api.slack.com/apps](https://api.slack.com/apps)
+2. Click **Create New App** > **From scratch**
+3. Add redirect URI: `https://api.astralform.ai/v1/connectors/oauth/callback`
+4. Under **OAuth & Permissions**, add required scopes:
+   - `channels:read` - List channels
+   - `chat:write` - Send messages
+   - `search:read` - Search messages
+5. Copy the **Client ID** and **Client Secret**
+
+### Notion
+
+1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations)
+2. Click **New integration**
+3. Select **Public integration**
+4. Add redirect URI: `https://api.astralform.ai/v1/connectors/oauth/callback`
+5. Copy the **OAuth client ID** and **OAuth client secret**
+
+### GitHub
+
+1. Go to [github.com/settings/developers](https://github.com/settings/developers)
+2. Click **New OAuth App**
+3. Set callback URL: `https://api.astralform.ai/v1/connectors/oauth/callback`
+4. Copy the **Client ID** and **Client Secret**
+
+## End-User Authentication
+
+When a connector is enabled with `require_auth: true` (default), end users must authenticate before the agent can use connector tools.
+
+The authentication flow:
+1. Agent calls a connector tool (e.g., `slack_list_channels`)
+2. If user hasn't authenticated, the SDK presents an OAuth prompt
+3. User authorizes access in their browser
+4. Token is stored encrypted for future requests
+5. Agent retries the tool call with the user's token
+
+## Managing Connectors
+
+### List Project Connectors
+
+View all enabled connectors and their status:
+
+```
+/astralform-connectors
+```
+
+### Update Configuration
+
+Update credentials, scopes, or auth settings:
+
+```
+astralform_update_project_connector with project_id, connector_id,
+  oauth_scopes="channels:read,chat:write"
+```
+
+### Disable a Connector
+
+Removing a connector also revokes all end-user tokens:
+
+```
+astralform_disable_connector with project_id, connector_id
+```
+
+<Warning>
+  Disabling a connector **permanently revokes all end-user tokens**. Users will need to re-authenticate if the connector is re-enabled.
+</Warning>
+
+## Assigning to Agents
+
+Connectors can be assigned to specific agents in multi-agent setups:
+
+1. Go to **Agents** and click an agent
+2. On the **Connectors** tab, assign available connectors
+3. Only assigned connectors' tools will be available to that agent
+
+## Security Best Practices
+
+| Practice | Details |
+|----------|---------|
+| Dedicated OAuth apps | Create separate OAuth apps per project, not shared |
+| Minimum scopes | Request only the permissions your agent needs |
+| Rotate credentials | Periodically rotate client secrets and API keys |
+| Separate environments | Use different OAuth apps for dev and production |
+| Monitor usage | Check token usage in provider dashboards |
+
+## Troubleshooting
+
+### OAuth Flow Not Working
+
+1. Verify redirect URI matches exactly (including trailing slash)
+2. Check that OAuth client ID and secret are correct
+3. Ensure the OAuth app is published/approved (some providers require this)
+
+### Tools Not Available
+
+1. Verify the connector is enabled (`is_enabled: true`)
+2. Check that the connector is assigned to the agent
+3. Ensure the user has authenticated (if `require_auth: true`)
+
+### Token Expired
+
+Tokens are automatically refreshed when possible. If refresh fails:
+1. The user will be prompted to re-authenticate
+2. Check that the OAuth app's refresh token settings are configured
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Assign connectors to specific agents
+  </Card>
+  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
+    Add server-side MCP integrations
+  </Card>
+</CardGroup>

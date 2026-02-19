@@ -61,7 +61,39 @@ Walks through:
 2. Configuring LLM provider
 3. Adding MCP servers
 4. Enabling platform tools
-5. Generating API key
+5. Enabling connectors (Slack, Notion, GitHub)
+6. Generating API key
+
+### /astralform-connectors
+
+Browse the connector catalog and view which connectors are enabled for your projects.
+
+```
+/astralform-connectors
+```
+
+Shows:
+- Available connectors with type, category, and tools count
+- Which connectors are enabled for each project
+- Tools provided by each connector
+
+### /astralform-enable-connector
+
+Interactive wizard to enable a connector for a project.
+
+```
+/astralform-enable-connector
+```
+
+Walks through:
+1. Selecting a project
+2. Choosing a connector from the catalog
+3. Collecting credentials (OAuth client ID/secret or API key)
+4. Enabling the connector
+
+<Warning>
+  OAuth connectors require a dedicated OAuth app created with the service provider (Slack, GitHub, Notion). See [Connectors](/dashboard/connectors) for setup guides.
+</Warning>
 
 ### /astralform-analytics
 
@@ -87,9 +119,11 @@ You can also use natural language - the plugin's skills will trigger automatical
 | "Add Astralform to my iOS app" | iOS SDK setup skill |
 | "Configure OpenAI for my project" | LLM configuration |
 | "Add GitHub MCP server" | MCP server setup |
+| "Enable Slack connector" | Connector setup |
+| "What connectors are available?" | Connector catalog |
 
 ## Next Steps
 
 <Card title="MCP Tools" icon="wrench" href="/plugin/mcp-tools">
-  See all 30+ MCP tools for programmatic access
+  See all 45+ MCP tools for programmatic access
 </Card>

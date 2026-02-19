@@ -41,6 +41,7 @@
               "dashboard/llm-providers",
               "dashboard/mcp-servers",
               "dashboard/platform-tools",
+              "dashboard/connectors",
               "dashboard/skills"
             ]
           }
