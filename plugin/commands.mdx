@@ -59,10 +59,13 @@ Interactive setup wizard for configuring a project completely.
 Walks through:
 1. Creating or selecting a project
 2. Configuring LLM provider
-3. Adding MCP servers
+3. Generating API key
 4. Enabling platform tools
-5. Enabling connectors (Slack, Notion, GitHub)
-6. Generating API key
+5. Adding MCP servers
+6. Enabling connectors (Slack, Notion, GitHub)
+7. Creating agents (multi-agent system)
+8. Adding skills to agents
+9. Summary with next steps
 
 ### /astralform-connectors
 
@@ -95,6 +98,35 @@ Walks through:
   OAuth connectors require a dedicated OAuth app created with the service provider (Slack, GitHub, Notion). See [Connectors](/dashboard/connectors) for setup guides.
 </Warning>
 
+### /astralform-agents
+
+List and manage agents configured for a project.
+
+```
+/astralform-agents
+```
+
+Shows:
+- Agent name, display name, and status (enabled/disabled)
+- Whether agent is the default
+- LLM provider and model (if overridden)
+- Assigned skills and MCP server counts
+
+### /astralform-create-agent
+
+Interactive wizard to create a new specialized agent.
+
+```
+/astralform-create-agent
+```
+
+Walks through:
+1. Selecting a project
+2. Agent name, display name, and description
+3. System prompt for the agent's specialty
+4. Optional LLM override
+5. Assigning skills, MCP servers, and platform tools
+
 ### /astralform-analytics
 
 View usage analytics for a project.
@@ -121,6 +153,9 @@ You can also use natural language - the plugin's skills will trigger automatical
 | "Add GitHub MCP server" | MCP server setup |
 | "Enable Slack connector" | Connector setup |
 | "What connectors are available?" | Connector catalog |
+| "List my agents" | Agent listing |
+| "Create a support agent" | Agent creation wizard |
+| "Add a skill to my project" | Skill creation flow |
 
 ## Next Steps
 
