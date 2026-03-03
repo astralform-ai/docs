@@ -35,6 +35,7 @@
           {
             "group": "Dashboard",
             "pages": [
+              "dashboard/teams",
               "dashboard/projects",
               "dashboard/api-keys",
               "dashboard/agents",

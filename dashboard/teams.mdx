@@ -1,0 +1,58 @@
+---
+title: "Teams"
+description: "Organize developers and projects under teams with role-based access control."
+---
+
+## Overview
+
+Teams are the top-level organizational unit in Astralform. Every project belongs to a team, and team membership controls who can access and manage projects.
+
+When you create an account, a default personal team is created automatically.
+
+## Team Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Owner** | Full control — manage members, transfer ownership, delete team |
+| **Admin** | Create projects, manage members (cannot add admins or delete team) |
+| **Member** | Access team projects, view members |
+
+## Creating a Team
+
+1. Go to [astralform.ai](https://astralform.ai)
+2. Click the team switcher in the sidebar
+3. Click **Create Team**
+4. Enter a team name and slug (URL-friendly identifier)
+
+The slug must be lowercase alphanumeric with hyphens, 2-60 characters (e.g., `my-startup`).
+
+## Managing Members
+
+### Adding Members
+
+Team admins and owners can add members by email. The invited user must already have an Astralform account.
+
+### Roles and Permissions
+
+- **Owners** can promote members to admin, remove admins, and transfer ownership
+- **Admins** can add/remove members (not other admins)
+- **Members** can leave the team voluntarily
+
+### Transferring Ownership
+
+Only the current owner can transfer ownership. The previous owner is demoted to admin.
+
+## Team Icon
+
+Upload a custom team icon (PNG, JPEG, or WebP, max 256 KB) from team settings.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Projects" icon="folder" href="/dashboard/projects">
+    Create projects under your team
+  </Card>
+  <Card title="API Keys" icon="key" href="/dashboard/api-keys">
+    Generate project API keys
+  </Card>
+</CardGroup>

@@ -1,22 +1,30 @@
 ---
 title: "Projects"
-description: "Create and manage Astralform projects to organize your AI agents, API keys, and tool configurations."
+description: "Create and manage Astralform projects under teams to organize your AI agents, API keys, and tool configurations."
 ---
 
 ## Overview
 
-Projects are the top-level organizational unit in Astralform. Each project has:
+Projects are the primary unit for organizing your AI agents. Each project belongs to a [team](/dashboard/teams) and has:
 
 - Its own API keys
 - Agents (each with LLM, skills, MCP servers, and tools)
 - Conversation history
+- Capsule sandbox sessions
 
 ## Creating a Project
 
 1. Go to [astralform.ai](https://astralform.ai)
-2. Click **New Project** in the sidebar
-3. Enter a project name
-4. Click **Create**
+2. Select the team you want to create the project under
+3. Click **New Project** in the sidebar
+4. Enter a project name
+5. Click **Create**
+
+You must have **owner** or **admin** role in the team to create projects.
+
+<Warning>
+  The encryption key is shown **only once** at creation. Save it securely — it's required for client-side MCP tools and conversation decryption.
+</Warning>
 
 ## Project Settings
 
@@ -26,6 +34,7 @@ Access project settings by clicking the gear icon next to your project name.
 
 - **Project Name** - Display name for the project
 - **Project ID** - Unique identifier (read-only)
+- **Team** - The team this project belongs to (read-only)
 
 ### Danger Zone
 

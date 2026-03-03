@@ -19,13 +19,14 @@ Authenticate with your Astralform account using device authorization flow.
 
 ### /astralform-projects
 
-List all your projects with their status and configuration.
+List all your projects grouped by team.
 
 ```
 /astralform-projects
 ```
 
 Shows:
+- Projects grouped by team
 - Project name and ID
 - LLM provider configured
 - Number of API keys
@@ -33,13 +34,14 @@ Shows:
 
 ### /astralform-create-project
 
-Create a new project interactively.
+Create a new project under a team.
 
 ```
 /astralform-create-project
 ```
 
 Prompts for:
+- Team selection (or create a new team)
 - Project name
 - LLM provider selection
 - API key generation
@@ -57,15 +59,16 @@ Interactive setup wizard for configuring a project completely.
 ```
 
 Walks through:
-1. Creating or selecting a project
-2. Configuring LLM provider
-3. Generating API key
-4. Enabling platform tools
-5. Adding MCP servers
-6. Enabling connectors (Slack, Notion, GitHub)
-7. Creating agents (multi-agent system)
-8. Adding skills to agents
-9. Summary with next steps
+1. Selecting or creating a team
+2. Creating or selecting a project
+3. Configuring LLM provider
+4. Generating API key
+5. Enabling platform tools
+6. Adding MCP servers
+7. Enabling connectors (Slack, Notion, GitHub)
+8. Creating agents (multi-agent system)
+9. Adding skills to agents
+10. Summary with next steps
 
 ### /astralform-connectors
 
@@ -89,7 +92,7 @@ Interactive wizard to enable a connector for a project.
 ```
 
 Walks through:
-1. Selecting a project
+1. Selecting a team, then a project
 2. Choosing a connector from the catalog
 3. Collecting credentials (OAuth client ID/secret or API key)
 4. Enabling the connector
@@ -121,7 +124,7 @@ Interactive wizard to create a new specialized agent.
 ```
 
 Walks through:
-1. Selecting a project
+1. Selecting a team, then a project
 2. Agent name, display name, and description
 3. System prompt for the agent's specialty
 4. Optional LLM override
@@ -160,5 +163,5 @@ You can also use natural language - the plugin's skills will trigger automatical
 ## Next Steps
 
 <Card title="MCP Tools" icon="wrench" href="/plugin/mcp-tools">
-  See all 45+ MCP tools for programmatic access
+  See all 55+ MCP tools for programmatic access
 </Card>

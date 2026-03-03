@@ -5,7 +5,7 @@ description: "Complete reference for Astralform MCP tools available in Claude Co
 
 ## Overview
 
-The plugin exposes 45+ MCP tools that Claude can use to manage your Astralform projects. These are invoked automatically when you ask Claude to perform Astralform operations.
+The plugin exposes 55+ MCP tools that Claude can use to manage your Astralform projects. These are invoked automatically when you ask Claude to perform Astralform operations.
 
 ## Authentication
 
@@ -15,23 +15,40 @@ The plugin exposes 45+ MCP tools that Claude can use to manage your Astralform p
 | `astralform_device_code` | Start device authorization flow |
 | `astralform_device_token` | Exchange device code for access token |
 
+## Teams
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_teams` | List all teams you belong to |
+| `astralform_get_team` | Get team details by ID |
+| `astralform_create_team` | Create a new team with name and slug |
+| `astralform_list_team_members` | List members and their roles in a team |
+
+### Example: List Teams
+
+```
+Show me my Astralform teams
+```
+
+Claude will call `astralform_list_teams` and display your teams with roles.
+
 ## Projects
 
 | Tool | Description |
 |------|-------------|
-| `astralform_list_projects` | List all your projects |
-| `astralform_get_project` | Get project details by ID |
-| `astralform_create_project` | Create a new project |
+| `astralform_list_projects` | List all your projects (includes team info) |
+| `astralform_get_project` | Get project details by ID (includes team_id) |
+| `astralform_create_project` | Create a new project under a team (requires `team_id`) |
 | `astralform_update_project` | Update project name |
 | `astralform_delete_project` | Delete a project |
 
 ### Example: Create Project
 
 ```
-Create a new Astralform project called "My AI Assistant"
+Create a new Astralform project called "My AI Assistant" under my startup team
 ```
 
-Claude will call `astralform_create_project` and return the project ID and encryption key.
+Claude will select the team, call `astralform_create_project` with the `team_id`, and return the project ID and encryption key.
 
 ## API Keys
 
@@ -129,8 +146,6 @@ Import the PDF processing skill from https://raw.githubusercontent.com/example/s
 | `astralform_update_agent` | Update an agent's configuration or resources |
 | `astralform_delete_agent` | Delete an agent (cannot delete default) |
 | `astralform_toggle_agent` | Enable/disable an agent |
-| `astralform_get_orchestration` | Get orchestration config (single/supervisor) |
-| `astralform_set_orchestration` | Set orchestration pattern for multi-agent routing |
 
 ### Example: Create an Agent
 
@@ -139,14 +154,6 @@ Create a support agent for my project that handles customer inquiries, assign it
 ```
 
 Claude will call `astralform_create_agent` with the name, description, and skill assignments.
-
-### Example: Set Up Supervisor
-
-```
-Set my project to supervisor orchestration with the router agent as supervisor
-```
-
-Claude will call `astralform_set_orchestration` with the supervisor pattern and agent ID.
 
 ## Connectors
 
@@ -179,8 +186,32 @@ Claude will call `astralform_list_connectors` and show the catalog with tool cou
 
 | Tool | Description |
 |------|-------------|
-| `astralform_get_analytics` | Get detailed usage analytics |
-| `astralform_get_stats` | Get aggregate statistics |
+| `astralform_get_analytics` | Get detailed usage analytics for a project |
+| `astralform_get_stats` | Get aggregate account statistics |
+
+## Provider Keys
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_provider_keys` | List stored model provider API keys |
+| `astralform_set_provider_key` | Store an API key for a provider (OpenAI, Anthropic, etc.) |
+| `astralform_delete_provider_key` | Remove a stored provider key |
+| `astralform_test_provider_key` | Test that a stored provider key is valid |
+
+### Example: Store Provider Key
+
+```
+Save my OpenAI API key sk-xxx for Astralform
+```
+
+Claude will call `astralform_set_provider_key` to securely store the key.
+
+## Capsule
+
+| Tool | Description |
+|------|-------------|
+| `astralform_list_capsule_sessions` | List sandbox sessions for a project |
+| `astralform_get_capsule_stats` | Get capsule usage statistics |
 
 ## Documentation
 
