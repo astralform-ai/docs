@@ -19,20 +19,36 @@ Every project starts with a **Main Agent**. It auto-inherits all project resourc
 
 ## Agent Detail Page
 
-Click any agent from the agents list to open its detail page. Configuration is organized into four tabs:
+Click any agent from the agents list to open its detail page. Configuration is organized into five tabs:
 
 ### Model Tab
 
-Configure the LLM provider and model for this agent.
+Configure the LLM provider, model, and generation parameters for this agent.
 
 1. Go to **Agents** and click an agent
 2. On the **Model** tab, select a provider (OpenAI, Anthropic, Groq, Ollama)
 3. Choose a model and enter the provider API key
-4. Click **Save**
+4. Configure additional model parameters as needed
+5. Click **Save**
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| Provider / Model | LLM provider and model selection | Inherited from Main Agent |
+| `temperature` | Controls output randomness (0.0 = deterministic, 2.0 = maximum randomness) | Provider default |
+| `thinking_effort` | Reasoning depth for thinking-enabled models: `low`, `medium`, or `high` | `medium` |
+| `auto_spawn_enabled` | Enables dynamic subagent spawning for complex multi-step tasks | `false` |
+| `sandbox_template` | VM template for the agent's Capsule sandbox: `base`, `browser`, `code-interpreter-v1`, `desktop` | `base` |
+| `sandbox_envs` | Encrypted environment variables injected into the sandbox (key-value pairs) | -- |
 
 If no LLM is configured on a named agent, it inherits the project's LLM settings from the Main Agent.
 
 See [LLM Providers](/dashboard/llm-providers) for provider details and available models.
+
+#### Auto-Capsule
+
+Agents with non-system skills automatically get a Capsule sandbox -- no manual sandbox configuration needed. The sandbox is an isolated Firecracker microVM provisioned using the agent's `sandbox_template`. Configure sandbox behavior via the `sandbox_template` and `sandbox_envs` fields above.
+
+See [Capsule Sandboxes](/dashboard/capsule/sandboxes) for more details on sandbox templates and lifecycle.
 
 ### Skills Tab
 
@@ -68,6 +84,18 @@ Assign platform tools (e.g., web search) to the agent.
 For the Main Agent, all project tools are auto-assigned.
 
 See [Platform Tools](/dashboard/platform-tools) for available tools.
+
+### Connectors Tab
+
+Assign connectors so the agent can access external data sources and services.
+
+1. On the **Connectors** tab, see assigned and available connectors
+2. Click **Assign** or **Unassign** to manage connector assignments
+3. Each connector provides the agent with access to a specific integration (e.g., Google Drive, Notion, Slack)
+
+Connectors are configured at the project level and then assigned per agent, allowing you to control which agents have access to which integrations.
+
+See [Connectors](/dashboard/connectors) for available connectors and setup instructions.
 
 ## Creating an Agent
 

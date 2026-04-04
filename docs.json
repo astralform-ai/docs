@@ -45,6 +45,13 @@
               "dashboard/connectors",
               "dashboard/skills"
             ]
+          },
+          {
+            "group": "Capsule",
+            "pages": [
+              "dashboard/capsule/pods",
+              "dashboard/capsule/templates"
+            ]
           }
         ]
       },

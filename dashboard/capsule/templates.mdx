@@ -1,0 +1,23 @@
+---
+title: "Templates"
+description: "Available sandbox templates and custom template management."
+---
+
+## Available Templates
+
+| Template | Includes | Use Case |
+|----------|----------|----------|
+| `base` | Python 3.11, Node.js 20, rclone, CLI tools | General-purpose coding and automation |
+| `browser` | Base + Chromium + xvfb | Headless browser automation, web scraping |
+| `code-interpreter-v1` | Jupyter + pandas, numpy, matplotlib, scikit-learn | Data science, visualization, analysis |
+| `desktop` | Full Ubuntu desktop with VNC, Chrome, VS Code | GUI automation, computer-use agents |
+
+## Template Assignment
+
+Set the template per agent in the agent configuration:
+
+1. Navigate to **Agent Team** > select an agent
+2. Under **Model** tab, set `sandbox_template`
+3. Save changes
+
+The template determines which VM image is used when the agent's sandbox is provisioned.

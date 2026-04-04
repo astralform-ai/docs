@@ -56,8 +56,17 @@ Instructions for the AI agent on how to handle PDF files...
 
 | Field | Description |
 |-------|-------------|
+| `runtime` | Execution environment: `workspace` provisions a sandbox automatically |
 | `metadata.version` | Semantic version (e.g., "1.0.0") |
 | `metadata.author` | Skill author name |
+
+## Auto-Capsule
+
+Skills with `runtime: workspace` in their frontmatter automatically provision a sandbox for their agent (auto-capsule). No manual sandbox configuration needed.
+
+When an agent with non-system skills processes a request, an isolated Capsule sandbox (Firecracker microVM) is automatically created. The agent can then execute code, run shell commands, and manage files inside the sandbox.
+
+See [Capsule Sandboxes](/dashboard/capsule/sandboxes) for details on sandbox templates and management.
 
 ## How Skills Work
 

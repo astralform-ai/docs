@@ -1,0 +1,29 @@
+---
+title: "Pods"
+description: "Manage active sandbox pods for your agents."
+---
+
+## Overview
+
+Astralform uses **auto-capsule** -- agents with non-system skills automatically get an isolated Capsule sandbox (Firecracker microVM). No manual configuration needed.
+
+## How It Works
+
+When an agent with skills processes a conversation turn:
+1. A sandbox is provisioned using the agent's `sandbox_template` (default: `base`)
+2. A shared `/workspace` filesystem is mounted via S3
+3. The agent runs tools (shell, code, files) inside the sandbox
+4. On completion, the sandbox remains active for subsequent turns
+
+## Agent Configuration
+
+Configure sandbox behavior per agent:
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `sandbox_template` | VM template: `base`, `browser`, `code-interpreter-v1`, `desktop` | `base` |
+| `sandbox_envs` | Encrypted environment variables injected into the VM | -- |
+
+## Session Management
+
+View active sessions, uptime, and command history in the Capsule > Sandboxes dashboard page. Use the MCP tools `astralform_list_capsule_sessions` and `astralform_get_capsule_stats` for programmatic access.

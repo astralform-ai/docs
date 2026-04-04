@@ -11,7 +11,7 @@ Slash commands provide quick access to common operations. Type `/` in Claude Cod
 
 ### /astralform-login
 
-Authenticate with your Astralform account using device authorization flow.
+Check authentication status. Authentication is automatic via MCP OAuth — Claude Code handles it when you first use any Astralform tool.
 
 ```
 /astralform-login
@@ -63,12 +63,14 @@ Walks through:
 2. Creating or selecting a project
 3. Configuring LLM provider
 4. Generating API key
-5. Enabling platform tools
-6. Adding MCP servers
-7. Enabling connectors (Slack, Notion, GitHub)
-8. Creating agents (multi-agent system)
-9. Adding skills to agents
-10. Summary with next steps
+5. Enabling connectors (Slack, Notion, GitHub)
+6. Configuring web search
+7. Configuring agent memory
+8. Setting up guard rails (PII detection, execution limits)
+9. Setting environment variables
+10. Creating agents (multi-agent system)
+11. Adding skills to agents
+12. Summary with next steps
 
 ### /astralform-connectors
 
@@ -128,7 +130,72 @@ Walks through:
 2. Agent name, display name, and description
 3. System prompt for the agent's specialty
 4. Optional LLM override
-5. Assigning skills, MCP servers, and platform tools
+5. Assigning skills and connectors
+
+### /astralform-search
+
+View or configure web search settings for a project.
+
+```
+/astralform-search
+```
+
+Shows:
+- Current provider (ddgs, tavily, serper, exa)
+- Max results setting
+- API key status
+- Options to enable/disable or change provider
+
+### /astralform-memory-settings
+
+View or configure agent memory settings for a project.
+
+```
+/astralform-memory-settings
+```
+
+Shows:
+- Memory enabled/disabled
+- Retrieval and extraction settings
+- Retrieval limit and injection token budget
+
+### /astralform-guardrails
+
+View or configure safety guard rails for a project.
+
+```
+/astralform-guardrails
+```
+
+Shows:
+- PII detection (types, strategy)
+- Execution limits (max model/tool calls)
+- Secret guard status (protected env var count)
+
+### /astralform-envs
+
+Manage environment variables for a project.
+
+```
+/astralform-envs
+```
+
+Shows:
+- Current variable keys (values never exposed)
+- Options to set, update, or delete variables
+- Variables are encrypted at rest and injected into sandboxes
+
+### /astralform-model-providers
+
+Manage model provider API keys in the account-level vault.
+
+```
+/astralform-model-providers
+```
+
+Shows:
+- Stored provider keys with hints
+- Options to add, update, delete, or test keys
 
 ### /astralform-analytics
 
@@ -153,15 +220,18 @@ You can also use natural language - the plugin's skills will trigger automatical
 | "Create an Astralform project" | Project creation flow |
 | "Add Astralform to my iOS app" | iOS SDK setup skill |
 | "Configure OpenAI for my project" | LLM configuration |
-| "Add GitHub MCP server" | MCP server setup |
 | "Enable Slack connector" | Connector setup |
-| "What connectors are available?" | Connector catalog |
+| "Enable web search" | Search settings |
+| "Enable memory for my project" | Memory settings |
+| "Set up guard rails" | Guard rails configuration |
+| "Set TAVILY_API_KEY for my project" | Environment variable |
 | "List my agents" | Agent listing |
 | "Create a support agent" | Agent creation wizard |
 | "Add a skill to my project" | Skill creation flow |
+| "Find skills for PDF processing" | Marketplace browse |
 
 ## Next Steps
 
 <Card title="MCP Tools" icon="wrench" href="/plugin/mcp-tools">
-  See all 55+ MCP tools for programmatic access
+  See all 58 MCP tools for programmatic access
 </Card>
