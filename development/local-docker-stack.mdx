@@ -1,0 +1,164 @@
+---
+title: "Local Docker Stack"
+description: "Run the full Astralform platform — backend, auth, dashboard, chat, gateway, Redis — on your laptop with one command. Hot reload across all services."
+---
+
+The local development stack runs every Astralform service in Docker, wired
+together by a single `docker-compose.dev.yml`. One command brings the whole
+platform up; source changes hot-reload without a rebuild.
+
+## What you get
+
+| Service | Host port | Role |
+| --- | --- | --- |
+| `dashboard` | `http://localhost:5173` | React + Vite dashboard SPA |
+| `chat` | `http://localhost:5174` | AstralChat (the canonical end-user chat surface) |
+| `auth-spa` | `http://localhost:5175` | OAuth consent + login UI |
+| `api-gateway` | `http://localhost:8000` | nginx — mirrors prod Traefik path routing |
+| `auth-backend` | `http://localhost:8090` | FastAPI — OAuth 2.1 Authorization Server + identity |
+| `backend` | (internal) | FastAPI + LangGraph — `/v1/*` routed by the gateway |
+| `redis` | `127.0.0.1:6379` | SSE event distribution (TCP — not an HTTP endpoint) |
+
+The gateway at `:8000` mirrors what `api.astralform.ai` does in production:
+OAuth and admin prefixes route to `auth-backend`, everything else to the
+main `backend`. The split is invisible to clients — calling
+`localhost:8000/oauth/authorize` and `localhost:8000/v1/jobs` works the same
+way `api.astralform.ai` does in prod.
+
+## Prerequisites
+
+- **Docker** — [OrbStack](https://orbstack.dev/) recommended on macOS, Docker
+  Desktop works too
+- **Three sibling repos** checked out next to each other:
+  ```text
+  ~/yourcode/
+  ├── Astralform/         ← this repo (backend + dashboard + compose)
+  ├── astralform-auth/    ← auth backend + auth SPA
+  └── astralform-chat/    ← chat SPA
+  ```
+- A populated `Astralform/.env` (copy from `.env.example`)
+
+## Bring it up
+
+```bash
+cd Astralform
+
+# First-time build of the backend image (only after Dockerfile changes)
+docker compose -f docker-compose.dev.yml build
+
+# Daily — start everything in the background
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Wait ~10 seconds for the backend's healthcheck to flip green, then visit
+[http://localhost:5174](http://localhost:5174) to use AstralChat or
+[http://localhost:5173](http://localhost:5173) for the dashboard.
+
+## Tail logs
+
+```bash
+# Everything, interleaved
+docker compose -f docker-compose.dev.yml logs -f
+
+# One service
+docker compose -f docker-compose.dev.yml logs -f backend
+docker compose -f docker-compose.dev.yml logs -f chat
+```
+
+Backend logs also rotate daily to `backend/logs/backend_YYYY-MM-DD.log` on
+the host (bind-mounted), so you can `grep` historical lines without
+spelunking through `docker logs`.
+
+## Hot reload
+
+Source changes are picked up automatically — no restart needed:
+
+- **Python** changes → uvicorn's `--reload` flag re-imports modules
+- **TypeScript / React** changes → Vite HMR pushes updates over WebSocket
+
+Restart a single service only when you've changed environment variables or
+dependencies:
+
+```bash
+docker compose -f docker-compose.dev.yml restart backend
+```
+
+## Run tests
+
+```bash
+# Inside the container — exactly what CI runs
+docker compose -f docker-compose.dev.yml exec backend uv run pytest tests/ -v
+
+# On the host — faster iteration, requires `cd backend && uv sync --extra dev` once
+cd backend && uv run pytest tests/ -v
+```
+
+Both paths read the same source tree (the container bind-mounts
+`backend/`). Use the host-side version for tight feedback loops; use the
+container version before pushing if you've changed runtime deps.
+
+## Stop the stack
+
+```bash
+docker compose -f docker-compose.dev.yml down
+```
+
+Named volumes (`dashboard_node_modules`, `chat_node_modules`, etc.) survive
+between runs so `npm install` doesn't fire on every `up`.
+
+## Common gotchas
+
+These are failure modes specific to running in containers — they don't show
+up when you run a single service host-side.
+
+### `localhost` from inside a container is the container itself
+
+A Vite proxy that targets `http://localhost:8000` will hit the SPA's own
+port 8000 (which isn't bound to anything), not the host's gateway. The
+compose file injects Docker DNS hostnames for container-to-container calls:
+
+```yaml
+environment:
+  BACKEND_URL: http://api-gateway:80          # chat → gateway (container port)
+  AUTH_BACKEND_URL: http://auth-backend:8000  # auth-spa → auth-backend (container port; host sees 8090)
+  AUTH_BASE_URL: http://auth-backend:8000     # backend's JWKS fetch (container port; host sees 8090)
+```
+
+If you see a SPA silently failing on its initial `/oauth/*` or `/v1/*`
+calls inside the stack, this is the first thing to check.
+
+### OrbStack's IPv6 port-publish resets streams
+
+Connections to `[::1]:PORT` drop after the handshake on some OrbStack
+versions. The compose file binds publishes to `127.0.0.1:PORT:PORT`
+explicitly so browsers fall back to IPv4 cleanly. If you remove the
+`127.0.0.1:` prefix, curl needs `-4` to reach the service.
+
+### Backend logs say "no LLM configured"
+
+Project-level LLM config (used by the suggestion-generation hook and a few
+admin paths) is separate from the per-agent LLM config (used by the actual
+chat turn). An agent's response can still stream successfully even while
+the project shows `is_ready=false` — they pull credentials from different
+tables. The "no LLM configured" warning in logs is harmless on its own.
+
+## Host-side fallback
+
+The standalone scripts at `scripts/dev-backend.sh` and
+`scripts/dev-frontend.sh` are still around for the case where you want to
+iterate on a single service against the host's `.venv` / `node_modules`
+— for example, to attach a debugger or test a tricky dependency in
+isolation.
+
+If you run a script while the docker stack is up, you'll get a port
+conflict. Stop the matching docker service first:
+
+```bash
+docker compose -f docker-compose.dev.yml stop backend
+cd backend && ../scripts/dev-backend.sh
+```
+
+## Next steps
+
+- [API Reference](/api-reference/introduction) — explore the `/v1/*` endpoints your local stack now serves
+- [Dashboard projects](/dashboard/projects) — create a project to get an API key for local testing

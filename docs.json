@@ -52,6 +52,12 @@
               "dashboard/capsule/pods",
               "dashboard/capsule/templates"
             ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/local-docker-stack"
+            ]
           }
         ]
       },
