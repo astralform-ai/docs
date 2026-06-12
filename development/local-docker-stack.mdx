@@ -17,7 +17,7 @@ platform up; source changes hot-reload without a rebuild.
 | `api-gateway` | `http://localhost:8000` | nginx — mirrors prod Traefik path routing |
 | `auth-backend` | `http://localhost:8090` | FastAPI — OAuth 2.1 Authorization Server + identity |
 | `backend` | (internal) | FastAPI + LangGraph — `/v1/*` routed by the gateway |
-| `redis` | `127.0.0.1:6379` | SSE event distribution |
+| `redis` | `127.0.0.1:6379` | SSE event distribution (TCP — not an HTTP endpoint) |
 
 The gateway at `:8000` mirrors what `api.astralform.ai` does in production:
 OAuth and admin prefixes route to `auth-backend`, everything else to the
@@ -30,7 +30,7 @@ way `api.astralform.ai` does in prod.
 - **Docker** — [OrbStack](https://orbstack.dev/) recommended on macOS, Docker
   Desktop works too
 - **Three sibling repos** checked out next to each other:
-  ```
+  ```text
   ~/yourcode/
   ├── Astralform/         ← this repo (backend + dashboard + compose)
   ├── astralform-auth/    ← auth backend + auth SPA
@@ -119,9 +119,9 @@ compose file injects Docker DNS hostnames for container-to-container calls:
 
 ```yaml
 environment:
-  BACKEND_URL: http://api-gateway:80      # chat → gateway
-  AUTH_BACKEND_URL: http://auth-backend:8000  # auth-spa → auth-backend
-  AUTH_BASE_URL: http://auth-backend:8000     # backend's JWKS fetch
+  BACKEND_URL: http://api-gateway:80          # chat → gateway (container port)
+  AUTH_BACKEND_URL: http://auth-backend:8000  # auth-spa → auth-backend (container port; host sees 8090)
+  AUTH_BASE_URL: http://auth-backend:8000     # backend's JWKS fetch (container port; host sees 8090)
 ```
 
 If you see a SPA silently failing on its initial `/oauth/*` or `/v1/*`
@@ -155,11 +155,10 @@ conflict. Stop the matching docker service first:
 
 ```bash
 docker compose -f docker-compose.dev.yml stop backend
-cd backend && ./../scripts/dev-backend.sh
+cd backend && ../scripts/dev-backend.sh
 ```
 
 ## Next steps
 
-- [Quickstart](/quickstart) — integrate Astralform into your iOS app
-- [Dashboard projects](/dashboard/projects) — create your first project
-  through the UI
+- [API Reference](/api-reference/introduction) — explore the `/v1/*` endpoints your local stack now serves
+- [Dashboard projects](/dashboard/projects) — create a project to get an API key for local testing
