@@ -70,21 +70,20 @@ Error responses:
 
 ## Rate Limits
 
-Default limits per API key:
+Requests are rate-limited **per project, per operation** (not a single per-key quota).
+Verified projects — those with a payment method on file — automatically get higher
+limits. See the [Rate Limits](/dashboard/rate-limits) dashboard page for the full model,
+including self-caps and per-API-key caps.
 
-| Plan | Requests/min |
-|------|-------------|
-| Free | 60 |
-| Pro | 300 |
-| Enterprise | Custom |
-
-Rate limit headers are included in responses:
+Every response includes rate-limit headers:
 
 ```
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 55
 X-RateLimit-Reset: 1609459200
 ```
+
+A throttled request returns `429` with a `Retry-After` header (seconds to wait).
 
 ## Endpoints
 

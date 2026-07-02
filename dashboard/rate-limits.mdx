@@ -53,8 +53,8 @@ be below the project's current effective limit.
 
 Projects with a valid payment method on file and billing enabled are **verified** and
 automatically get higher ceilings (a multiple of the base limit) across every
-operation — no request needed. Add a payment method under **Billing** to unlock them;
-the Rate Limits page shows whether the higher limits are active.
+operation — no request needed. Add a payment method to your project's billing to unlock
+them; the Rate Limits page shows whether the higher limits are active.
 
 ## Requesting an increase
 
@@ -75,3 +75,14 @@ When an operation is throttled the API returns `429 Too Many Requests` with a
 Back off using `Retry-After`, and watch `X-RateLimit-Remaining` to slow down before you
 hit the limit. When a per-key cap is the tighter constraint, these headers reflect the
 key's quota so you can back off before its own `429`.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Keys" icon="key" href="/dashboard/api-keys">
+    Generate and manage the keys these limits apply to
+  </Card>
+  <Card title="Projects" icon="folder" href="/dashboard/projects">
+    Rate limits are scoped per project
+  </Card>
+</CardGroup>
