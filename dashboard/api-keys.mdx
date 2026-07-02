@@ -78,13 +78,11 @@ If a key is compromised:
 
 ## Rate Limits
 
-API keys have the following default limits:
-
-| Plan | Requests/min | Requests/day |
-|------|-------------|--------------|
-| Free | 60 | 1,000 |
-| Pro | 300 | 50,000 |
-| Enterprise | Custom | Custom |
+Rate limits apply **per project, per operation** — not as a single per-key quota — with
+optional **per-API-key caps** for fine-grained control (for example, throttling a
+staging key without affecting production). See [Rate Limits](/dashboard/rate-limits) for
+the full model: usage, self-caps, per-key caps, and higher ceilings for verified
+projects.
 
 ## Next Steps
 

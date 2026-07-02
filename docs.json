@@ -38,6 +38,7 @@
               "dashboard/teams",
               "dashboard/projects",
               "dashboard/api-keys",
+              "dashboard/rate-limits",
               "dashboard/agents",
               "dashboard/llm-providers",
               "dashboard/mcp-servers",
