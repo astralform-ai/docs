@@ -1,0 +1,77 @@
+---
+title: "Rate Limits"
+description: "Monitor how close each operation is to its limit, cap your own usage to protect your bill, and unlock higher limits."
+---
+
+## Overview
+
+Astralform rate-limits each SDK operation (sending a conversation turn, submitting a
+tool result, creating a sandbox, etc.) per project. Limits protect platform stability
+and protect **you** from a runaway loop or an abusive end-user quietly running up your
+bill.
+
+The **Rate Limits** page (dashboard → **Rate Limits**) shows every operation's limit,
+current usage, and recent throttling — and lets project owners/admins tune the limits
+they care about.
+
+## Reading the page
+
+Each operation shows its usage this window (`used / limit`), a status, and the default
+ceiling:
+
+- **Healthy** — comfortably under the limit.
+- **Approaching** — at 70%+ of the current-window budget. A banner lists these so you
+  can act before requests start failing.
+- **Throttled** — the operation returned `429`s recently (rolling 24h). A banner shows
+  how many and on which operations.
+
+The **Closest to limit** card highlights the single operation using the largest share
+of its budget — the one most likely to throttle next.
+
+## Self-caps: lower a limit yourself
+
+Team **owners** and **admins** can cap any operation *below* its ceiling — useful to
+bound spend or to stop one integration from consuming a project's whole budget.
+
+1. On the **Rate Limits** page, click the edit icon on an operation.
+2. Enter a value **below** the ceiling and **Save cap**.
+3. Remove it any time with **Reset to default**.
+
+<Note>
+  Self-caps can only **lower** a limit, never raise it past the ceiling. Changes take
+  effect within ~30 seconds.
+</Note>
+
+### Cap a specific API key
+
+In the edit dialog, switch **Apply to** from *Whole project* to a specific API key to
+cap just that key — for example, to throttle a staging key without affecting production.
+A per-key cap applies on top of the project limit (whichever is stricter wins) and must
+be below the project's current effective limit.
+
+## Higher limits for verified projects
+
+Projects with a valid payment method on file and billing enabled are **verified** and
+automatically get higher ceilings (a multiple of the base limit) across every
+operation — no request needed. Add a payment method under **Billing** to unlock them;
+the Rate Limits page shows whether the higher limits are active.
+
+## Requesting an increase
+
+Need more than the ceiling allows? Owners/admins can use **Request a higher ceiling**
+in the edit dialog to send the operation, a desired limit, and a reason to the
+Astralform team for review. There's no automatic grant — it's a request for a manual
+increase beyond the verified ceiling.
+
+## Handling 429s in your app
+
+When an operation is throttled the API returns `429 Too Many Requests` with a
+`Retry-After` header (seconds) and `X-RateLimit-*` headers:
+
+- `X-RateLimit-Limit` — the limit for the active scope.
+- `X-RateLimit-Remaining` — requests left in the current window.
+- `X-RateLimit-Reset` — when the window resets (unix seconds).
+
+Back off using `Retry-After`, and watch `X-RateLimit-Remaining` to slow down before you
+hit the limit. When a per-key cap is the tighter constraint, these headers reflect the
+key's quota so you can back off before its own `429`.
