@@ -1,0 +1,58 @@
+---
+title: "Organizations"
+description: "The top-level tenant in Astralform. Organizations sit above teams and bind enterprise SSO and SCIM."
+---
+
+## Overview
+
+Organizations are the top of the Astralform tenant hierarchy: **Organization → Team → Project**. An organization owns one or more teams, and enterprise controls — SAML SSO and SCIM provisioning — bind at the organization level.
+
+Every developer gets a **personal organization** automatically on sign-up. Existing teams were migrated under their owner's organization, so nothing changes about how you access projects — the organization simply sits above the teams you already have.
+
+## Organization Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Owner** | Full control — manage members, transfer ownership, delete the organization, and manage SSO and SCIM |
+| **Admin** | Manage members and SSO/SCIM configuration (cannot delete the organization) |
+| **Member** | Access the organization and its teams (no admin surface) |
+
+## Managing an Organization
+
+Open the **Organizations** section in the dashboard sidebar to manage your organization.
+
+### Members
+
+Owners and admins can:
+
+- **Invite** a member by email (the user must already have an Astralform account)
+- Change a member's **role** (owner, admin, or member)
+- **Remove** a member from the organization
+
+### Settings
+
+- **Name** — the organization's display name
+- SSO and SCIM configuration (owner/admin only)
+
+### Switching Organizations
+
+Use the **organization switcher** at the top of the Organizations section to move between organizations you belong to — for example, your personal organization and a company organization you were invited to.
+
+## Relationship to Teams
+
+Teams belong to an organization, and a team's members are also members of that team's organization. The hierarchy flows downward:
+
+- **Organizations** own teams and hold enterprise settings (SSO, SCIM)
+- **[Teams](/dashboard/teams)** group projects and control membership
+- **[Projects](/dashboard/projects)** hold agents, API keys, and tool configuration
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Single Sign-On" icon="right-to-bracket" href="/enterprise/sso">
+    Let users sign in with your corporate IdP
+  </Card>
+  <Card title="SCIM Provisioning" icon="arrows-rotate" href="/enterprise/scim">
+    Provision users and map groups to teams
+  </Card>
+</CardGroup>

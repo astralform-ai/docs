@@ -1,0 +1,66 @@
+---
+title: "Single Sign-On (SAML)"
+description: "Configure SAML SSO so your users sign in to Astralform with your corporate identity provider (Okta, Microsoft Entra ID, and more)."
+---
+
+## Overview
+
+Single Sign-On (SSO) lets organization admins connect a corporate identity provider (IdP) so users sign in to Astralform with their existing work credentials. Astralform supports SAML with any compliant IdP, including Okta and Microsoft Entra ID.
+
+SSO binds to an [organization](/enterprise/organizations) and to the email domain(s) that organization owns. Only an organization **owner** or **admin** can configure it, in **Organization Settings > SSO**.
+
+## Set Up a Connection
+
+1. Go to **Organization Settings > SSO**
+2. Enter your IdP's **SAML metadata URL**
+3. Enter the **email domain(s)** your organization owns (e.g., `acme.com`) — users with these domains sign in through your IdP
+4. Click **Create Connection**
+
+The connection starts in a **Pending** state. It does not activate until you prove you own the domain.
+
+## Prove Domain Ownership
+
+SSO only activates after you prove ownership of each email domain — this is what prevents a connection from being bound to a domain you don't control.
+
+1. In the SSO section, the dashboard shows a **DNS TXT challenge** for each domain
+2. At your DNS provider, add a TXT record at `_astralform-challenge.<domain>` (for example, `_astralform-challenge.acme.com`) with the value shown in the dashboard
+3. Wait for DNS to propagate, then click **Verify domains**
+
+Once ownership is verified, the connection becomes active.
+
+## Configure Your IdP
+
+The dashboard shows the **Service Provider (SP) metadata** you need to create the SAML app in your IdP:
+
+- **SP Entity ID / metadata URL** — the service provider identifier
+- **ACS (Assertion Consumer Service) URL** — where your IdP posts the SAML assertion after authentication
+
+Paste these values into your IdP's SAML application configuration.
+
+### Attribute Mapping
+
+Configure your IdP to send the user's **email** and **name** in the SAML assertion. Astralform uses the email to match the user to a verified domain, and the name for their display profile.
+
+## Sign In with SSO
+
+Once a connection is active:
+
+1. Go to the Astralform login page
+2. Choose **Sign in with SSO**
+3. Enter your **work email**
+4. You're redirected to your IdP to authenticate, then back to Astralform, signed in
+
+<Note>
+  Any user with an email at a **verified domain** can sign in via SSO once the connection is active.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="SCIM Provisioning" icon="arrows-rotate" href="/enterprise/scim">
+    Automatically provision and deprovision users
+  </Card>
+  <Card title="Organizations" icon="building" href="/enterprise/organizations">
+    Manage members and roles
+  </Card>
+</CardGroup>
