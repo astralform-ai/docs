@@ -117,6 +117,18 @@ The authentication flow:
 4. Token is stored encrypted for future requests
 5. Agent retries the tool call with the user's token
 
+## Access Policy
+
+Each connector has an **access policy**, set in its own settings, that controls whether agents may use its tools:
+
+| Policy | Behavior |
+|--------|----------|
+| **Auto-allow** (recommended) | The agent uses the connector's tools without prompting — including headless runs like Cloud Routines. |
+| **Ask user** | The end user is asked to approve each use. |
+| **Block** | The tools are disabled. |
+
+This is separate from the global tool-approval rules — you set it per connector, so there's no need to hand-write approval patterns. Disabling a connector is a hard off-switch for all of its tools.
+
 ## Managing Connectors
 
 ### List Project Connectors

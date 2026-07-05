@@ -7,7 +7,7 @@ description: "Connect a Telegram bot so your agents can deliver routine results 
 
 The Telegram channel turns a Telegram bot into a two-way surface for your agents:
 
-- **Outbound** — a [Cloud Routine](/dashboard/agents) can post its result to a Telegram chat or channel on a schedule.
+- **Outbound** — a scheduled agent run (a Cloud Routine) can post its result to a Telegram chat or channel.
 - **Interactive** — a user can direct-message the bot and your project's agent replies, with full multi-turn memory.
 
 Both directions run on one bot and one webhook. You never copy a numeric chat ID — chats are linked with a one-time deep link, the same pattern used by production notification platforms.
@@ -41,9 +41,11 @@ Open the connector's detail page and click **Link a chat**. You get a one-time d
 
 The moment the recipient presses **Start**, the linked chat appears in the **Linked chats** list — no chat IDs, ever.
 
-### Link a channel
+### Link a channel or group
 
-To post to a channel, use the channel link from the same dialog to add the bot to your channel as an **admin** with permission to post. The channel then appears as a linked destination.
+To post to a channel or group, add the bot to it as an **admin** with permission to post —
+use the channel link from the same dialog, or add the bot to a group from Telegram directly.
+It then appears as a linked destination.
 
 <Warning>
   A bot can't message someone first — Telegram requires the recipient to press **Start** (or add the bot to their channel) before the bot can send anything. That's exactly what the enrollment link is for.
@@ -51,13 +53,12 @@ To post to a channel, use the channel link from the same dialog to add the bot t
 
 ## 4. Deliver routine results to Telegram
 
-Once a chat is linked, point a routine at it:
+A **Cloud Routine** is a scheduled agent run, configured through the API. Once a chat is
+linked, give a routine a **delivery target** pointing at that linked destination — when the
+run finishes, the agent's answer is posted there automatically.
 
-1. Create or edit a [Cloud Routine](/dashboard/agents) (a scheduled agent run).
-2. Set its **delivery** target to a linked Telegram destination.
-3. When the routine finishes, the agent's answer is posted to that chat or channel automatically.
-
-Delivery is best-effort and never fails the run itself. Long results are split across Telegram's 4096-character message limit.
+Delivery is best-effort and never fails the run itself. Long results are split across
+Telegram's 4096-character message limit.
 
 ## 5. Interactive chatbot
 
@@ -71,15 +72,10 @@ Each chat keeps its own conversation, so the agent remembers previous turns. Mes
 
 ## Access
 
-A connector's **access policy** lives in its own settings (not the global tool-approval rules):
-
-| Policy | Behavior |
-|--------|----------|
-| **Auto-allow** (recommended) | The agent uses the Telegram tools without prompting, including headless routines. |
-| **Ask user** | The end user approves each use. |
-| **Block** | The tools are disabled. |
-
-Disabling the connector is a hard off-switch — routine delivery and the chatbot both stop immediately.
+Telegram uses the standard connector [access policy](/dashboard/connectors#access-policy) —
+**Auto-allow** (recommended), **Ask user**, or **Block** — set in the connector's own
+settings. Disabling the connector is a hard off-switch: routine delivery and the chatbot
+both stop immediately.
 
 ## Agent tools
 
