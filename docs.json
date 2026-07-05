@@ -44,6 +44,7 @@
               "dashboard/mcp-servers",
               "dashboard/platform-tools",
               "dashboard/connectors",
+              "dashboard/telegram",
               "dashboard/skills"
             ]
           },

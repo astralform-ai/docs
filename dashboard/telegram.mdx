@@ -1,0 +1,108 @@
+---
+title: "Telegram Channel"
+description: "Connect a Telegram bot so your agents can deliver routine results to a chat or channel and answer messages directly in Telegram."
+---
+
+## Overview
+
+The Telegram channel turns a Telegram bot into a two-way surface for your agents:
+
+- **Outbound** — a scheduled agent run (a Cloud Routine) can post its result to a Telegram chat or channel.
+- **Interactive** — a user can direct-message the bot and your project's agent replies, with full multi-turn memory.
+
+Both directions run on one bot and one webhook. You never copy a numeric chat ID — chats are linked with a one-time deep link, the same pattern used by production notification platforms.
+
+## 1. Create a bot
+
+1. In Telegram, open [@BotFather](https://t.me/BotFather) and send `/newbot`.
+2. Choose a name and a username (must end in `bot`).
+3. BotFather replies with a **bot token** like `8624770228:AAH…`. Keep it secret.
+
+## 2. Connect the bot
+
+The Telegram connector is an **API-key connector** — the bot token is encrypted and stored per project.
+
+1. Go to **Project Settings → Connectors** and enable **Telegram**.
+2. Paste the **bot token** from BotFather.
+3. Choose the agent access policy (see [Access](#access)).
+4. Click **Save**.
+
+<Note>
+  Connecting the bot registers a webhook automatically the first time you link a chat, so Telegram delivers `/start` and incoming messages to your project. This requires the API to be reachable at a public HTTPS URL (it is, in production).
+</Note>
+
+## 3. Link a chat
+
+Open the connector's detail page and click **Link a chat**. You get a one-time deep link (valid 30 minutes) and a QR code:
+
+- **On this device** — click **Open in Telegram** and press **Start**. The chat links automatically.
+- **On a phone** — scan the QR code, then press **Start**.
+- **For someone else** — copy the link and send it to them; when they press **Start**, their chat links.
+
+The moment the recipient presses **Start**, the linked chat appears in the **Linked chats** list — no chat IDs, ever.
+
+### Link a channel or group
+
+To post to a channel or group, add the bot to it as an **admin** with permission to post —
+use the channel link from the same dialog, or add the bot to a group from Telegram directly.
+It then appears as a linked destination.
+
+<Warning>
+  A bot can't message someone first — Telegram requires the recipient to press **Start** (or add the bot to their channel) before the bot can send anything. That's exactly what the enrollment link is for.
+</Warning>
+
+## 4. Deliver routine results to Telegram
+
+A **Cloud Routine** is a scheduled agent run, configured through the API. Once a chat is
+linked, give a routine a **delivery target** pointing at that linked destination — when the
+run finishes, the agent's answer is posted there automatically.
+
+Delivery is best-effort and never fails the run itself. Long results are split across
+Telegram's 4096-character message limit.
+
+## 5. Interactive chatbot
+
+Any user who direct-messages the bot gets a reply from your project's agent:
+
+1. The user opens the bot in Telegram and sends a message.
+2. Your project's agent runs the message as a conversation turn.
+3. The reply is sent back in the same chat.
+
+Each chat keeps its own conversation, so the agent remembers previous turns. Messages sent in groups and channels are treated as delivery destinations, not chat prompts.
+
+## Access
+
+Telegram uses the standard connector [access policy](/dashboard/connectors#access-policy) —
+**Auto-allow** (recommended), **Ask user**, or **Block** — set in the connector's own
+settings. Disabling the connector is a hard off-switch: routine delivery and the chatbot
+both stop immediately.
+
+## Agent tools
+
+When the connector is enabled, agents also get raw Telegram tools:
+
+| Tool | Purpose |
+|------|---------|
+| `telegram_get_me` | Return the bot's identity — a quick connection test. |
+| `telegram_send_message` | Send a message to a chat. |
+| `telegram_get_updates` | Read recent incoming messages. |
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| Enrollment link expired | Links last 30 minutes — click **Link a chat** again. |
+| Bot never replies to a DM | Confirm the connector is enabled and the project has an enabled agent. |
+| Routine didn't deliver | Check the routine has a delivery target that is a linked chat, and that the connector is enabled. |
+| "Too fast" reply | The per-chat rate limit kicked in — wait a moment and retry. |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Connectors" icon="plug" href="/dashboard/connectors">
+    How connectors and end-user auth work
+  </Card>
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Build the agent that answers on Telegram
+  </Card>
+</CardGroup>

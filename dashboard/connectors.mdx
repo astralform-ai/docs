@@ -43,6 +43,11 @@ Remote MCP connectors connect to external MCP servers over HTTP. No additional c
 | Slack | OAuth | Communication | `slack_list_channels`, `slack_send_message`, `slack_search_messages` |
 | Notion | OAuth | Productivity | `notion_search`, `notion_get_page`, `notion_create_page` |
 | GitHub | OAuth | Development | `github_list_repos`, `github_search_issues` |
+| Telegram | API Key | Communication | `telegram_send_message`, `telegram_get_me`, `telegram_get_updates` |
+
+<Note>
+  **Telegram** is a full two-way channel — deliver routine results to a chat or channel and run an interactive chatbot. See the dedicated [Telegram guide](/dashboard/telegram).
+</Note>
 
 ## Enabling a Connector
 
@@ -111,6 +116,18 @@ The authentication flow:
 3. User authorizes access in their browser
 4. Token is stored encrypted for future requests
 5. Agent retries the tool call with the user's token
+
+## Access Policy
+
+Each connector has an **access policy**, set in its own settings, that controls whether agents may use its tools:
+
+| Policy | Behavior |
+|--------|----------|
+| **Auto-allow** (recommended) | The agent uses the connector's tools without prompting — including headless runs like Cloud Routines. |
+| **Ask user** | The end user is asked to approve each use. |
+| **Block** | The tools are disabled. |
+
+This is separate from the global tool-approval rules — you set it per connector, so there's no need to hand-write approval patterns. Disabling a connector is a hard off-switch for all of its tools.
 
 ## Managing Connectors
 
