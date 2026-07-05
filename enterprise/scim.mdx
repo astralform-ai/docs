@@ -1,0 +1,71 @@
+---
+title: "SCIM Provisioning"
+description: "Provision and deprovision users automatically and map your IdP's directory groups to Astralform teams with SCIM 2.0."
+---
+
+## Overview
+
+SCIM (System for Cross-domain Identity Management) lets organization admins provision and deprovision users automatically from their identity provider, and map directory groups to Astralform teams. Users pushed by your IdP become members of your [organization](/enterprise/organizations); deactivating a user in the IdP removes their access.
+
+Only an organization **owner** or **admin** can configure SCIM, in **Organization Settings > SCIM**.
+
+## Generate a Token
+
+Your IdP authenticates to the SCIM endpoint with a bearer token.
+
+1. Go to **Organization Settings > SCIM**
+2. Click **Generate**
+3. Give the token a **name**
+4. Copy the **bearer token** — it is shown **once**
+
+<Warning>
+  The bearer token is shown **only once** and cannot be retrieved later. Copy it immediately and store it securely. If you lose it, generate a new one. Tokens can be revoked at any time.
+</Warning>
+
+## SCIM Base URL
+
+Copy the **SCIM base URL** shown in the dashboard — this is the connector base URL your IdP posts to:
+
+```
+https://api.astralform.ai/scim/v2
+```
+
+## Configure Your IdP
+
+In your IdP's provisioning or SCIM settings (Okta, Microsoft Entra ID, and more), set:
+
+- **SCIM connector base URL** — `https://api.astralform.ai/scim/v2`
+- **Authentication** — the bearer token you generated
+
+Enable **create**, **update**, and **deactivate** so the IdP keeps Astralform in sync.
+
+Users pushed by your IdP become **members of your organization**. Deactivating a user in the IdP removes their organization access.
+
+## Map Groups to Teams
+
+Each directory group your IdP pushes appears in a table in the SCIM section. For each group, pick a **team** and a **role** to map it:
+
+1. In the SCIM section, find the directory group in the group table
+2. Choose the **team** to map it to
+3. Choose the **role** (owner, admin, or member) that members of the group receive in that team
+
+Once mapped:
+
+- Members of the group are synced into that team at the chosen role
+- Changing the mapped role updates the role of existing members
+- A user removed from the group loses that team access — unless another mapped group still grants it
+
+<Note>
+  Astralform's SCIM endpoint implements **SCIM 2.0** (RFC 7644). Provisioning has been tested with Okta and Microsoft Entra ID.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Single Sign-On" icon="right-to-bracket" href="/enterprise/sso">
+    Let users sign in with your corporate IdP
+  </Card>
+  <Card title="Teams" icon="users" href="/dashboard/teams">
+    Groups map into teams and roles
+  </Card>
+</CardGroup>

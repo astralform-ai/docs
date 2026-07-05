@@ -48,6 +48,14 @@
             ]
           },
           {
+            "group": "Enterprise",
+            "pages": [
+              "enterprise/organizations",
+              "enterprise/sso",
+              "enterprise/scim"
+            ]
+          },
+          {
             "group": "Capsule",
             "pages": [
               "dashboard/capsule/pods",
