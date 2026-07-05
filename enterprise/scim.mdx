@@ -55,6 +55,10 @@ Once mapped:
 - Changing the mapped role updates the role of existing members
 - A user removed from the group loses that team access — unless another mapped group still grants it
 
+<Warning>
+  Mapping a group to the **Owner** role means anyone your IdP adds to that group is automatically granted full control of the team — including transferring ownership and deleting it. Reserve Owner mappings for tightly controlled groups; **Admin** or **Member** is the right choice for most directory groups.
+</Warning>
+
 <Note>
   Astralform's SCIM endpoint implements **SCIM 2.0** (RFC 7644). Provisioning has been tested with Okta and Microsoft Entra ID.
 </Note>
