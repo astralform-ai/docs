@@ -189,5 +189,11 @@
     "playground": {
       "mode": "simple"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/api-reference/status/project",
+      "destination": "/api-reference/status/agent"
+    }
+  ]
 }
