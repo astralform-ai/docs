@@ -137,7 +137,7 @@
             "group": "Status",
             "pages": [
               "api-reference/status/health",
-              "api-reference/status/project"
+              "api-reference/status/agent"
             ]
           }
         ]
@@ -189,5 +189,11 @@
     "playground": {
       "mode": "simple"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/api-reference/status/project",
+      "destination": "/api-reference/status/agent"
+    }
+  ]
 }
