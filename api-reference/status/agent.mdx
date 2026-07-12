@@ -1,17 +1,17 @@
 ---
-title: "Project Status"
-description: "Check if a project is ready for chat with a configured LLM provider."
-api: "GET https://api.astralform.ai/v1/project/status"
+title: "Agent Status"
+description: "Check if an agent is ready for chat with a configured LLM provider."
+api: "GET https://api.astralform.ai/v1/agent/status"
 ---
 
 ## Overview
 
-Check if the project has a valid LLM configuration before starting a chat. iOS clients should call this on app launch to show appropriate UI when no LLM is configured.
+Check if the agent has a valid LLM configuration before starting a chat. iOS clients should call this on app launch to show appropriate UI when no LLM is configured.
 
 ## Response
 
 <ResponseField name="is_ready" type="boolean">
-  Whether the project is ready for chat.
+  Whether the agent is ready for chat.
 </ResponseField>
 
 <ResponseField name="llm_configured" type="boolean">
@@ -37,7 +37,7 @@ Check if the project has a valid LLM configuration before starting a chat. iOS c
   "llm_configured": true,
   "llm_provider": "openai",
   "llm_model": "gpt-4o",
-  "message": "Project is ready for chat."
+  "message": "Agent is ready for chat."
 }
 ```
 
@@ -56,7 +56,7 @@ Check if the project has a valid LLM configuration before starting a chat. iOS c
 
 <CodeGroup>
 ```swift Swift
-let status = try await client.getProjectStatus()
+let status = try await client.getAgentStatus()
 
 if !status.isReady {
     // Show setup required UI
@@ -65,7 +65,7 @@ if !status.isReady {
 ```
 
 ```bash cURL
-curl https://api.astralform.ai/v1/project/status \
+curl https://api.astralform.ai/v1/agent/status \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 </CodeGroup>
