@@ -1,63 +1,74 @@
 ---
 title: "Platform Tools"
-description: "Enable built-in platform tools like Tavily web search to enhance your AI agent's capabilities without additional setup."
+description: "Enable built-in platform tools like web search and deep research to enhance your AI agent's capabilities without additional setup."
 ---
 
 ## Overview
 
-Platform tools are pre-built capabilities that run on Astralform's backend. Enable them with a single click - no MCP server configuration needed.
+Platform tools are pre-built capabilities that run on Astralform's backend. Enable them from the agent's settings — no MCP server configuration needed. Once enabled, your agent decides on its own when to use them; you never toggle them per message.
 
 ## Available Tools
 
-### Tavily Search
+### Web search
 
-Web search powered by Tavily AI.
+Real-time web search and page reading, exposed to the agent as two tools:
 
-**Capabilities:**
-- Real-time web search
-- News search
-- Answer extraction
+- `web_search` — search the web and return titles, URLs, and snippets.
+- `web_read` — fetch and extract the readable text of a page.
+
+**Providers:**
+
+| Provider | API key | Notes |
+|----------|---------|-------|
+| DuckDuckGo | Not required | Default. Privacy-focused, no setup. |
+| Google | Required | Google Custom Search JSON API. |
+| Bing | Required | Microsoft Bing Web Search API. |
 
 **Configuration:**
-1. Go to **Agents** and click an agent
-2. On the **Tools** tab, enable **Tavily Search**
-3. Enter your Tavily API key (get one at [tavily.com](https://tavily.com))
+1. Go to **Agents**, click an agent, and open the **Search** page.
+2. Toggle **Enable Search** on.
+3. Keep the default DuckDuckGo provider, or switch to Google or Bing and enter that provider's API key.
 
-**Example Usage:**
-```
-User: What's the latest news about AI?
-AI: [Uses tavily_search tool]
-    Here are the latest AI news headlines...
-```
+When search is enabled, the tools are always available to the agent — it decides per task whether a quick lookup is enough or a topic needs several searches and full-page reads.
+
+### Deep research
+
+A built-in, multi-source research loop. In a single tool call (`deep_research`) the agent plans queries, fans out searches, reads the most relevant pages, assesses gaps, refines, and synthesizes a report with inline citations. The agent chooses it over `web_search` when a question needs several sources compared and synthesized; a quick fact still uses `web_search`, which is much cheaper.
+
+**Configuration:**
+Deep research is on by default whenever Search is enabled. On the **Search** page you can toggle it and tune its budgets:
+
+| Setting | What it bounds |
+|---------|----------------|
+| Max rounds | Search → read → refine passes |
+| Max queries / round | Parallel searches each round |
+| Max sources | Total pages fetched per call |
+| Max wall seconds | Hard time budget per call |
+
+Each budget is clamped to a hard cap (shown next to the field); a larger value saves but is capped.
 
 ## Enabling Platform Tools
 
-Platform tools are enabled and assigned per agent:
+1. Go to **Agents** and click an agent.
+2. Open the **Search** page.
+3. Toggle **Enable Search** on, pick a provider, and (optionally) adjust the Deep Research budgets.
 
-1. Go to **Agents** and click an agent
-2. On the **Tools** tab, find the tool you want to enable
-3. Toggle it **On**
-4. Enter any required API keys
-5. Click **Save**
-
-For the Main Agent, all platform tools are auto-assigned. Named agents get only the tools you explicitly assign.
-
-See [Agents](/dashboard/agents) for more on resource assignment.
+See [Agents](/dashboard/agents) for more on assigning capabilities to named agents.
 
 ## Tool Behavior
 
-Platform tools are automatically invoked by the AI when relevant. You don't need to explicitly request them.
+Platform tools are invoked automatically by the agent when relevant — you don't request them explicitly, and there is no per-message switch.
 
-### How the AI Decides
+### How the agent decides
 
-1. User asks a question
-2. AI analyzes if tools would help
-3. If web search is needed, AI calls `tavily_search`
-4. Results are incorporated into the response
+1. The user asks a question.
+2. The agent works out whether current, real-world information would help.
+3. For a single fact it calls `web_search` (and `web_read` to read a source in full); for an in-depth, multi-source question it calls `deep_research`.
+4. Results are incorporated into the response, with citations for deep research.
 
-### Controlling Tool Usage
+### Guiding tool usage
 
-You can guide tool usage through system prompts:
+You can steer usage through the agent's system prompt, for example:
 
 ```
 Always search the web for current information when asked about:
@@ -68,19 +79,19 @@ Always search the web for current information when asked about:
 
 ## API Key Management
 
-Platform tool API keys are stored securely and never exposed to clients.
+Provider API keys (Google, Bing) are stored encrypted and never exposed to clients.
 
 **To update a key:**
-1. Go to **Agents** and click any agent
-2. On the **Tools** tab, click the edit icon next to the tool
-3. Enter the new API key
-4. Click **Save**
+1. Go to **Agents**, click an agent, and open the **Search** page.
+2. Switch to the provider and enter the new API key.
+3. The key is saved encrypted at rest.
 
 ## Cost Considerations
 
 | Tool | Cost Model |
 |------|------------|
-| Tavily Search | Per search query |
+| Web search | Per search query |
+| Deep research | Per call (bundles several searches and reads) |
 
 Monitor usage in **Analytics**.
 
@@ -88,7 +99,7 @@ Monitor usage in **Analytics**.
 
 | Type | Runs On | Managed By | Example |
 |------|---------|------------|---------|
-| Platform | Astralform | Astralform | Web search |
+| Platform | Astralform | Astralform | Web search, deep research |
 | MCP | Your Server | You | Database queries |
 | Client | iOS Device | Your App | Calendar access |
 
@@ -96,7 +107,7 @@ Monitor usage in **Analytics**.
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/dashboard/agents">
-    Assign tools to specific agents
+    Assign capabilities to specific agents
   </Card>
   <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
     Add custom server-side tools
