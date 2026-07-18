@@ -72,19 +72,17 @@
         ]
       },
       {
-        "tab": "Claude Code Plugin",
+        "tab": "Claude Connector",
         "groups": [
           {
             "group": "Getting Started",
             "pages": [
-              "plugin/installation",
-              "plugin/authentication"
+              "plugin/connect"
             ]
           },
           {
             "group": "Reference",
             "pages": [
-              "plugin/commands",
               "plugin/mcp-tools"
             ]
           }
@@ -194,6 +192,18 @@
     {
       "source": "/api-reference/status/project",
       "destination": "/api-reference/status/agent"
+    },
+    {
+      "source": "/plugin/installation",
+      "destination": "/plugin/connect"
+    },
+    {
+      "source": "/plugin/authentication",
+      "destination": "/plugin/connect"
+    },
+    {
+      "source": "/plugin/commands",
+      "destination": "/plugin/connect"
     }
   ]
 }
