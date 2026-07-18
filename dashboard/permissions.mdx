@@ -1,6 +1,6 @@
 ---
 title: "Permissions & Autonomy"
-description: "Control whether an agent runs tools on its own with Autonomy mode, and set the sandbox isolation that keeps auto-approval safe."
+description: "Control whether an agent runs tools on its own with Autonomy mode, and set the Capsule isolation that keeps auto-approval safe."
 ---
 
 ## Overview
@@ -8,7 +8,7 @@ description: "Control whether an agent runs tools on its own with Autonomy mode,
 Tool governance has **two independent axes**:
 
 - **Approval** — *does the agent need sign-off to run a tool?* Controlled by the agent's **Autonomy** setting.
-- **Isolation** — *what can a tool actually reach?* Controlled by the sandbox tier, network egress, connector scope, and Deny rules.
+- **Isolation** — *what can a tool actually reach?* Controlled by the Capsule sandbox, network egress, connector scope, and Deny rules.
 
 Turning off approval does **not** turn off isolation. That separation is what makes "let the agent run on its own" safe: even a fully autonomous agent is still boxed in by its sandbox and can never touch anything a Deny rule forbids.
 
@@ -21,21 +21,21 @@ Pick one mode per agent — the single control most agents need:
 | Mode | Interactive chat | Headless routines | Use it when |
 |------|------------------|-------------------|-------------|
 | **Autonomous** *(default)* | Runs tools without an approval card | Runs tools to completion | You want the agent to just get the work done — especially routines, where there's nobody to approve. |
-| **Supervised** | Shows an approval card for tools that require it | Skips (deny-fasts) tools that would need approval | You want a human to approve sensitive tools before they run. |
+| **Supervised** | Shows an approval card for tools that require it | Fails the tool immediately without running it (rather than waiting for an approver who never comes) | You want a human to approve sensitive tools before they run. |
 
-In both modes, a **Deny** rule always blocks a tool, and the sandbox isolation below is always enforced.
+In both modes, a **Deny** rule always blocks a tool, and the Capsule isolation below is always enforced.
 
 <Note>
-  Autonomous is the default. A routine on an autonomous agent runs an `sandbox_exec` or research step to completion instead of silently failing for lack of an approver.
+  Autonomous is the default. A routine on an autonomous agent runs a shell/code step (e.g. `sandbox_exec`) or a research step to completion, instead of stopping there for lack of an approver.
 </Note>
 
 ## Isolation (always enforced)
 
 These are the real guardrails — they apply in every Autonomy mode:
 
-- **Sandbox tier** — code and shell tools run inside an ephemeral, isolated capsule. A rogue command only affects that throwaway sandbox.
+- **Capsule sandbox** — shell and code tools run inside an ephemeral, isolated Capsule microVM (configured per agent via `sandbox_template`). A rogue command only affects that throwaway sandbox. See [Capsule Sandboxes](/dashboard/capsule/sandboxes).
 - **Network egress** — off / allowlist / full. Off or allowlist means an autonomous agent can't reach the open internet or exfiltrate data.
-- **Connector scope** — an agent only sees the connectors (and their secrets) you grant it.
+- **Connector scope** — an agent only sees the [connectors](/dashboard/connectors) (and their secrets) you grant it.
 - **Deny rules** — a hard ceiling. A tool matched by a Deny rule never runs, in any mode.
 
 <Warning>
@@ -49,10 +49,21 @@ Under **Advanced** on the Permissions page you can go beyond the single Autonomy
 - A **capability matrix** to set Allow / Ask / Deny per tool category.
 - **Glob rules** to Deny (or Allow) specific tools or argument patterns.
 
-Most agents never need this — the Autonomy control plus isolation covers the common case. Advanced is there for the ceiling you want to pin exactly.
+Most agents never need this — the Autonomy control plus isolation covers the common case. Advanced is there for when you want to pin the ceiling exactly.
 
-## Next steps
+## Next Steps
 
-- **[Agents](/dashboard/agents)** — where each agent's Permissions page lives.
-- **[Connectors](/dashboard/connectors)** — scope which external services an agent can reach.
-- **[Platform Tools](/dashboard/platform-tools)** — the built-in tools an agent can run.
+<CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Configure each agent — its model, skills, tools, and Permissions page.
+  </Card>
+  <Card title="Capsule Sandboxes" icon="box" href="/dashboard/capsule/sandboxes">
+    The isolation layer: sandbox templates and lifecycle.
+  </Card>
+  <Card title="Connectors" icon="plug" href="/dashboard/connectors">
+    Scope which external services an agent can reach.
+  </Card>
+  <Card title="Platform Tools" icon="wrench" href="/dashboard/platform-tools">
+    The built-in tools an agent can run.
+  </Card>
+</CardGroup>
