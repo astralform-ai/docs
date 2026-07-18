@@ -1,0 +1,69 @@
+---
+title: "Connect to Claude"
+description: "Add Astralform to Claude as a custom connector — manage your projects from the Claude apps with no install."
+---
+
+## Overview
+
+Astralform is available as a **custom connector** for Claude. Add it once in the Claude apps (web, desktop, and mobile) and Claude can manage your Astralform account directly — teams, projects, API keys, LLM config, connectors, skills, and analytics — through [58 MCP tools](/plugin/mcp-tools).
+
+There is nothing to install and no API key to paste: the connector authenticates with your Astralform account over OAuth, handled by Claude's connector UI.
+
+<Note>
+  The connector is the recommended way to use Astralform from Claude. It replaces the former Claude Code plugin and works across every Claude surface, including Claude Code.
+</Note>
+
+## Add the connector
+
+<Steps>
+  <Step title="Open Connectors settings">
+    In the Claude app, go to **Settings → Connectors**.
+  </Step>
+  <Step title="Add a custom connector">
+    Click **Add custom connector**, then enter the Astralform MCP server URL:
+
+    ```
+    https://mcp.astralform.ai/mcp
+    ```
+  </Step>
+  <Step title="Authorize">
+    Claude opens Astralform's sign-in to authorize access. Log in to your Astralform account (or [create one](https://astralform.ai)) and approve. Claude stores the connection — there is no token handling on your side.
+  </Step>
+  <Step title="Confirm">
+    Start a chat and ask:
+
+    ```
+    Who am I on Astralform?
+    ```
+
+    Claude calls the `astralform_whoami` tool and returns your account identity. You're connected.
+  </Step>
+</Steps>
+
+## What you can do
+
+Once connected, ask Claude in plain language — it picks the right tool:
+
+- "Create a new Astralform project under my team and set the model to GPT-5.4."
+- "List my projects and show the API keys for the production one."
+- "Enable the Slack connector on my support agent."
+- "What's my token usage this month?"
+
+See the [MCP Tools reference](/plugin/mcp-tools) for the full catalog.
+
+## Authentication & security
+
+- **OAuth, self-serve.** Authorization runs through Astralform's OAuth server; Claude never sees your password and stores only the granted token.
+- **Revoke anytime.** Remove the connector from **Settings → Connectors** to revoke access.
+- **Scoped to you.** The connector acts as your authenticated Astralform developer account.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="MCP Tools" icon="wrench" href="/plugin/mcp-tools">
+    The full catalog of Astralform tools Claude can call.
+  </Card>
+  <Card title="Dashboard" icon="gauge" href="https://astralform.ai">
+    Manage the same projects in the Astralform web dashboard.
+  </Card>
+</CardGroup>
