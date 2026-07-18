@@ -40,6 +40,7 @@
               "dashboard/api-keys",
               "dashboard/rate-limits",
               "dashboard/agents",
+              "dashboard/permissions",
               "dashboard/llm-providers",
               "dashboard/mcp-servers",
               "dashboard/platform-tools",
