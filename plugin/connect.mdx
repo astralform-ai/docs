@@ -5,7 +5,7 @@ description: "Add Astralform to Claude as a custom connector — manage your pro
 
 ## Overview
 
-Astralform is available as a **custom connector** for Claude. Add it once in the Claude apps (web, desktop, and mobile) and Claude can manage your Astralform account directly — teams, projects, API keys, LLM config, connectors, skills, and analytics — through [58 MCP tools](/plugin/mcp-tools).
+Astralform is available as a **custom connector** for Claude. Add it once in Claude for web or desktop and Claude can manage your Astralform account directly — teams, projects, API keys, LLM config, connectors, skills, and analytics — through [58 MCP tools](/plugin/mcp-tools).
 
 There is nothing to install and no API key to paste: the connector authenticates with your Astralform account over OAuth, handled by Claude's connector UI.
 
@@ -16,15 +16,17 @@ There is nothing to install and no API key to paste: the connector authenticates
 ## Add the connector
 
 <Steps>
-  <Step title="Open Connectors settings">
-    In the Claude app, go to **Settings → Connectors**.
+  <Step title="Open Connectors">
+    In Claude for web or desktop, open **Customize → Connectors**.
   </Step>
   <Step title="Add a custom connector">
-    Click **Add custom connector**, then enter the Astralform MCP server URL:
+    Click the **+** next to Connectors, then **Add custom connector**. Give it a name (for example, `Astralform`) and enter the server URL:
 
     ```
     https://mcp.astralform.ai/mcp
     ```
+
+    Leave the advanced **OAuth Client ID / secret** fields empty — Astralform registers your client automatically. Click **Add**.
   </Step>
   <Step title="Authorize">
     Claude opens Astralform's sign-in to authorize access. Log in to your Astralform account (or [create one](https://astralform.ai)) and approve. Claude stores the connection — there is no token handling on your side.
@@ -54,7 +56,7 @@ See the [MCP Tools reference](/plugin/mcp-tools) for the full catalog.
 ## Authentication & security
 
 - **OAuth, self-serve.** Authorization runs through Astralform's OAuth server; Claude never sees your password and stores only the granted token.
-- **Revoke anytime.** Remove the connector from **Settings → Connectors** to revoke access.
+- **Revoke anytime.** Remove the connector from **Customize → Connectors** to revoke access.
 - **Scoped to you.** The connector acts as your authenticated Astralform developer account.
 
 ## Next steps
