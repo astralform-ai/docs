@@ -1,6 +1,6 @@
 ---
 title: "Connectors"
-description: "Integrate OAuth and API key services (Slack, Notion, GitHub) so your agents can access external tools on behalf of end users."
+description: "Integrate OAuth, API key, and GitHub App services so your agents can access external tools on behalf of end users."
 ---
 
 ## Overview
@@ -18,7 +18,7 @@ Connectors let you integrate third-party services into your AI agents. Unlike MC
 
 ### OAuth Connectors
 
-OAuth connectors (Slack, Notion, GitHub) require you to create a dedicated OAuth app with the service provider. End users then authenticate through the standard OAuth flow.
+OAuth connectors (Slack, Notion) require you to create a dedicated OAuth app with the service provider. End users then authenticate through the standard OAuth flow.
 
 **Setup requirements:**
 - OAuth Client ID
@@ -32,6 +32,15 @@ API key connectors use a single API key for all requests. The key is encrypted a
 **Setup requirements:**
 - Service API key
 
+### GitHub App Connector
+
+GitHub is different. There is **one** GitHub App — Astralform's — and you install it on your account or organisation. You create nothing and store nothing: no OAuth app, no client secret, no personal access token.
+
+**Setup requirements:**
+- None. Open the connector and click **Install on GitHub**.
+
+Repository access is minted per run, scoped to the single repository being worked on, and discarded when the run ends. See [GitHub](/dashboard/github) for the full setup, including how to have an agent answer mentions on issues and pull requests.
+
 ### Remote MCP Connectors
 
 Remote MCP connectors connect to external MCP servers over HTTP. No additional credentials are needed beyond the server URL.
@@ -42,8 +51,12 @@ Remote MCP connectors connect to external MCP servers over HTTP. No additional c
 |-----------|------|----------|-------|
 | Slack | OAuth | Communication | `slack_list_channels`, `slack_send_message`, `slack_search_messages` |
 | Notion | OAuth | Productivity | `notion_search`, `notion_get_page`, `notion_create_page` |
-| GitHub | OAuth | Development | `github_list_repos`, `github_search_issues` |
+| GitHub | GitHub App | Development | `github_list_repos`, `github_search_issues` |
 | Telegram | API Key | Communication | `telegram_send_message`, `telegram_get_me`, `telegram_get_updates` |
+
+<Note>
+  **GitHub** is more than these two tools — the same connector lets an agent answer `@astralform-agent` on an issue or pull request, do the work, and open a PR. See the dedicated [GitHub guide](/dashboard/github).
+</Note>
 
 <Note>
   **Telegram** is a full two-way channel — deliver routine results to a chat or channel and run an interactive chatbot. See the dedicated [Telegram guide](/dashboard/telegram).
@@ -99,12 +112,9 @@ astralform_enable_connector with project_id, connector_slug="slack",
 4. Add redirect URI: `https://api.astralform.ai/v1/connectors/oauth/callback`
 5. Copy the **OAuth client ID** and **OAuth client secret**
 
-### GitHub
-
-1. Go to [github.com/settings/developers](https://github.com/settings/developers)
-2. Click **New OAuth App**
-3. Set callback URL: `https://api.astralform.ai/v1/connectors/oauth/callback`
-4. Copy the **Client ID** and **Client Secret**
+<Note>
+  **GitHub is not in this list.** It uses Astralform's own GitHub App, so there is no OAuth app to create and no secret to copy. See [GitHub](/dashboard/github).
+</Note>
 
 ## End-User Authentication
 
@@ -158,6 +168,10 @@ astralform_disable_connector with project_id, connector_id
 
 <Warning>
   Disabling a connector **permanently revokes all end-user tokens**. Users will need to re-authenticate if the connector is re-enabled.
+</Warning>
+
+<Warning>
+  Uninstalling the **GitHub** connector unbinds the agent from its GitHub account. It cannot uninstall the App from your account or organisation — that is yours to remove on GitHub, and the confirmation dialog links you there. If other agents in your workspace answer for the same account, the dialog says so, because removing the App on GitHub stops all of them.
 </Warning>
 
 ## Assigning to Agents

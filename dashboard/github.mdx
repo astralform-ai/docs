@@ -1,0 +1,153 @@
+---
+title: "GitHub"
+description: "Mention your agent on an issue or pull request and it does the work, then opens a PR. No secrets to store."
+---
+
+## Overview
+
+Connect an agent to GitHub and it can answer mentions on issues and pull requests: it reads the thread, does the work, and opens a PR back.
+
+**You store nothing.** No API key, no private key, no personal access token. There is one GitHub App — Astralform's — and the workflow in your repository proves which repository it is with a GitHub-signed OIDC token.
+
+<Note>
+  Astralform holds no credential of yours here. Repository access is minted per run, scoped to the one repository the run is about, valid for an hour, and never written to a database.
+</Note>
+
+## Setup
+
+### 1. Install the app
+
+Open **Connectors** on your agent, add **GitHub**, then click **Install on GitHub**. Choose the account or organisation whose repositories the agent should work in, and GitHub brings you straight back.
+
+GitHub asks for two things — installing the app, and authorising Astralform to confirm you administer that installation. Both happen in the same trip.
+
+### 2. Add the workflow
+
+Commit this to each repository the agent should answer in, as `.github/workflows/astralform.yml`. The connector page generates it with your agent's name already filled in.
+
+```yaml .github/workflows/astralform.yml
+name: Astralform
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  astralform:
+    if: >-
+      github.event.sender.type != 'Bot' &&
+      contains(github.event.comment.body || github.event.issue.body ||
+               github.event.pull_request.body, '@astralform-agent')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: astralform-ai/astralform-action@v1
+        with:
+          agent: your-agent-name
+```
+
+<Warning>
+  `permissions: id-token: write` is **required**, not optional — it is what mints the token proving which repository is calling. Without it the action fails immediately and says so. This is the most common setup mistake.
+</Warning>
+
+The `if:` condition is yours to keep: without it, every issue, PR and comment starts a billable run rather than only the ones that mention the agent.
+
+## The action
+
+[`astralform-ai/astralform-action`](https://github.com/astralform-ai/astralform-action) is public and MIT-licensed. It mints the OIDC token, dispatches to Astralform, and reports back whatever Astralform said — so a refusal tells you *why* rather than failing as an opaque non-zero exit.
+
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `agent` | yes | — | The agent's **name** as shown in the dashboard. |
+| `instruction` | no | the triggering body | What to ask. Defaults to the comment, issue or PR body that fired the event. |
+| `issue-number` | no | the triggering number | The issue or PR the run is about. |
+| `api-url` | no | `https://api.astralform.ai` | Only for a self-hosted deployment. |
+| `audience` | no | `https://api.astralform.ai` | OIDC audience. Change only alongside `api-url`. |
+
+### Pinning
+
+`@v1` is a moving major tag — it follows every backwards-compatible release. Because the action runs on your runner with `id-token: write`, you may prefer something stricter:
+
+| Pin | What you get |
+|-----|--------------|
+| `@v1` | Fixes and features arrive automatically. The tag moves. |
+| `@v1.0.1` | Immutable. A repository ruleset blocks deletion, update and force-push on every `v*.*.*` tag. |
+| `@<full-sha>` | Immutable and independent of our tagging. Dependabot and Renovate keep SHA pins current. |
+
+## Who can start a run
+
+The OIDC token proves which **repository** is calling. It says nothing about **who** commented — so Astralform checks that separately, and only an `OWNER`, `MEMBER` or `COLLABORATOR` of the repository may start a run.
+
+A stranger commenting `@astralform-agent` on your public repository is refused server-side, whatever the workflow does.
+
+Runs are also rate limited: **10 per repository per minute** and **60 per account per minute**. Authorisation answers *whether* someone may start a run, not *how many*.
+
+## What the agent can touch
+
+The token minted for a run carries only what the work needs:
+
+| Permission | Level |
+|------------|-------|
+| `contents` | write |
+| `issues` | write |
+| `pull_requests` | write |
+| `metadata` | read |
+
+`workflows` is deliberately absent. A mention-driven run cannot rewrite the CI that runs on every future push.
+
+## Repository access
+
+The connector page lists the repositories your installation covers and flags which ones have the workflow committed — granting access and adding the workflow are two separate steps, and the second is the one people forget.
+
+| Label | Meaning |
+|-------|---------|
+| **Workflow file found** | `astralform.yml` or `astralform.yaml` exists in `.github/workflows`. |
+| **No workflow file** | Neither exists there. Mentions still work if you put the job in another workflow file. |
+| **Not checked** | GitHub did not answer for that repository, so its status is unknown — not a claim that anything is missing. |
+
+**Changing which repositories are covered happens on GitHub**, via the **Change on GitHub** link. GitHub's API for adding and removing repositories on an installation accepts only a classic personal access token with full `repo` scope, and asking you for one would mean Astralform holding read/write on every repository you own in order to manage a list.
+
+## Disconnecting
+
+**Disconnect** on the connector card unbinds the agent from its GitHub account. **Uninstall** removes the connector entirely.
+
+Neither removes the app from your GitHub account — that is yours to do in your GitHub settings, and the confirmation links you there. If other agents in your workspace answer for the same account, the dialog tells you, because removing the app on GitHub stops all of them.
+
+## Troubleshooting
+
+### The card says "Setup Required" after installing
+
+The install and the authorisation are separate legs, and reconfiguring an app you have already installed has no authorisation leg at all. Open the connector and click **Install on GitHub** again — it will ask only for the missing half.
+
+### The workflow fails immediately
+
+Check `permissions: id-token: write` is on the job. The action names this explicitly when it is missing.
+
+### Mentions do nothing
+
+1. Confirm the workflow is committed on the repository's **default branch**.
+2. Confirm the commenter is an `OWNER`, `MEMBER` or `COLLABORATOR`.
+3. Confirm `agent:` matches the agent's name in the dashboard exactly — names resolve only inside the GitHub account that owns the repository.
+
+### "That GitHub account is already connected to another workspace"
+
+One GitHub account belongs to one Astralform workspace. Disconnect it in the other workspace first.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Connectors" icon="plug" href="/dashboard/connectors">
+    Slack, Notion, Telegram and remote MCP servers.
+  </Card>
+  <Card title="Permissions" icon="shield" href="/dashboard/permissions">
+    Control which tools an agent may use, and when it must ask.
+  </Card>
+</CardGroup>

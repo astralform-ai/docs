@@ -45,6 +45,7 @@
               "dashboard/mcp-servers",
               "dashboard/platform-tools",
               "dashboard/connectors",
+              "dashboard/github",
               "dashboard/telegram",
               "dashboard/skills"
             ]
