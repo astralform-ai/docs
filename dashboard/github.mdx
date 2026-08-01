@@ -146,11 +146,17 @@ Two different scopes, matching the two in [How the pieces fit](#how-the-pieces-f
 | Action | Where | Effect |
 |--------|-------|--------|
 | **Uninstall** the connector | the connector page's menu | This agent stops answering. Your workspace stays connected, other agents carry on, and turning this one back on is a single click. |
-| **Disconnect** an account | next to the account on the card | **Every** GitHub-enabled agent in the workspace stops answering in that account. The confirmation says how many that is before you commit. |
+| **Disconnect** an account | next to the account on the card | **Every** GitHub-enabled agent in the workspace stops answering in that account. The confirmation says how many that is before you commit. Requires **team admin or owner** — the blast radius is the whole workspace, so agent ownership alone is not enough. |
 
 Neither removes the app from your GitHub account — that is yours to do in your GitHub settings, and the card links you there.
 
 Disconnecting an account does not remove the connector from any agent, so reconnecting later does not mean re-adding GitHub to each agent by hand.
+
+### If you removed the app on GitHub
+
+The account stays listed on the card, flagged **App removed on GitHub** or **Suspended on GitHub**, and your agents stop answering there.
+
+That is deliberate. The connection is still recorded on our side, and while it is, no other Astralform workspace can connect that account — so the card keeps it visible with its **Disconnect** action rather than quietly hiding it. Reinstall the app to carry on, or disconnect to release the account.
 
 ## Troubleshooting
 
