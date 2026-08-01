@@ -5,7 +5,7 @@ description: "Mention your agent on an issue or pull request and it does the wor
 
 ## Overview
 
-Connect an agent to GitHub and it can answer mentions on issues and pull requests: it reads the thread, does the work, and opens a PR back.
+Connect a GitHub account to your workspace and your agents can answer mentions on issues and pull requests: they read the thread, do the work, and open a PR back.
 
 **You store nothing.** No API key, no private key, no personal access token. There is one GitHub App — Astralform's — and the workflow in your repository proves which repository it is with a GitHub-signed OIDC token.
 
@@ -13,15 +13,43 @@ Connect an agent to GitHub and it can answer mentions on issues and pull request
   Astralform holds no credential of yours here. Repository access is minted per run, scoped to the one repository the run is about, valid for an hour, and never written to a database.
 </Note>
 
+## How the pieces fit
+
+Two things are true separately, and knowing which is which saves you a lot of clicking:
+
+| | Scope | What it costs |
+|---|---|---|
+| **Connecting an account** | your whole workspace | the install trip, **once per GitHub account** |
+| **Turning an agent on** | one agent | **one click** — no trip to GitHub |
+| **Routing a repository** | one repository | the `agent:` line in its workflow file |
+
+Your agents are addressed **by name from the workflow file**, so one connected account serves all of them. Point `agent: reviewer` at one repository and `agent: trader` at another and both work off the same installation.
+
 ## Setup
 
-### 1. Install the app
+### 1. Connect a GitHub account
 
-Open **Connectors** on your agent, add **GitHub**, then click **Install on GitHub**. Choose the account or organization whose repositories the agent should work in, and GitHub brings you straight back.
+<Note>
+  Connecting requires **team admin or owner**. It claims the account for your whole workspace — exclusively, so no other Astralform workspace can connect it — and every GitHub-enabled agent in the team then answers there. Step 2 needs no special role.
+</Note>
+
+Open **Connectors** on any agent, add **GitHub**, then click **Install on GitHub**. Choose the account or organization whose repositories your agents should work in, and GitHub brings you straight back.
 
 GitHub asks for two things — installing the app, and authorizing Astralform to confirm you administer that installation. Both happen in the same trip.
 
-### 2. Add the workflow
+This is a **workspace** action. You do it once per GitHub account, not once per agent.
+
+### 2. Turn on the agents that should answer
+
+The agent you installed from is turned on automatically. For every other agent, open its **Connectors** page, add **GitHub**, and the card will already say your workspace is connected — click **Use GitHub for this agent** and you are done. No second install, no second authorization.
+
+<Note>
+  Each agent is opted in individually on purpose. Without that step, every agent in your workspace would answer the moment somebody wrote its name into a workflow file — including one you never meant to expose.
+</Note>
+
+You can connect **more than one** GitHub account to a workspace (an organization and a personal account, say). Every GitHub-enabled agent answers in all of them.
+
+### 3. Add the workflow
 
 Commit this to each repository the agent should answer in, as `.github/workflows/astralform.yml`. The connector page generates it with your agent's name already filled in.
 
@@ -115,11 +143,24 @@ The connector page lists the repositories your installation covers and flags whi
 
 **Changing which repositories are covered happens on GitHub**, via the **Change on GitHub** link. GitHub's API for adding and removing repositories on an installation accepts only a classic personal access token with full `repo` scope, and asking you for one would mean Astralform holding read/write on every repository you own in order to manage a list.
 
-## Disconnecting
+## Turning it off
 
-**Disconnect** on the connector card unbinds the agent from its GitHub account. **Uninstall** removes the connector entirely.
+Two different scopes, matching the two in [How the pieces fit](#how-the-pieces-fit):
 
-Neither removes the app from your GitHub account — that is yours to do in your GitHub settings, and the confirmation links you there. If other agents in your workspace answer for the same account, the dialog tells you, because removing the app on GitHub stops all of them.
+| Action | Where | Effect |
+|--------|-------|--------|
+| **Uninstall** the connector | the connector page's menu | This agent stops answering. Your workspace stays connected, other agents carry on, and turning this one back on is a single click. |
+| **Disconnect** an account | next to the account on the card | **Every** GitHub-enabled agent in the workspace stops answering in that account. The confirmation says how many that is before you commit. Requires **team admin or owner** — the blast radius is the whole workspace, so agent ownership alone is not enough. |
+
+Neither removes the app from your GitHub account — that is yours to do in your GitHub settings, and the card links you there.
+
+Disconnecting an account does not remove the connector from any agent, so reconnecting later does not mean re-adding GitHub to each agent by hand.
+
+### If you removed the app on GitHub
+
+The account stays listed on the card, flagged **App removed on GitHub** or **Suspended on GitHub**, and your agents stop answering there.
+
+That is deliberate. The connection is still recorded on our side, and while it is, no other Astralform workspace can connect that account — so the card keeps it visible with its **Disconnect** action rather than quietly hiding it. Reinstall the app to carry on, or disconnect to release the account.
 
 ## Troubleshooting
 
@@ -135,7 +176,12 @@ Check `permissions: id-token: write` is on the job. The action names this explic
 
 1. Confirm the workflow is committed on the repository's **default branch**.
 2. Confirm the commenter is an `OWNER`, `MEMBER` or `COLLABORATOR`.
-3. Confirm `agent:` matches the agent's name in the dashboard exactly — names resolve only inside the GitHub account that owns the repository.
+3. Confirm the agent named in `agent:` has GitHub **turned on** — open its Connectors page and check the card does not say *"Your workspace is already connected"* with an un-clicked button.
+4. Confirm `agent:` matches the agent's name in the dashboard exactly — names resolve only inside the GitHub account that owns the repository.
+
+### A second agent asks me to install again
+
+It should not, and no longer does. If a card offers the full install flow while another agent in the same workspace is already connected, the account it was connected to has been disconnected or the app was removed on GitHub — reconnect it once and every agent picks it up.
 
 ### "That GitHub account is already connected to another workspace"
 

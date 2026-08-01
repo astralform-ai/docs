@@ -39,6 +39,8 @@ GitHub is different. There is **one** GitHub App — Astralform's — and you in
 **Setup requirements:**
 - None. Open the connector and click **Install on GitHub**.
 
+It is also the one connector configured per **workspace** rather than per agent: you install the App once per GitHub account, and every other agent is then one click — **Use GitHub for this agent** — with no second trip to GitHub.
+
 Repository access is minted per run, scoped to the single repository being worked on, and discarded when the run ends. See [GitHub](/dashboard/github) for the full setup, including how to have an agent answer mentions on issues and pull requests.
 
 ### Remote MCP Connectors
@@ -171,7 +173,7 @@ astralform_disable_connector with project_id, connector_id
 </Warning>
 
 <Warning>
-  For **GitHub**, neither **Disconnect** (unbind this agent from its GitHub account) nor **Uninstall** (remove the connector entirely) removes the App from your account or organization. That is yours to do on GitHub, and the confirmation dialog links you there. If other agents in your workspace answer for the same account, the dialog says so — removing the App on GitHub stops all of them. See [GitHub](/dashboard/github#disconnecting).
+  For **GitHub** the two actions have different blast radii. **Uninstall** removes this agent's connector and nothing else — the workspace stays connected and the other agents carry on. **Disconnect**, next to the account on the card, stops **every** GitHub-enabled agent in the workspace, and the confirmation says how many that is. Neither removes the App from your account or organization; that is yours to do on GitHub, and the card links you there. See [GitHub](/dashboard/github#turning-it-off).
 </Warning>
 
 ## Assigning to Agents
