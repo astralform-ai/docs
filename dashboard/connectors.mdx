@@ -12,7 +12,7 @@ Connectors let you integrate third-party services into your AI agents. Unlike MC
 | Auth model | Developer credentials | End-user OAuth/API keys |
 | Runs on | Backend (stdio/SSE) | Backend (API proxy) |
 | Use case | Databases, internal APIs | User-facing services (Slack, Notion) |
-| Setup | Command + env vars | OAuth app or API key |
+| Setup | Command + env vars | OAuth app, API key, or nothing at all (GitHub App) |
 
 ## Connector Types
 
@@ -34,7 +34,7 @@ API key connectors use a single API key for all requests. The key is encrypted a
 
 ### GitHub App Connector
 
-GitHub is different. There is **one** GitHub App — Astralform's — and you install it on your account or organisation. You create nothing and store nothing: no OAuth app, no client secret, no personal access token.
+GitHub is different. There is **one** GitHub App — Astralform's — and you install it on your account or organization. You create nothing and store nothing: no OAuth app, no client secret, no personal access token.
 
 **Setup requirements:**
 - None. Open the connector and click **Install on GitHub**.
@@ -171,7 +171,7 @@ astralform_disable_connector with project_id, connector_id
 </Warning>
 
 <Warning>
-  Uninstalling the **GitHub** connector unbinds the agent from its GitHub account. It cannot uninstall the App from your account or organisation — that is yours to remove on GitHub, and the confirmation dialog links you there. If other agents in your workspace answer for the same account, the dialog says so, because removing the App on GitHub stops all of them.
+  For **GitHub**, neither **Disconnect** (unbind this agent from its GitHub account) nor **Uninstall** (remove the connector entirely) removes the App from your account or organization. That is yours to do on GitHub, and the confirmation dialog links you there. If other agents in your workspace answer for the same account, the dialog says so — removing the App on GitHub stops all of them. See [GitHub](/dashboard/github#disconnecting).
 </Warning>
 
 ## Assigning to Agents

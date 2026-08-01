@@ -17,9 +17,9 @@ Connect an agent to GitHub and it can answer mentions on issues and pull request
 
 ### 1. Install the app
 
-Open **Connectors** on your agent, add **GitHub**, then click **Install on GitHub**. Choose the account or organisation whose repositories the agent should work in, and GitHub brings you straight back.
+Open **Connectors** on your agent, add **GitHub**, then click **Install on GitHub**. Choose the account or organization whose repositories the agent should work in, and GitHub brings you straight back.
 
-GitHub asks for two things — installing the app, and authorising Astralform to confirm you administer that installation. Both happen in the same trip.
+GitHub asks for two things — installing the app, and authorizing Astralform to confirm you administer that installation. Both happen in the same trip.
 
 ### 2. Add the workflow
 
@@ -88,7 +88,7 @@ The OIDC token proves which **repository** is calling. It says nothing about **w
 
 A stranger commenting `@astralform-agent` on your public repository is refused server-side, whatever the workflow does.
 
-Runs are also rate limited: **10 per repository per minute** and **60 per account per minute**. Authorisation answers *whether* someone may start a run, not *how many*.
+Runs are also rate limited: **10 per repository per minute** and **60 per account per minute**. Authorization answers *whether* someone may start a run, not *how many*.
 
 ## What the agent can touch
 
@@ -125,7 +125,7 @@ Neither removes the app from your GitHub account — that is yours to do in your
 
 ### The card says "Setup Required" after installing
 
-The install and the authorisation are separate legs, and reconfiguring an app you have already installed has no authorisation leg at all. Open the connector and click **Install on GitHub** again — it will ask only for the missing half.
+The install and the authorization are separate legs, and reconfiguring an app you have already installed has no authorization leg at all. Open the connector and click **Install on GitHub** again — it will ask only for the missing half.
 
 ### The workflow fails immediately
 
