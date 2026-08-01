@@ -65,20 +65,34 @@ Claude will select the team, call `astralform_create_project` with the `team_id`
 
 ## LLM Configuration
 
+These tools manage the agent's **conversation model** — the model it uses when a request
+doesn't name one.
+
 | Tool | Description |
 |------|-------------|
 | `astralform_list_llm_providers` | List available providers (OpenAI, Anthropic, Groq, Ollama) |
-| `astralform_get_llm_config` | Get current LLM configuration |
-| `astralform_set_llm_config` | Set LLM provider and model |
-| `astralform_delete_llm_config` | Remove LLM configuration |
+| `astralform_get_llm_config` | Get the agent's conversation model, and whether its provider key is connected |
+| `astralform_set_llm_config` | Set the agent's conversation model (provider + model, optional reasoning effort and temperature) |
+| `astralform_delete_llm_config` | Clear the conversation model |
+
+<Note>
+  Provider API keys are held **per team**, in the Model Providers vault — not per agent.
+  Connect the key with [`astralform_set_provider_key`](#provider-keys) *before* setting a
+  model; `astralform_set_llm_config` refuses a provider whose key isn't connected, rather
+  than saving a model that would fail at request time.
+</Note>
 
 ### Example: Configure LLM
 
 ```
-Set up Claude claude-sonnet-4-20250514 for my project
+Store my Anthropic key, then set claude-sonnet-4-20250514 as my agent's model
 ```
 
-Claude will call `astralform_set_llm_config` with the appropriate provider and model.
+Claude will call `astralform_set_provider_key` first, then `astralform_set_llm_config` with
+the provider and model.
+
+Clearing the model leaves the agent with no default: every request must then name a model
+explicitly, or the run fails.
 
 ## Search Settings
 
