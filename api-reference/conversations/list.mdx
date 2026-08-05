@@ -18,8 +18,9 @@ Conversations are returned **newest-updated first** (`updated_at` descending).
 
 ```
 X-API-Key: af_live_xxxxxxxxxxxx
-X-End-User-ID: your-end-user-id
 ```
+
+The list is scoped to the end user your credential identifies — Astralform derives that from the key itself, so no end-user header is needed.
 
 ### Query Parameters
 
@@ -71,8 +72,7 @@ A JSON **array** of conversation objects — there is no wrapper object.
 
 ```bash
 curl -X GET "https://api.astralform.ai/v1/conversations?limit=10" \
-  -H "X-API-Key: af_live_xxxxxxxxxxxx" \
-  -H "X-End-User-ID: your-end-user-id"
+  -H "X-API-Key: af_live_xxxxxxxxxxxx"
 ```
 
 ### Swift
@@ -103,8 +103,10 @@ GET /v1/conversations?limit=50&offset=50
 The response carries **no total count**. Infer whether more remain from the size of the page you got: a full page means there may be another, and a short page means you have reached the end.
 
 ```javascript
-const page = await client.getConversations(50, offset);
-const mayHaveMore = page.length === 50;
+// @astralform/js >= 4.3.0
+const limit = 50;
+const page = await client.getConversations(limit, offset);
+const mayHaveMore = page.length === limit;
 ```
 
 A total that happens to be an exact multiple of the page size therefore costs one extra empty request before you learn you are done — cheaper than adding a count query to every list call.
