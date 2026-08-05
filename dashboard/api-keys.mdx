@@ -22,21 +22,22 @@ API keys authenticate requests from your iOS app to Astralform. Each project can
 
 API keys follow this format:
 ```
-af_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+sk_xxxxxxxxxxxx
 ```
 
-- `af_` - Astralform prefix
-- `live_` - Environment (live or test)
-- `xxxx...` - Random identifier
+- `sk_` - Secret-key prefix
+- `xxxx...` - 32 bytes of URL-safe randomness
+
+There is no separate test environment — a key is either live or revoked.
 
 ## Using API Keys
 
-Include the key in all API requests:
+Send the key as a bearer token on every API request:
 
 ```swift
 let client = AstralformClient(
     baseURL: URL(string: "https://api.astralform.ai")!,
-    apiKey: "af_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    apiKey: "sk_xxxxxxxxxxxx"
 )
 ```
 
@@ -44,7 +45,7 @@ Or in raw HTTP requests:
 
 ```bash
 curl -X POST https://api.astralform.ai/v1/chat/stream \
-  -H "X-API-Key: af_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{"conversation_id": "...", "message": "Hello"}'
 ```
