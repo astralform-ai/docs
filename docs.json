@@ -110,7 +110,7 @@
             "group": "Conversations",
             "pages": [
               "api-reference/conversations/list",
-              "api-reference/conversations/get",
+              "api-reference/conversations/messages",
               "api-reference/conversations/rename",
               "api-reference/conversations/delete"
             ]
@@ -205,6 +205,10 @@
     {
       "source": "/plugin/commands",
       "destination": "/plugin/connect"
+    },
+    {
+      "source": "/api-reference/conversations/get",
+      "destination": "/api-reference/conversations/messages"
     }
   ]
 }
