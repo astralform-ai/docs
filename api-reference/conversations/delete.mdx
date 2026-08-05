@@ -26,9 +26,19 @@ Authorization: Bearer sk_xxxxxxxxxxxx
 
 ## Response
 
-**204 No Content**
+**200 OK**
 
-A successful deletion returns no content.
+```json
+{
+  "status": "deleted",
+  "id": "conv_abc123"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Always `"deleted"` |
+| `id` | string | The conversation that was removed |
 
 ## Example
 

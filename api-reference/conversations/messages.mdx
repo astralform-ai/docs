@@ -1,0 +1,113 @@
+---
+title: "Get Conversation Messages"
+description: "Retrieve the message history for a conversation."
+api: "GET /v1/conversations/:id/messages"
+---
+
+## Endpoint
+
+```
+GET https://api.astralform.ai/v1/conversations/{conversation_id}/messages
+```
+
+<Note>
+  There is no `GET /v1/conversations/{id}` — that path serves `PATCH` and `DELETE` only, and a `GET` against it returns **405 Method Not Allowed**. Message history lives here; the conversation's own row comes from [List Conversations](/api-reference/conversations/list).
+</Note>
+
+## Request
+
+### Headers
+
+```
+Authorization: Bearer sk_xxxxxxxxxxxx
+```
+
+### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `conversation_id` | string | The conversation whose messages you want |
+
+## Response
+
+A JSON **array** of message objects, oldest first — there is no wrapper object.
+
+```json
+[
+  {
+    "id": "msg_001",
+    "role": "user",
+    "content": "What's the weather like today?",
+    "tool_calls": null,
+    "sources": null,
+    "created_at": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": "msg_002",
+    "role": "assistant",
+    "content": "It's currently 65°F and sunny in San Francisco.",
+    "tool_calls": null,
+    "sources": null,
+    "created_at": "2024-01-15T10:30:05Z"
+  }
+]
+```
+
+### Message Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique message identifier |
+| `role` | string | `"user"`, `"assistant"`, or `"tool"` |
+| `content` | string | Message content |
+| `tool_calls` | array \| null | Tool invocations made on this turn, when any |
+| `sources` | array \| null | Citations backing the message, when any |
+| `created_at` | string | ISO 8601 timestamp |
+
+<Note>
+  `role` includes `"tool"`, not just `"user"` and `"assistant"`. A client that switches exhaustively on role has to handle it, or a tool turn falls through unrendered.
+</Note>
+
+## Example
+
+### cURL
+
+```bash
+curl -X GET https://api.astralform.ai/v1/conversations/conv_abc123/messages \
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx"
+```
+
+### JavaScript
+
+```javascript
+// @astralform/js
+const messages = await client.getMessages("conv_abc123");
+
+for (const m of messages) {
+  console.log(`[${m.role}]: ${m.content}`);
+}
+```
+
+## Error Responses
+
+**403 Forbidden** — the conversation belongs to another end user, or another agent.
+
+```json
+{
+  "detail": "Access denied"
+}
+```
+
+**404 Not Found**
+```json
+{
+  "detail": "Conversation not found"
+}
+```
+
+**401 Unauthorized**
+```json
+{
+  "detail": "Invalid API key"
+}
+```
