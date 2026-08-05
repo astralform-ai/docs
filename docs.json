@@ -111,6 +111,7 @@
             "pages": [
               "api-reference/conversations/list",
               "api-reference/conversations/get",
+              "api-reference/conversations/rename",
               "api-reference/conversations/delete"
             ]
           },

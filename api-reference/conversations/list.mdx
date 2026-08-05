@@ -99,3 +99,26 @@ GET /v1/conversations?limit=20&offset=40
 ```
 
 The `meta.total` field indicates the total number of conversations.
+
+## Caching
+
+The list is per-user and changes whenever a conversation is created, renamed, or deleted, so it is **validated rather than cached**:
+
+```
+Cache-Control: private, no-cache
+ETag: "a37f16fa0c7d3fda…"
+```
+
+`no-cache` does not mean "do not store" — it means the response may be stored but must be revalidated with the server before every reuse. Send the `ETag` back as `If-None-Match` and you get a bodiless **304 Not Modified** when nothing has changed:
+
+```bash
+curl -X GET "https://api.astralform.ai/v1/conversations?limit=20" \
+  -H "X-API-Key: af_live_xxxxxxxxxxxx" \
+  -H 'If-None-Match: "a37f16fa0c7d3fda…"'
+```
+
+The validator is derived from the response body, not from timestamps — [renaming a conversation](/api-reference/conversations/rename) deliberately leaves `updated_at` untouched, so a timestamp-based validator would report "unchanged" for a title the user just edited.
+
+<Note>
+  Browsers revalidate on their own. Application code needs the header explicitly: `ETag` is exposed via `Access-Control-Expose-Headers` and `If-None-Match` is allowed cross-origin, so a browser-based client can read and send it.
+</Note>
