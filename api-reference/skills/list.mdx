@@ -8,8 +8,8 @@ Returns metadata for all enabled skills configured for this project. The agent u
 
 ## Authentication
 
-<ParamField header="X-API-Key" type="string" required>
-  Project API key (e.g., `sk_live_...` or `sk_test_...`)
+<ParamField header="Authorization" type="string" required>
+  Your project API key as a bearer token: `Bearer sk_xxxxxxxxxxxx`
 </ParamField>
 
 ## Response
@@ -38,7 +38,7 @@ Returns metadata for all enabled skills configured for this project. The agent u
 <RequestExample>
 ```bash cURL
 curl -X GET https://api.astralform.ai/v1/skills \
-  -H "X-API-Key: sk_live_your_api_key"
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx"
 ```
 
 ```swift Swift

@@ -183,9 +183,7 @@
   "api": {
     "baseUrl": "https://api.astralform.ai",
     "auth": {
-      "method": "key",
-      "name": "X-API-Key",
-      "inputPrefix": "af_live_"
+      "method": "bearer"
     },
     "playground": {
       "mode": "simple"

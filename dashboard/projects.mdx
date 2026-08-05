@@ -57,9 +57,9 @@ Use separate projects for:
 Each project exposes the same API endpoints, authenticated by project-specific API keys:
 
 ```bash
-# All requests require the X-API-Key header
+# All requests require the Authorization header
 curl -X GET https://api.astralform.ai/v1/conversations \
-  -H "X-API-Key: your-project-api-key"
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx"
 ```
 
 ## Next Steps
