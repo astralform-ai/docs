@@ -28,6 +28,15 @@ Authorization: Bearer sk_xxxxxxxxxxxx
 |-----------|------|-------------|
 | `conversation_id` | string | The conversation whose messages you want |
 
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | integer | Optional, 1–200. Return only the most recent `limit` messages (still oldest-first). Omitted, the response is the whole conversation, and grows with it |
+| `before_seq` | integer | Optional. Return messages older than this row sequence — pass the `X-Next-Before-Seq` value from the previous response to fetch the next older page |
+
+When `limit` is set, the response carries two headers: `X-Next-Before-Seq` (the `before_seq` for the next older page) and `X-Has-More` (`true` / `false` — whether an older page exists).
+
 ## Response
 
 A JSON **array** of message objects, oldest first — there is no wrapper object.
@@ -44,6 +53,21 @@ A JSON **array** of message objects, oldest first — there is no wrapper object
   },
   {
     "id": "msg_002",
+    "role": "tool",
+    "content": "{\"temp_f\": 65, \"conditions\": \"sunny\"}",
+    "tool_calls": [
+      {
+        "call_id": "call_7f3a",
+        "tool_name": "get_weather",
+        "arguments": { "city": "San Francisco" },
+        "is_client_tool": false
+      }
+    ],
+    "sources": null,
+    "created_at": "2024-01-15T10:30:03Z"
+  },
+  {
+    "id": "msg_003",
     "role": "assistant",
     "content": "It's currently 65°F and sunny in San Francisco.",
     "tool_calls": null,
@@ -60,13 +84,26 @@ A JSON **array** of message objects, oldest first — there is no wrapper object
 | `id` | string | Unique message identifier |
 | `role` | string | `"user"`, `"assistant"`, or `"tool"` |
 | `content` | string | Message content |
-| `tool_calls` | array \| null | Tool invocations made on this turn, when any |
+| `tool_calls` | array \| null | On a `"tool"` message, the call it answers — see below. `null` on user and assistant messages |
 | `sources` | array \| null | Citations backing the message, when any |
 | `created_at` | string | ISO 8601 timestamp |
 
 <Note>
   `role` includes `"tool"`, not just `"user"` and `"assistant"`. A client that switches exhaustively on role has to handle it, or a tool turn falls through unrendered.
 </Note>
+
+### Tool Call Object
+
+A `"tool"` message's `content` is the tool's output; `tool_calls` says which tool produced it. Its one entry has the same shape as the SDKs' `ToolCallRequest`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `call_id` | string | The call this message answers — the same id the [Stream](/api-reference/chat/stream) `tool_use` event carries as `id` and [Tool Result](/api-reference/chat/tool-result) takes as `tool_call_id` |
+| `tool_name` | string | The tool that ran (e.g. `"read_file"`, `"capsule_run_code"`) |
+| `arguments` | object | The arguments the tool ran with, read from the assistant turn that requested the call — a turn the response omits when it carried no text, so it is not visible here. `{}` when that turn lies outside a `limit`ed window (on an older page than this one) |
+| `is_client_tool` | boolean | Always `false` in history, including for tools that ran on the client: the flag means "execute this now" on a live request and is not recorded with the result |
+
+A tool message whose tool cannot be identified keeps `tool_calls: null`.
 
 ## Example
 
