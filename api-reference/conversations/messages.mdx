@@ -28,6 +28,15 @@ Authorization: Bearer sk_xxxxxxxxxxxx
 |-----------|------|-------------|
 | `conversation_id` | string | The conversation whose messages you want |
 
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | integer | Optional, 1–200. Return only the most recent `limit` messages (still oldest-first). Omitted, the response is the whole conversation, and grows with it |
+| `before_seq` | integer | Optional. Return messages older than this row sequence — pass the `X-Next-Before-Seq` value from the previous response to fetch the next older page |
+
+When `limit` is set, the response carries two headers: `X-Next-Before-Seq` (the `before_seq` for the next older page) and `X-Has-More` (`true` / `false` — whether an older page exists).
+
 ## Response
 
 A JSON **array** of message objects, oldest first — there is no wrapper object.
@@ -89,10 +98,10 @@ A `"tool"` message's `content` is the tool's output; `tool_calls` says which too
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `call_id` | string | The call this message answers |
+| `call_id` | string | The call this message answers — the same id the [Stream](/api-reference/chat/stream) `tool_use` event carries as `id` and [Tool Result](/api-reference/chat/tool-result) takes as `tool_call_id` |
 | `tool_name` | string | The tool that ran (e.g. `"read_file"`, `"capsule_run_code"`) |
-| `arguments` | object | The arguments the tool ran with — `{}` when the assistant turn that requested the call is not in this page |
-| `is_client_tool` | boolean | Always `false` here: a settled history row is never for the client to execute |
+| `arguments` | object | The arguments the tool ran with, read from the assistant turn that requested the call — a turn the response omits when it carried no text, so it is not visible here. `{}` when that turn lies outside a `limit`ed window (on an older page than this one) |
+| `is_client_tool` | boolean | Always `false` in history, including for tools that ran on the client: the flag means "execute this now" on a live request and is not recorded with the result |
 
 A tool message whose tool cannot be identified keeps `tool_calls: null`.
 
