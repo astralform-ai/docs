@@ -1,0 +1,129 @@
+---
+title: "Video Generation"
+description: "Give an agent a generate_video tool that animates an image into a short clip through any ComfyUI host you can reach — a box you run, a RunPod pod, a ComfyUI behind a proxy — or Astralform's own media service."
+---
+
+## Overview
+
+Video generation is a per-agent capability. When it is on, the agent gets a `generate_video` tool that turns an image already in the conversation — something the user attached, or a picture the agent generated earlier — into a short clip:
+
+- **Image-to-video only.** There is no text-to-video mode; the agent always needs a source image.
+- **About 5 seconds by default, silent.** 81 frames at 16 fps (frames are tunable, see step 5), rendered by Wan 2.2 I2V (14B) with the 4-step lightx2v distill. The clip has no audio.
+- **The workflow is Astralform's, the GPU is yours.** Astralform builds the ComfyUI workflow and sends it to the host you configure. The host needs stock ComfyUI and six weight files — nothing of Astralform's installed.
+
+## Providers
+
+| Provider | What it is | Needs |
+|----------|------------|-------|
+| **ComfyUI** | Any ComfyUI you can reach over HTTPS — a box you run, a RunPod pod, or a ComfyUI behind a reverse proxy. A private or plain-`http` host works too, once the operator lists it (see [Private hosts](#private-or-plain-http-hosts)). | Endpoint URL. An API key only if something in front of the server asks for one. |
+| **Astral Media (self-hosted)** | Astralform's own media service (`infra/astral-media/` in the main repository), which owns the workflow and a queue in front of one GPU. | Endpoint URL and its bearer token. |
+
+Pick **ComfyUI** unless you are running the astral-media service yourself.
+
+## Setting up a ComfyUI host
+
+<Steps>
+  <Step title="Open the agent's Video page">
+    Go to **Agents**, click an agent, open **Video**, and choose **ComfyUI** from the available providers.
+  </Step>
+  <Step title="Enter the endpoint URL">
+    The ComfyUI root — the address where `/system_stats` answers with JSON. For example `https://<pod-id>-8188.proxy.runpod.net` or `https://comfy.example.com`.
+
+    <Warning>
+      **Comfy Cloud is not a native ComfyUI endpoint.** `https://cloud.comfy.org` serves
+      its web app for unknown paths, so `/system_stats` and `/prompt` both answer `200`
+      with `text/html` — it looks reachable and is not. Its API lives under `/api/v2`
+      and speaks a different protocol, which this provider does not use.
+    </Warning>
+
+    The URL must be `https`: the first frame of every clip, and any API key, are sent to it. A private or plain-`http` host needs listing by the operator — see [Private hosts](#private-or-plain-http-hosts).
+  </Step>
+  <Step title="Add an API key if the host wants one">
+    A local ComfyUI or a RunPod pod has no authentication; leave the key empty. If something in front of the server checks a header, paste the key and choose how to send it:
+
+    | Send the key as | Use for |
+    |-----------------|---------|
+    | `Authorization: Bearer` | Reverse proxies, cloudflared service tokens, pods with auth — the common case |
+    | `X-API-Key` header | Hosts whose proxy asks for that header instead |
+
+    The key is stored encrypted and never shown again.
+  </Step>
+  <Step title="Save, then Check server">
+    **Check server** asks the saved endpoint whether it has the nodes and the six weight files the workflow needs. On a stock install expect *zero missing nodes* and *six missing weights* — every node Astralform uses ships with ComfyUI; the weights are what you stage.
+
+    Once the files are on the host, each **Weight files** slot becomes a picker of what the server actually lists. Map a slot only when the host stores a file under another name or in a subfolder; **Other…** lets you type a name the list does not show.
+  </Step>
+  <Step title="Choose the output shape, then turn it on">
+    **Output size** defaults to matching the source image's shape (least cropping); pick a fixed size only if every clip must come out the same. **Frames** and **Steps** are bounded — the distilled model is trained for 4 steps, and more is slower, not better. Toggle **Enable video generation** on.
+  </Step>
+</Steps>
+
+## Weight files the host needs
+
+These are the official Wan 2.2 release names, used when a slot is not mapped. They go in ComfyUI's usual model directories (`diffusion_models`, `loras`, `text_encoders`, `vae`).
+
+| Slot | Loader | Default filename |
+|------|--------|------------------|
+| High-noise expert (UNET) | `UNETLoader` | `wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors` |
+| Low-noise expert (UNET) | `UNETLoader` | `wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors` |
+| High-noise 4-step LoRA | `LoraLoaderModelOnly` | `wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors` |
+| Low-noise 4-step LoRA | `LoraLoaderModelOnly` | `wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors` |
+| Text encoder (umT5-XXL) | `CLIPLoader` | `umt5_xxl_fp8_e4m3fn_scaled.safetensors` |
+| VAE (Wan 2.1) | `VAELoader` | `wan_2.1_vae.safetensors` |
+
+## Running a host
+
+A clip takes a few minutes and holds the GPU for its whole duration, so clips generate one at a time. A card with about 22 GB of VRAM renders 832×480 in roughly four minutes once the weights are warm.
+
+<Note>
+Every clip leaves its first frame on the host as `input/astral_*.png`. ComfyUI has no route for deleting inputs, so prune that directory on the host from time to time.
+</Note>
+
+## Private or plain-http hosts
+
+By default every endpoint must be `https` and must resolve to a public address. A ComfyUI on a LAN, or a plain-`http` box, can still be a target — but only if the **operator** of the Astralform backend lists it:
+
+```bash
+# comma-separated host or host:port; a bare host trusts every port on it
+COMFY_TRUSTED_HOSTS=192.168.1.10:8188,comfy.lan
+```
+
+This is configuration on the backend, never inferred from the URL you type. The same list governs both saving the endpoint and dialling it.
+
+## Changing the endpoint or the key
+
+A saved API key is only ever sent to the endpoint it was saved for. If you change the endpoint URL without re-entering the key, the stored key is removed — re-enter it (or remove it deliberately with **Remove**) when you point the agent somewhere new.
+
+## Using Astral Media
+
+If you run the astral-media service yourself, choose **Astral Media (self-hosted)** and enter its endpoint URL and bearer token. The service owns the workflow and a queue in front of its GPU, so there are no weight slots to map; output sizes come from its preset table.
+
+## How the agent uses it
+
+1. The user asks for a video of an image in the conversation — an attachment, or something the agent just generated.
+2. The agent calls `generate_video` with a motion prompt and the source image's asset id.
+3. Progress is streamed while the host renders (queued, generating, and so on).
+4. The clip is saved to the conversation's files and plays inline in chat; the agent gets a reference to it, never the bytes.
+
+If no image is available the agent will ask for one rather than invent a video from text.
+
+## Troubleshooting
+
+| Message | Meaning | Fix |
+|---------|---------|-----|
+| `weight slot low_unet (…) needs 'wan2.2_…'; UNETLoader offers: …` | The host has no file by that name in that loader. | Stage the file, or map the slot to one of the names offered. |
+| `the server returned an empty node catalogue` | On hosted endpoints this is how an invalid API key presents. | Check the key and how it is sent. |
+| `base_url must use https` | The host is private or plain-`http` and not on the trusted list. | Ask the operator to add it to `COMFY_TRUSTED_HOSTS`, or put the host behind HTTPS. |
+| `ComfyUI rejected the graph: …` | The host refused the workflow at submit — usually a node or file it cannot see. | Run **Check server** and read the report. |
+| `still queued after 1800s` | The host never finished the job within the poll budget. | Check the host's queue and GPU; the job may still be running there. |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Assign capabilities to specific agents
+  </Card>
+  <Card title="Platform Tools" icon="wrench" href="/dashboard/platform-tools">
+    Web search and deep research for the same agent
+  </Card>
+</CardGroup>
