@@ -1,21 +1,21 @@
 ---
 title: "Video Generation"
-description: "Give an agent a generate_video tool that animates an image into a short clip through any ComfyUI host — self-hosted, Comfy Cloud, a RunPod pod — or Astralform's own media service."
+description: "Give an agent a generate_video tool that animates an image into a short clip through any ComfyUI host you can reach — a box you run, a RunPod pod, a ComfyUI behind a proxy — or Astralform's own media service."
 ---
 
 ## Overview
 
-Video generation is a per-agent capability. When it is on, the agent gets a `generate_video` tool that turns an image already in the conversation — something the user attached, or a picture the agent just made with `generate_image` — into a short clip:
+Video generation is a per-agent capability. When it is on, the agent gets a `generate_video` tool that turns an image already in the conversation — something the user attached, or a picture the agent generated earlier — into a short clip:
 
 - **Image-to-video only.** There is no text-to-video mode; the agent always needs a source image.
-- **About 5 seconds, silent.** 81 frames at 16 fps, rendered by Wan 2.2 I2V (14B) with the 4-step lightx2v distill. The clip has no audio.
+- **About 5 seconds by default, silent.** 81 frames at 16 fps (frames are tunable, see step 5), rendered by Wan 2.2 I2V (14B) with the 4-step lightx2v distill. The clip has no audio.
 - **The workflow is Astralform's, the GPU is yours.** Astralform builds the ComfyUI workflow and sends it to the host you configure. The host needs stock ComfyUI and six weight files — nothing of Astralform's installed.
 
 ## Providers
 
 | Provider | What it is | Needs |
 |----------|------------|-------|
-| **ComfyUI** | Any ComfyUI reachable over HTTPS — a box you run, [Comfy Cloud](https://cloud.comfy.org), a RunPod pod, or a ComfyUI behind a reverse proxy. | Endpoint URL. An API key only if something in front of the server asks for one. |
+| **ComfyUI** | Any ComfyUI you can reach over HTTPS — a box you run, a RunPod pod, or a ComfyUI behind a reverse proxy. A private or plain-`http` host works too, once the operator lists it (see [Private hosts](#private-or-plain-http-hosts)). | Endpoint URL. An API key only if something in front of the server asks for one. |
 | **Astral Media (self-hosted)** | Astralform's own media service (`infra/astral-media/` in the main repository), which owns the workflow and a queue in front of one GPU. | Endpoint URL and its bearer token. |
 
 Pick **ComfyUI** unless you are running the astral-media service yourself.
@@ -27,7 +27,14 @@ Pick **ComfyUI** unless you are running the astral-media service yourself.
     Go to **Agents**, click an agent, open **Video**, and choose **ComfyUI** from the available providers.
   </Step>
   <Step title="Enter the endpoint URL">
-    The ComfyUI root — the address where `/system_stats` answers. For example `https://cloud.comfy.org`, `https://<pod-id>-8188.proxy.runpod.net`, or `https://comfy.example.com`.
+    The ComfyUI root — the address where `/system_stats` answers with JSON. For example `https://<pod-id>-8188.proxy.runpod.net` or `https://comfy.example.com`.
+
+    <Warning>
+      **Comfy Cloud is not a native ComfyUI endpoint.** `https://cloud.comfy.org` serves
+      its web app for unknown paths, so `/system_stats` and `/prompt` both answer `200`
+      with `text/html` — it looks reachable and is not. Its API lives under `/api/v2`
+      and speaks a different protocol, which this provider does not use.
+    </Warning>
 
     The URL must be `https`: the first frame of every clip, and any API key, are sent to it. A private or plain-`http` host needs listing by the operator — see [Private hosts](#private-or-plain-http-hosts).
   </Step>
@@ -36,8 +43,8 @@ Pick **ComfyUI** unless you are running the astral-media service yourself.
 
     | Send the key as | Use for |
     |-----------------|---------|
-    | `X-API-Key` header | Comfy Cloud |
-    | `Authorization: Bearer` | Reverse proxies, cloudflared service tokens, pods with auth |
+    | `Authorization: Bearer` | Reverse proxies, cloudflared service tokens, pods with auth — the common case |
+    | `X-API-Key` header | Hosts whose proxy asks for that header instead |
 
     The key is stored encrypted and never shown again.
   </Step>
@@ -63,6 +70,8 @@ These are the official Wan 2.2 release names, used when a slot is not mapped. Th
 | Low-noise 4-step LoRA | `LoraLoaderModelOnly` | `wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors` |
 | Text encoder (umT5-XXL) | `CLIPLoader` | `umt5_xxl_fp8_e4m3fn_scaled.safetensors` |
 | VAE (Wan 2.1) | `VAELoader` | `wan_2.1_vae.safetensors` |
+
+## Running a host
 
 A clip takes a few minutes and holds the GPU for its whole duration, so clips generate one at a time. A card with about 22 GB of VRAM renders 832×480 in roughly four minutes once the weights are warm.
 
