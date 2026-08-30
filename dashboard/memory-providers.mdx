@@ -1,0 +1,141 @@
+---
+title: "Memory Providers"
+description: "Keep an agent's end-user memory in Astralform, or point it at mem0, Supermemory, Zep, Honcho or any memory MCP server — and use Astralform itself as a memory layer from Claude Code."
+---
+
+## Overview
+
+Every agent remembers what it learns about each end user — facts, preferences, feedback, project
+state — and recalls it in later conversations. By default that memory lives in Astralform. A team
+owner or admin can instead point an agent's **end-user memory** at an external memory service,
+from the agent's **Memory → Provider** tab.
+
+Whatever you choose, some memory never leaves Astralform:
+
+| Memory | Where it lives |
+|--------|----------------|
+| What the agent learns about each **end user** (`user`, `feedback`, `project`, `reference` kinds) | **The provider you pick** — Astralform by default |
+| Facts shared at the agent or team scope | Astralform |
+| Episodes (task-pattern experiences) and learned lessons | Astralform |
+| Session notes (working notes for one conversation) | Astralform |
+
+Native or external, the agent's tools (`save_memory`, `search_memories`, `list_memories`) and the
+dashboard behave the same; an external memory shows its origin.
+
+## Providers
+
+| Provider | Needs | How the memory is scoped |
+|----------|-------|--------------------------|
+| **Astralform (built-in)** | nothing | per agent, per end user |
+| **Mem0** | API key | `user_id` = end user, `agent_id` = agent, `run_id` = conversation; Mem0 extracts memories itself |
+| **Supermemory** | API key | one container tag per agent + end user |
+| **Zep** | API key | `user_id` = end user, one thread per conversation; optional context block |
+| **Honcho** | API key (+ optional workspace id) | one workspace per agent, one peer per end user; optional peer context block |
+| **Memory MCP server** | server URL, a preset or a tool mapping, optional key | whatever the mapping names — see [The MCP mapping](#the-mcp-mapping) |
+
+Providers that extract memories from conversations on their own side (all of the above) receive
+the completed conversation's turns instead of Astralform's own extractor running; providers that
+de-duplicate on their own side skip Astralform's duplicate check.
+
+## Choosing a provider
+
+1. Open the agent → **Memory** → **Provider**.
+2. Pick the provider. Its fields appear: the **API key** (write-only — the tab shows a hint of the
+   stored key; leave it blank to keep it, type to replace it) and the provider's own settings.
+3. Read **What leaves Astralform** and tick the acknowledgement. Saving an external provider
+   requires it, and requires a team **owner or admin**; members see the tab read-only.
+4. **Test connection** probes the provider with the key and settings on screen — before saving.
+   A test never blocks saving.
+5. **Save.** The Browse tab now says which provider manages end-user memory, and the native-only
+   **Reset memory** is disabled while it does.
+
+To bring memory back into Astralform, pick **Astralform (built-in)** and save — no
+acknowledgement needed. Memories already stored with the vendor stay there.
+
+<Warning>
+**What leaves Astralform** when an external provider is selected: the end-user id, the agent id,
+the conversation id, and the full user/assistant text of every completed job, plus anything the
+agent saves explicitly. Episodes, lessons and session notes stay in Astralform.
+</Warning>
+
+### Endpoints
+
+A provider's **Base URL** (or an MCP server's **URL**) must be `https://` and resolve to a public
+address — private, link-local and loopback hosts are refused, and Astralform pins the connection
+to the address it validated. A self-run server therefore needs a public hostname.
+
+### If the provider is down
+
+A slow or failing provider never fails a conversation: recall falls back to Astralform's own
+memories for that turn, an explicit save tells the agent the provider is unavailable, and the
+run's events record the error. **Recall timeout** (seconds) bounds how long a turn waits.
+
+## The MCP mapping
+
+The **Memory MCP server** provider talks to any memory server over MCP (streamable HTTP). Pick a
+preset for a server whose tools Astralform already knows, or describe your own server's tools:
+
+| Preset | Server |
+|--------|--------|
+| `mem0` | Mem0's MCP server (`search_memories`, `add_memory`, `get_memories`, …) |
+| `honcho` | Honcho's MCP server (`query_conclusions`, `add_messages_to_session`, `get_peer_context`, …) |
+| `graphiti` | Graphiti (`search_memory_facts`, `add_memory`, `get_episodes`) |
+| `custom` | your **Tool mapping (JSON)** |
+
+A mapping names one tool per operation. `recall` is required; the others are optional and decide
+what the provider can do:
+
+```json
+{
+  "recall": {
+    "tool": "search_memories",
+    "args": {"query": "$query", "user_id": "$user_id", "limit": "$limit"},
+    "result": {"items": "$.results", "id": "id", "content": "memory", "score": "score"}
+  },
+  "ingest": {"tool": "add_memory", "args": {"messages": "$messages", "user_id": "$user_id"}},
+  "save":   {"tool": "add_memory", "args": {"text": "$content", "user_id": "$user_id"}},
+  "delete": {"tool": "delete_memory", "args": {"memory_id": "$id"}}
+}
+```
+
+- **Operations:** `recall`, `ingest`, `save`, `update`, `delete`, `get`, `list`, `context`.
+- **Placeholders** in `args`: `$query`, `$user_id`, `$agent_id`, `$conversation_id`, `$limit`,
+  `$content`, `$description`, `$kind`, `$id`, `$messages` (role/content turns), `$messages_text`.
+  Anything else is sent literally.
+- **`result`** says where the rows are (`items`: `$` for the whole answer or a `$.dotted.path`)
+  and which keys carry the `id`, `content`, `score`, timestamps and `user_id`. Without a score,
+  rows are ranked in the order the server returned them.
+- Every operation that reads or writes by user should carry `$user_id` (or `$conversation_id`):
+  a server whose tools take neither would pool every end user under one account, which is why
+  Supermemory's MCP server has no preset — use the **Supermemory** provider instead.
+
+**Authentication:** the stored API key is sent as `Authorization: Bearer` (default), as a header
+you name, or not at all; extra static headers (for example a workspace id) can be added as JSON.
+Servers that only accept a browser OAuth login are not supported.
+
+**Test connection** lists the server's tools and reports any the mapping names that are missing.
+
+## Using Astralform as a memory layer
+
+Astralform's own MCP server exposes memory to any MCP client — Claude Code, Cursor, Claude
+Desktop — with three tools:
+
+| Tool | What it does |
+|------|--------------|
+| `astralform_memory_search` | search the memories you hold on a project, ranked by relevance |
+| `astralform_memory_add` | save a memory on a project (a near-duplicate is reported, not stored twice) |
+| `astralform_memory_list` | browse your memories on a project, newest first |
+
+They act as **you** — the signed-in developer's own end-user identity on that agent, the same one
+the dashboard and chat use — never as another user. What you add from Claude Code is what the
+agent recalls for you in later conversations, whether the agent's memory is native or external.
+See [MCP Servers](/dashboard/mcp-servers) for connecting a client.
+
+## Limits
+
+- Provider selection is per agent; every end user of that agent is routed to it — there is no
+  per-user opt-in.
+- The dashboard lists a vendor's memories per end user; a very large vendor store is walked in
+  pages, and the count shown is a floor once it passes 500.
+- Switching providers does not migrate existing memories. Export first from the Memory page if
+  you need them elsewhere.
