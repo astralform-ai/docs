@@ -42,6 +42,7 @@
               "dashboard/agents",
               "dashboard/permissions",
               "dashboard/llm-providers",
+              "dashboard/voice",
               "dashboard/mcp-servers",
               "dashboard/platform-tools",
               "dashboard/memory-providers",
@@ -115,6 +116,14 @@
               "api-reference/conversations/messages",
               "api-reference/conversations/rename",
               "api-reference/conversations/delete"
+            ]
+          },
+          {
+            "group": "Voice",
+            "pages": [
+              "api-reference/voice/config",
+              "api-reference/voice/transcriptions",
+              "api-reference/voice/polish"
             ]
           },
           {

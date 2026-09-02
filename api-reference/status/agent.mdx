@@ -30,6 +30,10 @@ Check if the agent has a valid LLM configuration before starting a chat. iOS cli
   Human-readable status message.
 </ResponseField>
 
+<ResponseField name="capabilities" type="array">
+  What the agent can do right now, so a client offers a feature only where it will work. Each entry is `{ "key": string, "enabled": boolean }`; keys are `image`, `video`, `web`, `skills` and `voice`. Empty whenever `is_ready` is false. `voice` is on when the developer enabled [voice input](/dashboard/voice) — the signal to show a microphone; [`/v1/voice/config`](/api-reference/voice/config) then carries the defaults.
+</ResponseField>
+
 <ResponseExample>
 ```json Ready
 {
@@ -37,7 +41,14 @@ Check if the agent has a valid LLM configuration before starting a chat. iOS cli
   "llm_configured": true,
   "llm_provider": "openai",
   "llm_model": "gpt-4o",
-  "message": "Agent is ready for chat."
+  "message": "Agent is ready for chat.",
+  "capabilities": [
+    { "key": "image", "enabled": false },
+    { "key": "skills", "enabled": true },
+    { "key": "video", "enabled": false },
+    { "key": "voice", "enabled": true },
+    { "key": "web", "enabled": true }
+  ]
 }
 ```
 
@@ -47,7 +58,8 @@ Check if the agent has a valid LLM configuration before starting a chat. iOS cli
   "llm_configured": false,
   "llm_provider": null,
   "llm_model": null,
-  "message": "No LLM configured. Please configure an LLM provider in the dashboard."
+  "message": "No LLM configured. Please configure an LLM provider in the dashboard.",
+  "capabilities": []
 }
 ```
 </ResponseExample>
