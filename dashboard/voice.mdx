@@ -18,11 +18,24 @@ The **Voice** section of an agent picks both halves. Keys stay in [LLM Providers
 
 1. Connect a speech-to-text provider (Groq or OpenAI, or a custom OpenAI-compatible endpoint) and a polish LLM provider in **LLM Providers**.
 2. Go to **Agents**, open the agent, and choose **Voice** in the Build group.
-3. **Speech-to-text** — pick the provider and model. Groq's `whisper-large-v3-turbo` is the fast default; a custom endpoint takes a model name or **Discover models**.
+3. **Speech-to-text** — add a channel and pick its provider and model. Groq's `whisper-large-v3-turbo` is the fast default; a custom endpoint takes a model name or **Discover models**. Add a fallback channel if you have a second key — see [Speech-to-text channels](#speech-to-text-channels).
 4. **Polish** — pick the provider and model that rewrite the transcript. Leave **Let the model think first** off unless you want a reasoning model's full pass; it adds 40–70 seconds before the first word.
 5. Press **Test** on each card. Speech-to-text is probed with a quarter second of silence; polish with a one-token completion.
 6. Set the **Defaults**, adjust **Style prompts** and add **Vocabulary** as needed, then **Save**.
-7. Turn on **Enable voice input**. The switch is refused while either card is missing a connected provider.
+7. Turn on **Enable voice input**. The switch is refused until at least one speech-to-text channel and the polish provider are connected.
+
+## Speech-to-text channels
+
+Speech-to-text is an ordered list of up to five channels (provider + model), each backed by a key in **LLM Providers**. Each recording is offered to the channels in order until one returns a transcript:
+
+- A channel that answers **429** is put on cooldown for the time its `Retry-After` header asks (60 seconds when it says nothing, an hour at most) and the next channel takes the recording. The cooldown is shared by every backend worker.
+- A channel that fails any other way — a 5xx, a timeout, a key that has gone missing — is skipped for that recording only.
+- A channel that **refuses the audio** (any other 4xx: empty audio, over its size limit, a rejected language) ends the request. The next channel would refuse it too, and retrying would bill every key for one bad upload.
+- The **last** channel is always tried, cooling or not, so a single-channel setup that keeps answering 429 keeps being tried rather than going silent.
+
+Each row has its own **Test** and shows a badge: **Primary** marks the stored channel the route tries first (the first ready one), **Not ready** a channel whose key is missing, and **Cooling down** a channel a 429 has parked, with the time left. Use the arrows to reorder; order is priority. Duplicate provider + model pairs are dropped on save. Polish has no failover: when the polish model fails, every client keeps the raw transcript.
+
+End users never learn which channel answered — the transcription response carries no channel or vendor.
 
 ## Defaults
 

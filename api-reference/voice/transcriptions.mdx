@@ -53,7 +53,7 @@ curl -X POST https://api.astralform.ai/v1/voice/transcriptions \
 
 | Status | `error` | Meaning |
 |--------|---------|---------|
-| 400 | — | Empty recording, or larger than the configured provider's limit (25 MB for the hosted providers). |
-| 409 | `voice_not_ready` | Voice input is disabled, or the configured provider has lost its key. |
-| 429 | — | The project's `voice.transcribe` rate limit. |
-| 502 | `transcription_failed` | The provider did not return a transcript. Details are logged server-side; the response names no vendor. |
+| 400 | — | Empty recording, larger than the most generous configured channel accepts (25 MB for the hosted providers), or refused by the provider as unusable audio. |
+| 409 | `voice_not_ready` | Voice input is disabled, or no speech-to-text channel has a usable key. |
+| 429 | — | The project's own `voice.transcribe` rate limit. A provider's 429 never reaches the caller: that channel goes on cooldown and the next configured channel takes the recording. |
+| 502 | `transcription_failed` | Every configured channel failed to return a transcript. Details are logged server-side; the response names no vendor, and which channel answered a successful request is never reported either. |
