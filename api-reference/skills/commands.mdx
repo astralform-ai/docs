@@ -1,0 +1,123 @@
+---
+title: "List Slash Commands"
+api: "GET /v1/skills/commands"
+description: "Get the slash commands a chat surface can offer: system commands plus the agent's enabled skills."
+---
+
+Slash commands are the agent's skills. Every enabled skill is available as `/<skill-name>`, and a
+small set of system commands sits in front of them. This endpoint returns the list a composer's
+`/` menu should offer — the same catalog-derived list the Telegram bot uses for `/help` — so
+clients never hardcode commands and a newly enabled skill appears with no client change.
+
+Sending a command is just sending a message: post `/<name> <args>` as the `message` of
+[`POST /v1/jobs`](/api-reference/chat/stream). The backend resolves it.
+
+## Authentication
+
+<ParamField header="Authorization" type="string" required>
+  Your project API key as a bearer token (`Bearer sk_xxxxxxxxxxxx`), or an end-user token.
+</ParamField>
+
+## Query parameters
+
+<ParamField query="surface" type="string" default="web">
+  Who will execute the commands. A surface is only told about the commands it can run:
+
+  - `web` — clients of `POST /v1/jobs` (the chat SPA, the iOS app, SDK apps). Lists `/goal`,
+    `/plan` and the enabled skills.
+  - `telegram` — the Telegram bot. Lists `/new`, `/goal`, `/tasks`, `/help` and the enabled
+    skills, with Telegram-valid names (hyphens become underscores).
+  - `all` — every command with its `surfaces`, for a discovery UI.
+</ParamField>
+
+## Response
+
+<ResponseField name="commands" type="array">
+  System commands first, then enabled skills.
+  <Expandable title="Command object">
+    <ResponseField name="name" type="string">
+      The command name, without the leading slash
+    </ResponseField>
+    <ResponseField name="display_name" type="string">
+      Human-readable name
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      One line for the menu row
+    </ResponseField>
+    <ResponseField name="args_hint" type="string">
+      Argument hint to show after the name (`<objective>`, `[args]`, or empty)
+    </ResponseField>
+    <ResponseField name="surfaces" type="string[]">
+      Surfaces that can execute this command (`web`, `telegram`)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.astralform.ai/v1/skills/commands?surface=web" \
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx"
+```
+
+```typescript JavaScript
+const commands = await session.client.get<SlashCommand[]>("/v1/skills/commands");
+// render `/${name} ${args_hint}` rows filtered by what the user typed after "/"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+[
+  {
+    "name": "goal",
+    "display_name": "Goal",
+    "description": "Start a durable autonomous goal",
+    "args_hint": "<objective>",
+    "surfaces": ["web", "telegram"]
+  },
+  {
+    "name": "plan",
+    "display_name": "Plan",
+    "description": "Run a read-only planning turn",
+    "args_hint": "<request>",
+    "surfaces": ["web"]
+  },
+  {
+    "name": "youtube",
+    "display_name": "YouTube",
+    "description": "Extract transcripts and summarize YouTube videos.",
+    "args_hint": "[args]",
+    "surfaces": ["web", "telegram"]
+  }
+]
+```
+
+```json 401
+{
+  "detail": "Invalid or missing API key"
+}
+```
+</ResponseExample>
+
+## System commands
+
+| Command | Surfaces | What it does |
+|---------|----------|--------------|
+| `/goal <objective>` | web, telegram | Starts a durable autonomous goal — the same request the composer's Goal mode sends. |
+| `/plan <request>` | web | Runs a read-only planning turn — the same as Plan mode. |
+| `/new` | telegram | Starts a fresh conversation. |
+| `/tasks` | telegram | Lists the goals started in this chat. |
+| `/help` | telegram | Lists the commands, including enabled skills. |
+
+`/new`, `/tasks` and `/help` are chat actions the job API has no equivalent for — a web client
+has its own New chat button, and its `/` menu is the help — so they are not advertised to the
+`web` surface.
+
+## Usage notes
+
+- A skill command seeds the turn with the skill's full instructions, then runs the request
+  normally. The text the user typed stays on their message; only the model sees the seed.
+- A skill whose name collides with a system command is not exposed as a command.
+- `/goal` and `/plan` without an argument return `400` with the usage hint.
+- Anything that is not a recognized command is sent to the agent as ordinary text, so an
+  unknown `/foo` behaves exactly like a plain message.

@@ -84,6 +84,34 @@ Agent: [Sees pdf-processing skill matches]
        [Follows the skill's workflow]
 ```
 
+## Slash Commands
+
+Every enabled skill is also a slash command. In the chat composer (AstralChat, the iOS app) and
+in Telegram, typing `/` opens a menu of the agent's commands: a few system commands, then one
+`/<skill-name>` entry per enabled skill.
+
+```
+/youtube https://youtu.be/…
+```
+
+Sending a skill command activates that skill for the turn — the same path as `activate_skill`,
+with the skill's instructions and reference files in front of the request — then runs the
+request normally. The user's message keeps the text they typed.
+
+| Where | How commands are discovered |
+|-------|-----------------------------|
+| Chat composer | The `/` menu reads [`GET /v1/skills/commands`](/api-reference/skills/commands) |
+| Telegram | `/help` lists them, and the bot's native `/` menu is registered from the same list |
+
+Enabling a skill adds its command everywhere at once; disabling it removes the command. Skill
+names are lowercase with hyphens; Telegram command names cannot contain hyphens, so there the
+skill appears as its underscore form (`/ui_ux_pro_max` for `ui-ux-pro-max`). Both forms work.
+
+<Note>
+  A skill named like a system command (`new`, `goal`, `tasks`, `help`, `plan`) is still a skill
+  the agent can activate, but it is not exposed as a slash command.
+</Note>
+
 ## Managing Skills
 
 ### Enable/Disable
