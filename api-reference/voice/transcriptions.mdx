@@ -1,0 +1,59 @@
+---
+title: "Transcribe a Recording"
+description: "Turn one recording into text with the agent's configured speech-to-text provider."
+api: "POST /v1/voice/transcriptions"
+---
+
+## Endpoint
+
+```
+POST https://api.astralform.ai/v1/voice/transcriptions
+```
+
+Accepts an API key or an end-user OAuth token (send `X-Agent-ID` with a user token).
+
+## Request
+
+`multipart/form-data`:
+
+| Part | Type | Required | Description |
+|------|------|----------|-------------|
+| `file` | file | Yes | The recording. 16 kHz mono 16-bit WAV is the reference format; anything the provider accepts works. |
+| `hotwords` | string | No | The caller's own vocabulary, comma-separated. Merged after the project's. |
+| `language` | string | No | ISO 639-1 hint (`en`, `zh`). Omit for auto-detection. |
+
+The whole vocabulary is sent to the provider as its biasing prompt within a 240-character budget, project words first.
+
+```bash
+curl -X POST https://api.astralform.ai/v1/voice/transcriptions \
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx" \
+  -F "file=@clip.wav;type=audio/wav" \
+  -F "hotwords=MCP, Capsule"
+```
+
+## Response
+
+```json
+{
+  "text": "let's ship the voice feature on friday",
+  "language": "en",
+  "duration_ms": 4120,
+  "asr_ms": 610
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `text` | string | The transcript as the provider produced it. |
+| `language` | string \| null | The language the provider detected. |
+| `duration_ms` | integer \| null | Length of the recording, when the WAV header says so. |
+| `asr_ms` | integer | Time the provider took. |
+
+## Errors
+
+| Status | `error` | Meaning |
+|--------|---------|---------|
+| 400 | — | Empty recording, or larger than the provider's limit (25 MB for Groq and OpenAI). |
+| 409 | `voice_not_ready` | Voice input is disabled, or the configured provider has lost its key. |
+| 502 | `transcription_failed` | The provider did not return a transcript. Details are logged server-side; the response names no vendor. |
+| 429 | — | The project's `voice.transcribe` rate limit. |

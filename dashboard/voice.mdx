@@ -1,0 +1,59 @@
+---
+title: "Voice"
+description: "Configure the speech-to-text provider and the polish model that turn a user's dictation into a finished message, per agent."
+---
+
+## Overview
+
+Voice input lets an end user of your agent tap a microphone, speak, and get a finished, mode-shaped message — not a raw transcript. The pipeline runs on Astralform, with the providers you choose:
+
+```
+recording ──▶ speech-to-text provider ──▶ transcript ──▶ polish model ──▶ message
+                (Groq, OpenAI, or your endpoint)         (any connected LLM)
+```
+
+The **Voice** section of an agent picks both halves. Keys stay in [Model Providers](/dashboard/llm-providers); voice settings only reference them, and the feature cannot be turned on until both halves have a connected key. Clients never learn which vendor or model you chose — they only learn that voice input is available.
+
+## Configuration
+
+1. Connect a speech-to-text provider (Groq or OpenAI, or a custom OpenAI-compatible endpoint) and a polish LLM provider in **Model Providers**.
+2. Go to **Agents**, open the agent, and choose **Voice** in the Build group.
+3. **Speech-to-text** — pick the provider and model. Groq's `whisper-large-v3-turbo` is the fast default; a custom endpoint takes a model name or **Discover models**.
+4. **Polish** — pick the provider and model that rewrite the transcript. Leave **Let the model think first** off unless you want a reasoning model's full pass; it adds 40–70 seconds before the first word.
+5. Press **Test** on each card. Speech-to-text is probed with a quarter second of silence; polish with a one-token completion.
+6. Set the **Defaults**, adjust **Style prompts** and add **Vocabulary** as needed, then **Save**.
+7. Turn on **Enable voice input**. The switch is refused while either card is missing a connected provider.
+
+## Defaults
+
+| Setting | Meaning | Default |
+|---|---|---|
+| **Style** | How the transcript is shaped: `raw` (no polish), `light`, `structured` (an AI-ready prompt), `formal` | `structured` |
+| **Stop after silence** | In tap-to-talk mode, how long a pause ends the recording | 2 s |
+| **Send when the result is ready** | Send the message as soon as polishing finishes | on |
+| **Longest recording** | Cap per dictation, 10–300 s | 300 s |
+
+Users can pick a different style per device; the default is what a fresh install gets.
+
+## Style prompts
+
+Each style is a system prompt. The built-in prompts ship in English and Chinese (the Chinese set is OpenLess's, reproduced under its MIT licence); pick the language under **Built-in prompt language**. Edit a prompt to override it, and keep `{{HOTWORDS}}` where the vocabulary block should be spliced in — a prompt without it gets the vocabulary appended when there is any. The `raw` style has no prompt: it never calls the polish model.
+
+<Note>
+The transcript is sent to the polish model as data, inside a `<raw_transcript>` envelope, with an injection-defence clause appended to every system prompt. A user cannot redirect the polish model by talking to it.
+</Note>
+
+## Vocabulary
+
+Product names and terms the recognizer should spell correctly. The list is sent to the speech-to-text provider as its biasing prompt — within Whisper's 240-character budget, in the order you list them — and spliced into every polish prompt, where it has no budget. Users can add their own words per device; those are merged after yours.
+
+## For client developers
+
+The end-user API exposes the pipeline without any provider details:
+
+- `GET /v1/agent/status` reports a `voice` capability when the feature is enabled.
+- [`GET /v1/voice/config`](/api-reference/voice/config) returns the modes, defaults and vocabulary.
+- [`POST /v1/voice/transcriptions`](/api-reference/voice/transcriptions) turns one recording into text.
+- [`POST /v1/voice/polish`](/api-reference/voice/polish) streams the rewrite as Server-Sent Events.
+
+Both calls are rate-limited per project and can be tuned under [Rate Limits](/dashboard/rate-limits) as the `voice.transcribe` and `voice.polish` operations.

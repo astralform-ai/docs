@@ -1,0 +1,71 @@
+---
+title: "Polish a Transcript"
+description: "Stream the LLM rewrite of a transcript in the chosen style as Server-Sent Events."
+api: "POST /v1/voice/polish"
+---
+
+## Endpoint
+
+```
+POST https://api.astralform.ai/v1/voice/polish
+```
+
+Accepts an API key or an end-user OAuth token (send `X-Agent-ID` with a user token).
+
+## Request
+
+```json
+{
+  "text": "um so let's ship the voice feature on friday and uh tell the client",
+  "mode": "structured",
+  "hotwords": ["MCP"]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `text` | string | Yes | The transcript, up to 16 000 characters. |
+| `mode` | string | Yes | `light`, `structured` or `formal`. `raw` is refused with 400 — it never calls the model. |
+| `hotwords` | string[] | No | The caller's own vocabulary, merged after the project's into the polish prompt. |
+
+## Response
+
+A Server-Sent Events stream.
+
+**delta** — the rewrite as it is generated. Append to the field in order.
+```
+event: delta
+data: {"text": "Ship the voice feature on Friday"}
+```
+
+**done** — the finished text. `text` is authoritative: it is the cleaned full output, which can differ from the concatenated deltas when a code fence or a lead-in was stripped at the end.
+```
+event: done
+data: {"text": "Ship the voice feature on Friday, and tell the client.", "polish_ms": 1840}
+```
+
+**error** — the rewrite failed. Keep the raw transcript; `partial` is what was streamed before the failure.
+```
+event: error
+data: {"reason": "timeout_first_token", "partial": ""}
+```
+
+| `reason` | Meaning |
+|----------|---------|
+| `voice_not_ready` | The polish model is not configured or has no key. |
+| `unsupported_mode` | `raw`, or a mode the agent does not offer. |
+| `timeout_first_token` | No first character within the budget (`ceil(chars × 0.05) + 30` seconds; 90 s with thinking on). |
+| `timeout_idle` | The stream stalled for 20 seconds after it had started. |
+| `timeout_total` | The 900-second cap. |
+| `provider_error` | The model call failed; `detail` carries the error category. |
+| `empty_output` | The model returned nothing usable. |
+
+Closing the connection cancels the upstream request, so an abandoned rewrite stops spending the developer's quota.
+
+## Errors before the stream opens
+
+| Status | `error` | Meaning |
+|--------|---------|---------|
+| 400 | `unsupported_mode` | `mode` is `raw` or unknown. |
+| 409 | `voice_not_ready` | Voice input is disabled, or the polish provider has lost its key. |
+| 429 | — | The project's `voice.polish` rate limit. |
