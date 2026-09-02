@@ -10,7 +10,21 @@ api: "GET /v1/voice/config"
 GET https://api.astralform.ai/v1/voice/config
 ```
 
-Accepts an API key or an end-user OAuth token (send `X-Agent-ID` with a user token).
+Accepts either credential the platform issues:
+
+- **API key** — `Authorization: Bearer sk_…`. The key is already bound to one agent.
+- **End-user OAuth token** — the access token AstralChat and the SDKs obtain for a signed-in user (`Authorization: Bearer <access token>`), plus `X-Agent-ID: <agent UUID>`, because a user token is not bound to an agent. The header is ignored on the API-key path.
+
+```bash
+# API key
+curl https://api.astralform.ai/v1/voice/config \
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx"
+
+# End-user token
+curl https://api.astralform.ai/v1/voice/config \
+  -H "Authorization: Bearer eyJhbGciOi..." \
+  -H "X-Agent-ID: 2f1c8a4e-9b7d-4c3e-8f0a-1d2e3f4a5b6c"
+```
 
 ## Response
 
@@ -29,14 +43,14 @@ Accepts an API key or an end-user OAuth token (send `X-Agent-ID` with a user tok
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `enabled` | boolean | The developer enabled voice input for this agent. Mirrors the `voice` capability on `/v1/agent/status`. |
+| `enabled` | boolean | The developer enabled voice input for this agent. Mirrors the `voice` entry in `capabilities` on [`/v1/agent/status`](/api-reference/status/agent). |
 | `modes` | string[] | The styles a client may request. `raw` never calls the polish model. |
 | `default_mode` | string | The style to use when the user has not picked one. |
 | `silence_auto_stop_seconds` | number | In tap-to-talk mode, the pause that ends a recording. |
 | `auto_send` | boolean | Whether the client should send the message as soon as the result is ready. |
 | `max_recording_seconds` | integer | Longest recording to accept before stopping. |
 | `supports_streaming` | boolean | Whether the configured recognizer emits live partial transcripts. Batch (Whisper-style) providers do not. |
-| `hotwords` | string[] | The project vocabulary. Send it back — plus the user's own words — with each request. |
+| `hotwords` | string[] | The project vocabulary, for display. The server applies it to every transcription and polish itself; the `hotwords` a client sends with those requests are only the user's own words, merged after these. |
 
 <Note>
 The response deliberately carries no provider or model names. An end-user token must not learn which vendor the developer configured.

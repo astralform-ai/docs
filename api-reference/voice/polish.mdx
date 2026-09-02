@@ -10,7 +10,7 @@ api: "POST /v1/voice/polish"
 POST https://api.astralform.ai/v1/voice/polish
 ```
 
-Accepts an API key or an end-user OAuth token (send `X-Agent-ID` with a user token).
+Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are shown on [Voice Config](/api-reference/voice/config).
 
 ## Request
 
@@ -26,7 +26,7 @@ Accepts an API key or an end-user OAuth token (send `X-Agent-ID` with a user tok
 |-------|------|----------|-------------|
 | `text` | string | Yes | The transcript, up to 16 000 characters. |
 | `mode` | string | Yes | `light`, `structured` or `formal`. `raw` is refused with 400 — it never calls the model. |
-| `hotwords` | string[] | No | The caller's own vocabulary, merged after the project's into the polish prompt. |
+| `hotwords` | string[] | No | The user's own vocabulary — not the project's, which the server already holds and splices into the prompt first. |
 
 ## Response
 
@@ -54,9 +54,9 @@ data: {"reason": "timeout_first_token", "partial": ""}
 |----------|---------|
 | `voice_not_ready` | The polish model is not configured or has no key. |
 | `unsupported_mode` | `raw`, or a mode the agent does not offer. |
-| `timeout_first_token` | No first character within the budget (`ceil(chars × 0.05) + 30` seconds; 90 s with thinking on). |
+| `timeout_first_token` | No first character within the budget: `ceil(chars × 0.05) + 30` seconds, raised to a floor of 90 s when thinking is on (so a short transcript gets 90 s, a long one keeps its own figure). |
 | `timeout_idle` | The stream stalled for 20 seconds after it had started. |
-| `timeout_total` | The 900-second cap. |
+| `timeout_total` | The 900-second cap on the whole stream. The first-token budget is clamped to it, so at the 16 000-character limit (830 s) a slow model still fails as `timeout_first_token` before the cap. |
 | `provider_error` | The model call failed; `detail` carries the error category. |
 | `empty_output` | The model returned nothing usable. |
 
