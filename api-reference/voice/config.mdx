@@ -12,7 +12,7 @@ GET https://api.astralform.ai/v1/voice/config
 
 Accepts either credential the platform issues:
 
-- **API key** — `Authorization: Bearer sk_…`. The key is already bound to one agent.
+- **API key** — `Authorization: Bearer sk_…`. A key belongs to one project, and a project is one agent, so no header is needed.
 - **End-user OAuth token** — the access token AstralChat and the SDKs obtain for a signed-in user (`Authorization: Bearer <access token>`), plus `X-Agent-ID: <agent UUID>`, because a user token is not bound to an agent. The header is ignored on the API-key path.
 
 ```bash
