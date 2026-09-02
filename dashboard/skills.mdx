@@ -109,6 +109,32 @@ skill appears as its underscore form (`/ui_ux_pro_max` for `ui-ux-pro-max`). The
 resolves either spelling on every surface, so a command copied from Telegram still works
 in the web composer.
 
+### Turning a command off
+
+Not every skill wants to be typed. A policy skill or a procedure meant for subagents is
+something the agent activates on its own when a request matches, so it need not appear in
+the `/` menu. Two settings decide, and the per-agent one wins:
+
+| Where | Setting | Effect |
+|-------|---------|--------|
+| SKILL.md frontmatter | `metadata.command: "false"` | The author's default — travels with the skill wherever it is installed |
+| SKILL.md frontmatter | `metadata.command-hint: "<url>"` | Replaces the generic `[args]` hint shown after the name |
+| Skill page in the dashboard | **Slash command**: Inherit / On / Off | Per-agent override; *Inherit* follows the author's default |
+
+```yaml
+---
+name: support-agent
+description: Handles customer inquiries following company policies.
+metadata:
+  command: "false"
+---
+```
+
+A skill whose command is off disappears from the chat menu and the Telegram menu, and
+typing `/support-agent` is sent as ordinary text. The agent can still activate the skill
+itself. The same setting is available through the API (`command_mode` on the skill update
+endpoint) and the MCP tool `astralform_update_skill`.
+
 <Note>
   A skill named like a system command (`new`, `goal`, `tasks`, `help`, `plan`) is still a skill
   the agent can activate, but it is not exposed as a slash command.

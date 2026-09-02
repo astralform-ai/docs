@@ -124,6 +124,9 @@ has its own New chat button, and its `/` menu is the help — so they are not ad
 - A skill command seeds the turn with the skill's full instructions, then runs the request
   normally. The text the user typed stays on their message; only the model sees the seed.
 - A skill whose name collides with a system command is not exposed as a command.
+- A skill whose command is turned off — `metadata.command: "false"` in its SKILL.md, or
+  **Slash command: Off** on its dashboard page — is not listed and `/<name>` is sent as
+  ordinary text. See [Skills → Turning a command off](/dashboard/skills#turning-a-command-off).
 - `/goal` and `/plan` without an argument return `400` with the usage hint.
 - Anything that is not a recognized command is sent to the agent as ordinary text, so an
   unknown `/foo` behaves exactly like a plain message.
