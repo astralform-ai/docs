@@ -70,6 +70,23 @@ Any user who direct-messages the bot gets a reply from your project's agent:
 
 Each chat keeps its own conversation, so the agent remembers previous turns. Messages sent in groups and channels are treated as delivery destinations, not chat prompts.
 
+### Commands
+
+The bot understands slash commands. Type `/` in Telegram to see the menu, or send `/help`:
+
+| Command | What it does |
+|---------|--------------|
+| `/new` | Start a fresh conversation (clears the current context). |
+| `/goal <objective>` | Start an autonomous goal the agent pursues on its own; it reports back in this chat when done. `/tasks` shows its status, and you can pause it from the dashboard. |
+| `/tasks` | List the goals you've started in this chat. |
+| `/help` | Show the commands, including the agent's skills. |
+| `/<skill>` | Run one of the agent's enabled [skills](/dashboard/skills) — e.g. `/youtube https://…`. |
+
+The menu and `/help` are built from the agent's enabled skills, so enabling a skill in the
+dashboard makes its command available in Telegram immediately. Skill names with hyphens
+appear with underscores (`/ui_ux_pro_max`), because Telegram command names cannot contain a
+hyphen. Anything that is not a command is a normal chat message.
+
 ## Access
 
 Telegram uses the standard connector [access policy](/dashboard/connectors#access-policy) —

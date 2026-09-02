@@ -127,7 +127,8 @@
           {
             "group": "Skills",
             "pages": [
-              "api-reference/skills/list"
+              "api-reference/skills/list",
+              "api-reference/skills/commands"
             ]
           },
           {
