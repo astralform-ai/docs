@@ -59,6 +59,8 @@ Instructions for the AI agent on how to handle PDF files...
 | `runtime` | Execution environment: `workspace` provisions a sandbox automatically |
 | `metadata.version` | Semantic version (e.g., "1.0.0") |
 | `metadata.author` | Skill author name |
+| `metadata.command` | `"false"` to keep the skill out of the `/` menus (default `"true"`); see [Slash Commands](#slash-commands) |
+| `metadata.command-hint` | Argument hint shown after `/<name>` in menus, e.g. `"<url>"` |
 
 ## Auto-Capsule
 
@@ -86,7 +88,7 @@ Agent: [Sees pdf-processing skill matches]
 
 ## Slash Commands
 
-Every enabled skill is also a slash command. In the chat composer (AstralChat, the iOS app) and
+Every enabled skill is a slash command by default. In the chat composer (AstralChat, the iOS app) and
 in Telegram, typing `/` opens a menu of the agent's commands: a few system commands, then one
 `/<skill-name>` entry per enabled skill.
 
@@ -103,11 +105,41 @@ request normally. The user's message keeps the text they typed.
 | Chat composer | The `/` menu reads [`GET /v1/skills/commands`](/api-reference/skills/commands) |
 | Telegram | `/help` lists them, and the bot's native `/` menu is registered from the same list |
 
-Enabling a skill adds its command everywhere at once; disabling it removes the command. Skill
+Enabling a skill adds its command everywhere at once, unless its command is turned off (see
+[below](#turning-a-command-off)); disabling the skill removes the command. Skill
 names are lowercase with hyphens; Telegram command names cannot contain hyphens, so there the
 skill appears as its underscore form (`/ui_ux_pro_max` for `ui-ux-pro-max`). The backend
 resolves either spelling on every surface, so a command copied from Telegram still works
 in the web composer.
+
+### Turning a command off
+
+Not every skill wants to be typed. A policy skill or a procedure meant for subagents is
+something the agent activates on its own when a request matches, so it need not appear in
+the `/` menu. Two settings decide whether a skill is a command, and the per-agent one wins:
+
+| Where | Setting | Values | Effect |
+|-------|---------|--------|--------|
+| SKILL.md frontmatter | `metadata.command` | `"true"` (default) or `"false"` | The author's default — travels with the skill wherever it is installed |
+| Skill page in the dashboard | **Slash command** | Inherit / On / Off | Per-agent override; *Inherit* follows the author's default |
+
+A third key, `metadata.command-hint`, does not turn anything on or off: it replaces the
+generic `[args]` hint shown after the name in menus (for example `"<url>"`).
+
+```yaml
+---
+name: support-agent
+description: Handles customer inquiries following company policies.
+metadata:
+  command: "false"
+---
+```
+
+A skill whose command is off disappears from the chat menu and the Telegram menu, and
+typing `/support-agent` is sent as ordinary text. The agent can still activate the skill
+itself. The same setting is `command_mode` (`inherit`, `on` or `off`) on the dashboard API's
+skill update call, `PATCH /v1/dashboard/agents/{agent_id}/skills/{skill_id}`, and on the MCP
+tool `astralform_update_skill`.
 
 <Note>
   A skill named like a system command (`new`, `goal`, `tasks`, `help`, `plan`) is still a skill
