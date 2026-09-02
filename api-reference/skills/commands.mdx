@@ -9,8 +9,8 @@ small set of system commands sits in front of them. This endpoint returns the li
 `/` menu should offer — the same catalog-derived list the Telegram bot uses for `/help` — so
 clients never hardcode commands and a newly enabled skill appears with no client change.
 
-Sending a command is just sending a message: post `/<name> <args>` as the `message` of
-[`POST /v1/jobs`](/api-reference/chat/stream). The backend resolves it.
+Sending a command is just sending a message: post `/<name> <args>` as the `message` of a
+job (`POST /v1/jobs`). The backend resolves it; nothing about the request changes.
 
 ## Authentication
 
@@ -27,13 +27,16 @@ Sending a command is just sending a message: post `/<name> <args>` as the `messa
     `/plan` and the enabled skills.
   - `telegram` — the Telegram bot. Lists `/new`, `/goal`, `/tasks`, `/help` and the enabled
     skills, with Telegram-valid names (hyphens become underscores).
-  - `all` — every command with its `surfaces`, for a discovery UI.
+  - `all` — every command, unfiltered, for a discovery UI. Every row carries `surfaces`
+    whichever value you pass.
 </ParamField>
 
 ## Response
 
-<ResponseField name="commands" type="array">
-  System commands first, then enabled skills.
+A JSON array of command objects: system commands first, then enabled skills.
+
+<ResponseField name="command" type="object">
+  One row of the array.
   <Expandable title="Command object">
     <ResponseField name="name" type="string">
       The command name, without the leading slash
@@ -59,9 +62,12 @@ curl "https://api.astralform.ai/v1/skills/commands?surface=web" \
   -H "Authorization: Bearer sk_xxxxxxxxxxxx"
 ```
 
-```typescript JavaScript
-const commands = await session.client.get<SlashCommand[]>("/v1/skills/commands");
-// render `/${name} ${args_hint}` rows filtered by what the user typed after "/"
+```javascript JavaScript
+const res = await fetch("https://api.astralform.ai/v1/skills/commands?surface=web", {
+  headers: { Authorization: "Bearer sk_xxxxxxxxxxxx" },
+});
+const commands = await res.json();
+// render `/${name} ${args_hint}` rows, filtered by what the user typed after "/"
 ```
 </RequestExample>
 

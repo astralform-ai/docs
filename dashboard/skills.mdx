@@ -105,7 +105,9 @@ request normally. The user's message keeps the text they typed.
 
 Enabling a skill adds its command everywhere at once; disabling it removes the command. Skill
 names are lowercase with hyphens; Telegram command names cannot contain hyphens, so there the
-skill appears as its underscore form (`/ui_ux_pro_max` for `ui-ux-pro-max`). Both forms work.
+skill appears as its underscore form (`/ui_ux_pro_max` for `ui-ux-pro-max`). The backend
+resolves either spelling on every surface, so a command copied from Telegram still works
+in the web composer.
 
 <Note>
   A skill named like a system command (`new`, `goal`, `tasks`, `help`, `plan`) is still a skill
