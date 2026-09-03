@@ -129,7 +129,8 @@
             "pages": [
               "api-reference/voice/config",
               "api-reference/voice/transcriptions",
-              "api-reference/voice/polish"
+              "api-reference/voice/polish",
+              "api-reference/voice/stream"
             ]
           },
           {
