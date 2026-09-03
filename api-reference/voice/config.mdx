@@ -43,13 +43,13 @@ curl https://api.astralform.ai/v1/voice/config \
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `enabled` | boolean | The developer enabled voice input for this agent. Mirrors the `voice` entry in `capabilities` on [`/v1/agent/status`](/api-reference/status/agent). |
+| `enabled` | boolean | The developer's switch: voice input is turned on for this agent. Mirrors the `voice` entry in `capabilities` on [`/v1/agent/status`](/api-reference/status/agent). It is the switch, not a readiness check — a **speech-to-text** key removed after the switch was turned on leaves `enabled` true while every recording answers **409 `voice_not_ready`** — so a client shows the microphone on this field and handles that 409 by telling the user voice input is not available for this agent, not by asking them to re-record. A removed **polish** key is different: transcription still succeeds and the 409 comes from [`/v1/voice/polish`](/api-reference/voice/polish), where the client keeps the raw transcript it already has. |
 | `modes` | string[] | The styles a client may request. `raw` never calls the polish model. |
 | `default_mode` | string | The style to use when the user has not picked one. |
 | `silence_auto_stop_seconds` | number | In tap-to-talk mode, the pause that ends a recording. |
 | `auto_send` | boolean | Whether the client should send the message as soon as the result is ready. |
 | `max_recording_seconds` | integer | Longest recording to accept before stopping. |
-| `supports_streaming` | boolean | Whether the configured recognizer emits live partial transcripts. Batch (Whisper-style) providers do not. |
+| `supports_streaming` | boolean | Whether the client may expect live partial transcripts while recording. `false` today for every provider (batch, Whisper-style: they transcribe on stop). Once streaming channels exist it reflects the channel the route would try first as of this config fetch — the first channel that is **ready and not parked** (neither rate-limited nor key-rejected), or, when every ready channel is parked, the first ready one in stored order (with nothing healthy the route's deferred pass runs the parked channels in that order, key-parked ones included); `false` when no channel is ready at all, the state in which every recording is a 409. It is the same channel the dashboard marks [Primary](/dashboard/voice#speech-to-text-channels). A park that starts after the fetch — a 429 cooldown, or the ten-minute key park, which only a key save clears early — can route a recording to a batch channel behind that primary (the route tries a parked channel last), in which case a client rendering partials sees none until stop; the batch fallback still delivers the transcript on stop, so the recording is never lost, only the live preview. |
 | `hotwords` | string[] | The project vocabulary, for display. The server applies it to every transcription and polish itself; the `hotwords` a client sends with those requests are only the user's own words, merged after these. |
 
 <Note>

@@ -1,6 +1,6 @@
 ---
 title: "Transcribe a Recording"
-description: "Turn one recording into text with the agent's configured speech-to-text provider."
+description: "Turn one recording into text with the agent's speech-to-text channels, tried in order."
 api: "POST /v1/voice/transcriptions"
 ---
 
@@ -18,11 +18,11 @@ Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are 
 
 | Part | Type | Required | Description |
 |------|------|----------|-------------|
-| `file` | file | Yes | The recording. 16 kHz mono 16-bit WAV is the reference format; anything the provider accepts works. |
+| `file` | file | Yes | The recording. 16 kHz mono 16-bit WAV is the reference format and every hosted channel accepts it. Another container works only if **every channel the recording reaches** accepts it: unlike the size limit, container support is not checked before the call, so the first channel that refuses the container ends the request as a **400** even when a later channel would have taken it — and a recording reaches a later channel whenever the ones ahead are out of the way for that recording — deferred (cooling or key-parked), skipped for size, or failed in an advancing way (a 5xx, a timeout, a 404 or a call-time vault failure). The hosted providers take WAV, MP3, M4A, WebM/Opus and FLAC; a custom endpoint decides for itself, and its accepted containers — WAV included — are the developer's to verify. Put the channel with the narrowest container support last: that makes reaching it the rarest path, not an impossible one, and whenever a recording does reach it in a container it refuses the result is a 400. Sending 16 kHz mono WAV is the client-side way out for the hosted providers; a custom endpoint that refuses WAV is terminal for every recording that reaches it. |
 | `hotwords` | string | No | The user's own vocabulary, comma-separated — not the project's, which the server already holds. A word cannot itself contain a comma. |
 | `language` | string | No | ISO 639-1 hint (`en`, `zh`). Omit for auto-detection. |
 
-The server merges the project vocabulary with these words, project words first, and sends the result to the provider as its biasing prompt within a 240-character budget.
+The server merges the project vocabulary with these words, project words first, cuts the result once at the 240-character budget, and sends that same prompt to whichever channel takes the recording.
 
 ```bash
 curl -X POST https://api.astralform.ai/v1/voice/transcriptions \
@@ -44,16 +44,18 @@ curl -X POST https://api.astralform.ai/v1/voice/transcriptions \
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `text` | string | The transcript as the provider produced it. |
-| `language` | string \| null | The language the provider detected. |
+| `text` | string | The transcript as the channel that answered produced it. |
+| `language` | string \| null | The language that channel detected. |
 | `duration_ms` | integer \| null | Length of the recording, when the WAV header says so. |
-| `asr_ms` | integer | Time the provider took. |
+| `asr_ms` | integer | Wall-clock time of the whole speech-to-text step, from the first channel tried to the transcript — including the seconds spent on channels that failed or timed out before one answered. A rising `asr_ms` with a healthy transcript is the sign a primary channel is going bad. |
+
+Which channel answered is never reported: naming one by elimination would name a vendor, and an end-user token must not learn which vendor the developer configured.
 
 ## Errors
 
 | Status | `error` | Meaning |
 |--------|---------|---------|
-| 400 | — | Empty recording, or larger than the configured provider's limit (25 MB for the hosted providers). |
-| 409 | `voice_not_ready` | Voice input is disabled, or the configured provider has lost its key. |
-| 429 | — | The project's `voice.transcribe` rate limit. |
-| 502 | `transcription_failed` | The provider did not return a transcript. Details are logged server-side; the response names no vendor. |
+| 400 | — | Four causes share this one bare 400 and the response does not say which: an empty recording; a recording larger than every configured channel's limit (25 MB — the hosted providers' ceiling, and what a custom endpoint is assumed to take; checked before any call, so a channel whose limit the recording exceeds is skipped without a call); audio a provider refused as unusable (its 400 / 413 / 415 / 422), which ends the request because retrying would bill every key for one bad upload — for empty audio or a rejected language the next channel would refuse it too; and a refused container, the exception, since a later channel might have taken it (see `file` above). Their fixes differ (record something, record smaller, re-record, send WAV): a client that sees a 400 after a long recording should suspect size first — 300 s of 44.1 kHz mono 16-bit WAV is 26.5 MB, while the reference 16 kHz mono format stays under 10 MB. Because every channel's limit is 25 MB today, the pre-flight ceiling is the same whichever channels are configured; the keyless-channel case in the 409 row can only arise once a provider declares a higher limit. |
+| 409 | `voice_not_ready` | Voice input is disabled, no speech-to-text channel has a key in LLM Providers, no channel could be called at all (every keyed channel too small for the recording, see the 400 row), or every channel that was called refused its key (401 / 402 / 403). The causes share this one `error` value and the response does not say which. Today every reachable 409 is the developer's to fix — a client should show it as "voice input is not available for this agent", never as advice to re-record. The size cause (a channel with a higher limit and **no key** raising the pre-flight ceiling past the recording while every keyed channel is too small) is listed for completeness and is not reachable while every channel's limit is 25 MB; an oversized recording is the 400 above, which is where the suspect-size advice lives. |
+| 429 | — | The project's own `voice.transcribe` rate limit. A provider's 429 never reaches the caller: that channel goes on cooldown and the next configured channel takes the recording; when every channel that could take it has failed — the cooling ones answering 429 again while still cooling — the outcome is the 502 below. |
+| 502 | `transcription_failed` | Every channel that could take the recording failed to return a transcript — including a single channel answering 429 again while still cooling (a cooling channel is tried last, not never; the request does not wait the cooldown out). A channel skipped without a call (over its size limit, key-parked and not offered, no key in LLM Providers) is not counted. Details are logged server-side; the response names no vendor. |
