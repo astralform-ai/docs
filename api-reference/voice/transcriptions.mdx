@@ -1,6 +1,6 @@
 ---
 title: "Transcribe a Recording"
-description: "Turn one recording into text with the agent's configured speech-to-text provider."
+description: "Turn one recording into text with the agent's speech-to-text channels, tried in order."
 api: "POST /v1/voice/transcriptions"
 ---
 
@@ -44,16 +44,18 @@ curl -X POST https://api.astralform.ai/v1/voice/transcriptions \
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `text` | string | The transcript as the provider produced it. |
-| `language` | string \| null | The language the provider detected. |
+| `text` | string | The transcript as the channel that answered produced it. |
+| `language` | string \| null | The language that channel detected. |
 | `duration_ms` | integer \| null | Length of the recording, when the WAV header says so. |
-| `asr_ms` | integer | Time the provider took. |
+| `asr_ms` | integer | Wall-clock time of the whole speech-to-text step, from the first channel tried to the transcript — including the seconds spent on channels that failed or timed out before one answered. A rising `asr_ms` with a healthy transcript is the sign a primary channel is going bad. |
+
+Which channel answered is never reported: naming one by elimination would name a vendor, and an end-user token must not learn which vendor the developer configured.
 
 ## Errors
 
 | Status | `error` | Meaning |
 |--------|---------|---------|
-| 400 | — | Empty recording, larger than the most generous configured channel accepts (25 MB for the hosted providers), or refused by the provider as unusable audio. |
-| 409 | `voice_not_ready` | Voice input is disabled, or no speech-to-text channel has a usable key. |
-| 429 | — | The project's own `voice.transcribe` rate limit. A provider's 429 never reaches the caller: that channel goes on cooldown and the next configured channel takes the recording. |
-| 502 | `transcription_failed` | Every configured channel failed to return a transcript. Details are logged server-side; the response names no vendor, and which channel answered a successful request is never reported either. |
+| 400 | — | Empty recording; larger than every configured channel accepts (25 MB for the hosted providers — a channel whose limit the recording exceeds is skipped without a call, so only a recording no channel can take is refused); or refused by a provider as unusable audio (its 400 / 413 / 415 / 422), which ends the request because the next channel would refuse it too. |
+| 409 | `voice_not_ready` | Voice input is disabled, no speech-to-text channel has a key in LLM Providers, or every channel that was called refused its key (401 / 402 / 403). |
+| 429 | — | The project's own `voice.transcribe` rate limit. A provider's 429 never reaches the caller: that channel goes on cooldown and the next configured channel takes the recording; when no channel is left, the outcome is the 502 below. |
+| 502 | `transcription_failed` | Every configured channel failed to return a transcript — including a single channel answering 429 again after its cooldown. Details are logged server-side; the response names no vendor. |
