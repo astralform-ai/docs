@@ -18,11 +18,11 @@ Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are 
 
 | Part | Type | Required | Description |
 |------|------|----------|-------------|
-| `file` | file | Yes | The recording. 16 kHz mono 16-bit WAV is the reference format; anything the provider accepts works. |
+| `file` | file | Yes | The recording. 16 kHz mono 16-bit WAV is the reference format and every channel accepts it; another container works only if the channel that takes the recording accepts it — the hosted providers take WAV, MP3, M4A, WebM/Opus and FLAC, a custom endpoint decides for itself, and a container a channel refuses ends the request (415). |
 | `hotwords` | string | No | The user's own vocabulary, comma-separated — not the project's, which the server already holds. A word cannot itself contain a comma. |
 | `language` | string | No | ISO 639-1 hint (`en`, `zh`). Omit for auto-detection. |
 
-The server merges the project vocabulary with these words, project words first, and sends the result to the provider as its biasing prompt within a 240-character budget.
+The server merges the project vocabulary with these words, project words first, cuts the result once at the 240-character budget, and sends that same prompt to whichever channel takes the recording.
 
 ```bash
 curl -X POST https://api.astralform.ai/v1/voice/transcriptions \
