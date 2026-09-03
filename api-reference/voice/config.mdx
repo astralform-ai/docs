@@ -43,7 +43,7 @@ curl https://api.astralform.ai/v1/voice/config \
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `enabled` | boolean | The developer's switch: voice input is turned on for this agent. Mirrors the `voice` entry in `capabilities` on [`/v1/agent/status`](/api-reference/status/agent). It is the switch, not a readiness check — a key removed after the switch was turned on leaves `enabled` true while every recording answers **409 `voice_not_ready`** — so a client shows the microphone on this field and handles that 409 by telling the user voice input is not available for this agent, not by asking them to re-record. |
+| `enabled` | boolean | The developer's switch: voice input is turned on for this agent. Mirrors the `voice` entry in `capabilities` on [`/v1/agent/status`](/api-reference/status/agent). It is the switch, not a readiness check — a **speech-to-text** key removed after the switch was turned on leaves `enabled` true while every recording answers **409 `voice_not_ready`** — so a client shows the microphone on this field and handles that 409 by telling the user voice input is not available for this agent, not by asking them to re-record. A removed **polish** key is different: transcription still succeeds and the 409 comes from [`/v1/voice/polish`](/api-reference/voice/polish), where the client keeps the raw transcript it already has. |
 | `modes` | string[] | The styles a client may request. `raw` never calls the polish model. |
 | `default_mode` | string | The style to use when the user has not picked one. |
 | `silence_auto_stop_seconds` | number | In tap-to-talk mode, the pause that ends a recording. |

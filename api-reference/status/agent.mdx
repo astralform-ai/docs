@@ -31,7 +31,7 @@ Check if the agent has a valid LLM configuration before starting a chat. iOS cli
 </ResponseField>
 
 <ResponseField name="capabilities" type="array">
-  What the agent can do right now, so a client offers a feature only where it will work. Each entry is `{ "key": string, "enabled": boolean }`; keys are `image`, `video`, `web`, `skills` and `voice`. Empty whenever `is_ready` is false. `voice` is on when the developer enabled [voice input](/dashboard/voice) — the signal to show a microphone; [`/v1/voice/config`](/api-reference/voice/config) then carries the defaults.
+  What the agent can do right now, so a client offers a feature only where it will work. Each entry is `{ "key": string, "enabled": boolean }`; keys are `image`, `video`, `web`, `skills` and `voice`. Empty whenever `is_ready` is false. `voice` is on when the developer enabled [voice input](/dashboard/voice) — the signal to show a microphone; [`/v1/voice/config`](/api-reference/voice/config) then carries the defaults. It tracks the developer's switch, not channel readiness: a speech-to-text key removed after the switch was turned on leaves `voice` on while every recording answers **409 `voice_not_ready`**, which a client handles by telling the user voice input is not available for this agent.
 </ResponseField>
 
 <ResponseExample>
