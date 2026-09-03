@@ -37,23 +37,26 @@ The composer shows a microphone when the agent reports the `voice` capability on
 [`/v1/agent/status`](/api-reference/status/agent) **and** [`GET /v1/voice/config`](/api-reference/voice/config)
 comes back `enabled` — that is, the developer turned voice input on in the dashboard's
 [Voice](/dashboard/voice) section, which required a speech-to-text provider and a polish model
-at the time. Either signal absent, no mic. The config also decides whether a dictation auto-sends and which
-styles the menu offers, so the mic appears one round-trip after the composer does. The client
+at the time. Either signal absent, no mic. The config also decides whether a dictation
+auto-sends and which styles the menu offers, so the mic appears one round-trip after the
+composer does. The client
 never learns which vendor runs.
 
 - **Gestures.** Click the mic to start a tap-to-talk session; silence auto-stop ends it
   (speech, then the agent's configured pause), or click again to stop. Press and hold past
   400 ms for push-to-talk; releasing stops. A recording that reaches the agent's
-  `max_recording_seconds` (10–300 s, 300 s by default) stops on its own. Enter or Space on the focused button
-  toggles. Escape cancels: before the transcript lands nothing is kept; mid-polish the raw text
+  `max_recording_seconds` (10–300 s, 300 s by default) stops on its own. Enter or Space on the
+  focused button toggles. Escape cancels: before the transcript lands nothing is kept;
+  mid-polish the raw text
   stays in the field, unsent.
 - **Pipeline.** Recording → [`POST /v1/voice/transcriptions`](/api-reference/voice/transcriptions)
   → the raw transcript lands after the draft that was in the field →
   [`POST /v1/voice/polish`](/api-reference/voice/polish) streams the rewrite in over it (`done.text`
   is authoritative) → sent automatically when the agent's `auto_send` says so, otherwise it
   waits. A failed polish keeps the raw text with a Retry row. A transcription that comes back
-  **409 `voice_not_ready`** keeps nothing: the agent's speech-to-text key was removed after voice
-  was turned on, so `enabled` stays `true`, the mic shows, and every recording answers 409 — the
+  **409 `voice_not_ready`** keeps nothing: the agent's speech-to-text key was removed or refused
+  after voice was turned on, so `enabled` stays `true`, the mic shows, and every recording
+  answers 409 — the
   client then says voice input is not available for this agent rather than asking for another
   take. The `raw` style skips polish.
 - **Style.** Whichever of Raw, Light, Structured and Formal the agent's `modes` offer, under the
