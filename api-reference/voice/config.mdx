@@ -49,7 +49,7 @@ curl https://api.astralform.ai/v1/voice/config \
 | `silence_auto_stop_seconds` | number | In tap-to-talk mode, the pause that ends a recording. |
 | `auto_send` | boolean | Whether the client should send the message as soon as the result is ready. |
 | `max_recording_seconds` | integer | Longest recording to accept before stopping. |
-| `supports_streaming` | boolean | Whether the client may expect live partial transcripts while recording. `false` today for every provider (batch, Whisper-style: they transcribe on stop). Once streaming channels exist it reflects the **first ready channel** of the speech-to-text list — the one the route tries first — never a later one, so a client that renders partials on `true` is never left waiting on a batch fallback; batch fallbacks behind a streaming primary still deliver a transcript on stop. |
+| `supports_streaming` | boolean | Whether the client may expect live partial transcripts while recording. `false` today for every provider (batch, Whisper-style: they transcribe on stop). Once streaming channels exist it reflects the **first ready channel** of the speech-to-text list as of this config fetch. A cooldown that starts afterwards can route a recording to a batch channel behind that primary — the route tries a cooling channel last — in which case a client rendering partials sees none until stop; the batch fallback still delivers the transcript on stop, so the recording is never lost, only the live preview. |
 | `hotwords` | string[] | The project vocabulary, for display. The server applies it to every transcription and polish itself; the `hotwords` a client sends with those requests are only the user's own words, merged after these. |
 
 <Note>
