@@ -1,0 +1,86 @@
+---
+title: "Live Transcription"
+description: "Stream a recording over a WebSocket and receive partial text while the user is still speaking."
+api: "POST /v1/voice/stream/ticket"
+---
+
+## Overview
+
+When [`/v1/voice/config`](/api-reference/voice/config) reports `supports_streaming: true`, the channel the agent would use is a live one and a client may open a WebSocket instead of uploading the recording on stop. Two steps: mint a ticket, then dial the socket with it — a browser cannot set an `Authorization` header on a WebSocket, so the ticket carries the authentication.
+
+The client never learns which vendor runs the session: the frames below carry no provider or model name, and the only error reasons are the fixed vocabulary listed here.
+
+## Step 1 — mint a ticket
+
+```
+POST https://api.astralform.ai/v1/voice/stream/ticket
+```
+
+Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are shown on [Voice Config](/api-reference/voice/config).
+
+```json
+{
+  "hotwords": ["MCP"],
+  "language": "en"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `hotwords` | string[] | No | The user's own vocabulary — not the project's, which the server already holds and merges in first. Up to 100 words. |
+| `language` | string | No | ISO 639-1 hint. Omit for auto-detection. |
+
+```json
+{
+  "ticket": "Q4rZ…",
+  "expires_in": 60
+}
+```
+
+A ticket is valid for 60 seconds and is spent by the first handshake that presents it. It is bound to the agent and end user it was minted for and carries the channel, the recording cap and the vocabulary, so the socket handshake does no further lookups.
+
+| Status | `error` | Meaning |
+|--------|---------|---------|
+| 409 | `voice_not_ready` | Voice input is disabled, or the channel the route would use is not a live one — the same state `/v1/voice/config` reports as `supports_streaming: false`. Fall back to [`POST /v1/voice/transcriptions`](/api-reference/voice/transcriptions). |
+| 429 | — | The project's `voice.stream` rate limit: one ticket is one live recording. |
+| 503 | `voice_stream_unavailable` | Tickets cannot be minted right now. Fall back to the batch route. |
+
+## Step 2 — dial the socket
+
+```
+wss://api.astralform.ai/v1/voice/stream?ticket=Q4rZ…
+```
+
+A missing, spent or expired ticket closes the socket with code **4001** before it is accepted.
+
+**Client → server**
+
+- Binary frames: 16 kHz mono 16-bit little-endian PCM, as recorded — the server resamples if the vendor needs another rate. Any frame size works; ~100 ms chunks keep partials responsive.
+- A text frame `{"type": "stop"}` when the user stops. The server asks for the final transcript; audio sent after it is ignored.
+
+**Server → client** (text frames, JSON)
+
+```
+{"type": "partial", "text": "ship the voice feature"}
+{"type": "final", "text": "Ship the voice feature on Friday.", "language": "en", "asr_ms": 1840}
+{"type": "error", "reason": "timeout"}
+```
+
+| Frame | Meaning |
+|-------|---------|
+| `partial` | The transcript so far. Cumulative — replace what the field shows, do not append. Some models only produce these after `stop`. |
+| `final` | The finished transcript. Exactly one, after which the socket closes normally (1000). Continue exactly as after a batch transcription: polish it with [`/v1/voice/polish`](/api-reference/voice/polish), then send. |
+| `error` | The session failed. Exactly one, then the socket closes. Keep the audio you buffered and fall back to `POST /v1/voice/transcriptions` with it — the batch channels behind the live one still transcribe it. |
+
+| `reason` | Meaning |
+|----------|---------|
+| `not_ready` | The live channel could not be opened (its key was refused, or it is gone). |
+| `provider_error` | The vendor failed the session. Details are logged server-side; the frame names no vendor. |
+| `timeout` | No final transcript arrived within 20 seconds of `stop`, or the recording ran past its cap plus a 30-second grace without a `stop`. |
+| `stream_ended` | The vendor closed the session before a final transcript. |
+
+The recording cap from `/v1/voice/config` (`max_recording_seconds`) is enforced on the socket: audio past it is not forwarded and the session is stopped as if the user had stopped, so what was captured is still transcribed. Closing the socket from the client side closes the vendor session with it — an abandoned recording stops spending the developer's quota.
+
+<Note>
+Which channel serves a live session, and when it is used at all, is the dashboard's [Primary](/dashboard/voice#speech-to-text-channels) rule: the live channel must be the first ready, unparked channel in the list. Clients that only speak batch — the web client, older app builds — are never routed to it, and a live session that fails falls back to those same batch channels.
+</Note>
