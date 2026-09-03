@@ -27,7 +27,7 @@ Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are 
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `hotwords` | string[] | No | The user's own vocabulary — not the project's, which the server already holds and merges in first. Up to 100 words. |
+| `hotwords` | string[] | No | The user's own vocabulary — not the project's, which the server already holds and merges in first. The merged list is cut to the same 240-character biasing budget as the batch route, project words first, so words past it never reach the vendor. |
 | `language` | string | No | ISO 639-1 hint. Omit for auto-detection. |
 
 ```json
@@ -76,11 +76,11 @@ A missing, spent or expired ticket closes the socket with code **4001** before i
 |----------|---------|
 | `not_ready` | The live channel could not be opened (its key was refused, or it is gone). |
 | `provider_error` | The vendor failed the session. Details are logged server-side; the frame names no vendor. |
-| `timeout` | No final transcript arrived within 20 seconds of `stop`, or the recording ran past its cap plus a 30-second grace without a `stop`. |
+| `timeout` | No final transcript within 20 seconds of the stop — the client's `stop`, the server's own at the recording cap, or the server's own after the cap plus a 30-second grace when the client sent neither audio nor a `stop` (a silent, abandoned socket). |
 | `stream_ended` | The vendor closed the session before a final transcript. |
 
 The recording cap from `/v1/voice/config` (`max_recording_seconds`) is enforced on the socket: audio past it is not forwarded and the session is stopped as if the user had stopped, so what was captured is still transcribed. Closing the socket from the client side closes the vendor session with it — an abandoned recording stops spending the developer's quota.
 
 <Note>
-Which channel serves a live session, and when it is used at all, is the dashboard's [Primary](/dashboard/voice#speech-to-text-channels) rule: the live channel must be the first ready, unparked channel in the list. Clients that only speak batch — the web client, older app builds — are never routed to it, and a live session that fails falls back to those same batch channels.
+Which channel serves a live session, and when it is used at all, is the dashboard's [Primary](/dashboard/voice#speech-to-text-channels) rule: the live channel must be the channel the dashboard marks Primary. Clients that only speak batch — the web client, older app builds — are never routed to it, and a live session that fails falls back to those same batch channels.
 </Note>
