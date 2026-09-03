@@ -54,6 +54,12 @@
             ]
           },
           {
+            "group": "AstralChat",
+            "pages": [
+              "astralchat/overview"
+            ]
+          },
+          {
             "group": "Enterprise",
             "pages": [
               "enterprise/organizations",

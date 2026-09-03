@@ -1,0 +1,66 @@
+---
+title: "AstralChat"
+description: "The reference web client for Astralform agents — a third-party app built on the public API and the JavaScript SDK, with sign-in through the Astralform identity provider."
+---
+
+## Overview
+
+AstralChat is the reference implementation of an Astralform client. It runs at
+[chat.astralform.ai](https://chat.astralform.ai) as a static single-page app with no backend of
+its own: it signs users in with an OIDC authorization-code flow (PKCE) against
+`auth.astralform.ai`, then talks to the public API at `api.astralform.ai` with the user's access
+token — the same primitives any external developer gets. Everything it does, your own client can
+do the same way.
+
+Source: [astralform-ai/astralform-chat](https://github.com/astralform-ai/astralform-chat).
+
+| | |
+|---|---|
+| **Stack** | React 19, Vite, TypeScript (strict), Tailwind v4, Zustand, TanStack Query |
+| **SDK** | [`@astralform/js`](https://www.npmjs.com/package/@astralform/js) from the npm registry |
+| **Auth** | End-user OIDC token from `auth.astralform.ai`; agent chosen in the app and sent as `X-Agent-ID` |
+| **Transport** | REST plus Server-Sent Events for streamed turns, through the SDK |
+
+## What it exercises
+
+- Conversations: create, list, rename, delete, and resume a running turn when the user
+  returns to the page.
+- Streaming turns with tool activity, attachments, slash commands from the agent's skills,
+  and a model picker driven by `GET /v1/models`.
+- Capability gating: image and video generation, and the microphone, appear only when the
+  agent reports them on [`/v1/agent/status`](/api-reference/status/agent) — an absent signal
+  reads as hidden, never as available.
+
+## Voice input
+
+The composer shows a microphone when the agent reports the `voice` capability on
+[`/v1/agent/status`](/api-reference/status/agent) **and** [`GET /v1/voice/config`](/api-reference/voice/config)
+comes back `enabled` — that is, the developer turned voice input on in the dashboard's
+[Voice](/dashboard/voice) section and connected a speech-to-text provider and a polish model.
+Either one absent, no mic. The config also decides whether a dictation auto-sends and which
+styles the menu offers, so the mic appears one round-trip after the composer does. The client
+never learns which vendor runs.
+
+- **Gestures.** Click the mic to start a tap-to-talk session; silence auto-stop ends it
+  (speech, then the agent's configured pause), or click again to stop. Press and hold past
+  400 ms for push-to-talk; releasing stops. Enter or Space on the focused button toggles.
+  Escape cancels: before the transcript lands nothing is kept; mid-polish the raw text stays in
+  the field, unsent.
+- **Pipeline.** Recording → [`POST /v1/voice/transcriptions`](/api-reference/voice/transcriptions)
+  → the raw transcript lands after the draft that was in the field →
+  [`POST /v1/voice/polish`](/api-reference/voice/polish) streams the rewrite in over it (`done.text`
+  is authoritative) → sent automatically when the agent's `auto_send` says so, otherwise it
+  waits. A failed polish keeps the raw text with a Retry row. The `raw` style skips polish.
+- **Style.** Whichever of Raw, Light, Structured and Formal the agent's `modes` offer, under the
+  "+" menu; remembered per device (`localStorage` key `voice.mode`) over the agent's
+  `default_mode`, and a remembered pick this agent does not offer falls back to that default.
+- **What is uploaded.** The container the browser's `MediaRecorder` produces, as-is —
+  `audio/webm;codecs=opus` where supported, `audio/mp4` on Safari — with no transcoding.
+  Vocabulary: the server holds the project's list and merges it itself; this client sends no
+  words of its own yet.
+
+<Note>
+The transcript is sent to the polish model as data, inside a `<raw_transcript>` envelope, with an
+injection-defence clause in the system prompt. A user cannot redirect the polish model by talking
+to it — see [Voice](/dashboard/voice#style-prompts).
+</Note>
