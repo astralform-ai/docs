@@ -11,7 +11,7 @@ small set of system commands sits in front of them. This endpoint returns the li
 clients never hardcode commands and a newly enabled skill appears with no client change.
 
 Sending a command is just sending a message: post `/<name> <args>` as the `message` of a
-job (`POST /v1/jobs`). The backend resolves it; nothing about the request changes.
+job ([`POST /v1/jobs`](/api-reference/chat/stream)). The backend resolves it; nothing about the request changes.
 
 ## Authentication
 
@@ -24,7 +24,7 @@ job (`POST /v1/jobs`). The backend resolves it; nothing about the request change
 <ParamField query="surface" type="string" default="web">
   Who will execute the commands. A surface is only told about the commands it can run:
 
-  - `web` — clients of `POST /v1/jobs` (the chat SPA, the iOS app, SDK apps). Lists `/goal`,
+  - `web` — clients of [`POST /v1/jobs`](/api-reference/chat/stream) (the chat SPA, the iOS app, SDK apps). Lists `/goal`,
     `/plan` and the enabled skills whose command is on.
   - `telegram` — the Telegram bot. Lists `/new`, `/goal`, `/tasks`, `/help` and the same
     skills, with Telegram-valid names (hyphens become underscores).
