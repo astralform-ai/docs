@@ -1,147 +1,203 @@
 ---
-title: "Chat Stream"
-description: "Stream AI responses in real-time using Server-Sent Events (SSE) for responsive chat experiences."
-api: "POST /v1/chat/stream"
+title: "Stream a Chat"
+description: "Create a job, then stream its events over SSE — resumably, from any sequence number."
+api: "POST /v1/jobs"
 ---
 
-## Endpoint
+## Overview
+
+Sending a message is two steps: create a **job**, then subscribe to its events.
 
 ```
-POST https://api.astralform.ai/v1/chat/stream
+POST /v1/jobs                 → { "job_id": "…" }
+GET  /v1/jobs/{job_id}/events → the SSE stream
 ```
 
-## Request
+The split is what makes a turn survive a dropped connection. The agent runs server-side against the job, not against your socket, and every event is persisted with a sequence number — so a client that reconnects with `?after=<last seq>` gets the events it missed and then continues live. A phone that locks mid-answer, a tab that sleeps, a proxy that times out: none of them lose the turn.
+
+<Note>
+  This replaces the removed `POST /v1/chat/stream`, which answered a single request with a single unresumable stream.
+</Note>
+
+## Step 1 — create the job
+
+```
+POST https://api.astralform.ai/v1/jobs
+```
 
 ### Headers
 
-```
-Authorization: Bearer sk_xxxxxxxxxxxx
-Content-Type: application/json
-```
+<ParamField header="Authorization" type="string" required>
+  Your project API key as a bearer token (`Bearer sk_xxxxxxxxxxxx`), or an end-user OAuth token.
+</ParamField>
+
+<ParamField header="X-Agent-ID" type="string">
+  Required only with an end-user token, which is not bound to an agent. Ignored with an API key — the key already names its agent.
+</ParamField>
 
 ### Body
 
 ```json
 {
-  "conversation_id": "conv_abc123",
+  "conversation_id": "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
   "message": "What's the weather like today?",
-  "client_tools": [
-    {
-      "name": "get_location",
-      "description": "Get user's current GPS location",
-      "input_schema": {
-        "type": "object",
-        "properties": {}
-      }
-    }
-  ]
+  "agent_name": "support-agent"
 }
 ```
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `conversation_id` | string | Yes | Conversation to send message to |
-| `message` | string | Yes | User's message content |
-| `client_tools` | array | No | Available client-side tools |
-| `agent_name` | string | No | Route to a specific agent (bypasses supervisor) |
+| `message` | string | Yes¹ | The user's message. Max 100,000 characters. |
+| `conversation_id` | string | No | Conversation to append to. A new one is created when omitted, and its id comes back on the response. |
+| `agent_name` | string | No | Route to a specific agent. Lowercase, hyphen-separated. Omit to use the project's default agent. |
+| `continue_from_message` | string | No | Message id to continue from, for picking a turn back up after tool results when no job is still waiting on them. One of this or `message` is required. |
+| `resend_from` | string | No | Message id to branch from — truncates the conversation after it and re-runs. |
+| `upload_ids` | string[] | No | Conversation upload asset ids to attach to this turn. |
+| `plan_mode` | boolean | No | Run a read-only planning turn — the agent gets read and task tools only, and writes nothing. Takes precedence over `image_mode` and `video_mode`. |
+| `image_mode` | boolean | No | Give the agent the image generation tool for this turn, and require it to use one. Off by default so a paid provider is never called unless a picture was asked for. |
+| `video_mode` | boolean | No | Same, for video. Image-to-video only: attach an image or reference one already in the conversation, because this mode does not include the image tool to invent a source. |
+| `goal` | string | No | Start a durable long-horizon goal and run this turn under it. Omit for an ordinary turn. |
+| `goal_id` | string | No | Resume an existing goal by id. Ignored when `goal` is also set — a new goal wins. |
+| `cadence` | object | No | How often a **new** goal continues: `{"mode": "immediate" \| "interval" \| "cron" \| "self_paced", "interval_seconds": …, "cron": "…", "timezone": "UTC"}`. Ignored without `goal`. |
+| `provider`, `model` | string | No | Pick the model for this turn. Supply both or neither; omitted, the turn inherits the thread's last model. An explicit choice is recorded, so later omitted-model turns inherit it. |
+| `reasoning_effort` | string | No | One rung of the model's ladder (see `thinking_control` on `GET /v1/models`). Omit for the model's default — `"none"` is an explicit request *not* to think, which is not the same thing. |
+| `temperature` | number | No | 0–2. Omit for the provider default. |
+| `mcp_manifest` | array | No | Tool definitions the client can execute itself. See [Client tools](#client-tools). |
+| `enabled_mcp` | string[] | No | Which of the client's MCP tools the end user has switched on. |
+| `repository` | string | No | `owner/repo` the task belongs to. Required on the first turn of a conversation on a code-mode agent; ignored on chat-mode agents. |
 
-## Response
+¹ Either `message` or `continue_from_message` — a request with neither returns `400`.
 
-Returns a Server-Sent Events (SSE) stream.
+A message that begins with a slash is a [slash command](/api-reference/skills/commands): `/goal <objective>` and `/plan <request>` are resolved server-side into the fields above, and `/<skill-name>` seeds the turn with that skill. Nothing about the request changes.
 
-### Event Types
+### Response
 
-**content_block_delta**
-```
-event: content_block_delta
-data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}
-```
-
-**tool_use**
-```
-event: tool_use
-data: {"type":"tool_use","id":"tool_123","name":"get_location","input":{}}
-```
-
-**message_start**
-```
-event: message_start
-data: {"type":"message_start","message_id":"msg_123","conversation_id":"conv_abc","agent_name":"support-agent","agent_display_name":"Customer Support"}
-```
-
-The `agent_name` and `agent_display_name` fields are included when an agent handles the response.
-
-**agent_start** / **agent_end**
-```
-event: agent_start
-data: {"type":"agent_start","agent_name":"support-agent","agent_display_name":"Customer Support"}
-```
-```
-event: agent_end
-data: {"type":"agent_end","agent_name":"support-agent"}
-```
-
-Emitted when a specific agent begins and finishes handling a request. Useful for showing agent attribution in the UI.
-
-**message_stop**
-```
-event: message_stop
-data: {"type":"message_stop"}
-```
-
-**error**
-```
-event: error
-data: {"type":"error","message":"Rate limit exceeded"}
-```
-
-## Example
-
-### cURL
-
-```bash
-curl -N -X POST https://api.astralform.ai/v1/chat/stream \
-  -H "Authorization: Bearer sk_xxxxxxxxxxxx" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "conversation_id": "conv_abc123",
-    "message": "Hello, how are you?"
-  }'
-```
-
-### Swift
-
-```swift
-for try await event in client.streamChat(
-    conversationId: "conv_abc123",
-    message: "Hello, how are you?"
-) {
-    switch event {
-    case .contentBlock(let text):
-        print(text, terminator: "")
-    case .toolUse(let tool):
-        // Handle tool call
-        break
-    case .messageStop:
-        print("\n[Done]")
-    case .error(let error):
-        print("Error: \(error)")
-    }
+```json 201
+{
+  "job_id": "0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55",
+  "conversation_id": "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
+  "message_id": "c41d7e69-8b02-4f5a-91d3-6a0e8c2b7f14",
+  "status": "queued"
 }
 ```
 
-## Handling Tool Calls
+It returns as soon as the job is queued — the agent has not run yet. `message_id` identifies the user message this turn was created for; keep it for `continue_from_message` and for submitting tool results.
 
-When the AI needs to use a client tool, you'll receive a `tool_use` event. Execute the tool locally and submit the result:
+## Step 2 — stream the events
 
-```swift
-case .toolUse(let tool):
-    let result = await executeLocalTool(tool)
-    try await client.submitToolResult(
-        conversationId: conversationId,
-        toolCallId: tool.id,
-        result: result
-    )
+```
+GET https://api.astralform.ai/v1/jobs/{job_id}/events
 ```
 
-See [Tool Result](/api-reference/chat/tool-result) for the response format.
+<ParamField query="after" type="integer" default="-1">
+  Replay every event with `seq` greater than this, then continue live. The default replays the job from the beginning. On a reconnect, pass the `seq` of the last event you processed.
+</ParamField>
+
+Each frame's `event:` line is the event's `type`, and `data:` is the event as JSON. Every event carries `seq` (monotonic, per job), `ts`, and `job_id`.
+
+```
+event: message_start
+data: {"type":"message_start","seq":0,"ts":1757000000.0,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","model":"claude-opus-5","agent_name":"support-agent","agent_display_name":"Customer Support","agent_avatar_url":null}
+```
+
+The stream ends with a `done` frame carrying `{"data": "[DONE]"}`. A subscriber that reconnects to a job which already finished gets the whole thing replayed from the store and then that sentinel, so the same code path handles live and catch-up.
+
+## The block protocol
+
+A turn is a sequence of **blocks** — text, thinking, or a tool call — each opened, streamed into, and closed. `path` identifies a block within the turn; a nested run (a tool that itself calls the model) carries the spawning block's `parent_path`.
+
+| Event | Meaning |
+|-------|---------|
+| `message_start` | A turn begins. Carries the `model` actually used and, when an agent handles the turn, its `agent_name` / `agent_display_name` / `agent_avatar_url`. |
+| `block_start` | A block opens at `path`, with `kind` of `text`, `thinking`, or `tool_use`. A `tool_use` block's `metadata` carries `is_client_tool`, `is_concurrent_safe` and, when declared, `tool_category` and `icon_url`. |
+| `block_delta` | Incremental content. `delta.channel` says what kind — see the channel table below. |
+| `block_stop` | The block closes with a terminal `status` and its finalized `final` content. |
+| `message_stop` | The turn ends. `stop_reason` is one of `end_turn`, `tool_use`, `max_tokens`, `context_overflow`, `error`; `usage` carries `input_tokens`, `output_tokens`, `cached_tokens` and `cache_creation_tokens`, alongside `ttfb_ms` and `total_ms`. |
+| `stall` | No model event for longer than the stall threshold. Not fatal — the stream is still open. Surface a "slow" hint if you like. |
+| `retry` | A recoverable error triggered a retry, with `attempt`, `reason`, `backoff_ms` and the recovery `strategy`. |
+| `error` | A fatal error ended the stream, with a `code` and `message`. |
+| `keepalive` | Heartbeat the server sends after 45 seconds of silence. Ignore it; its arrival is how you know the connection is alive. |
+| `custom` | A conversation-level event that is not part of a block — `todo_update`, `title_generated`, `context_update`, `workspace_ready` and similar. `name` says which; `data` carries its payload. |
+
+### Delta channels
+
+| `channel` | Payload | On |
+|-----------|---------|-----|
+| `text` | `text` | a `text` block |
+| `thinking` | `text` | a `thinking` block |
+| `signature` | `signature` | a `thinking` block — assignment, not an append |
+| `input` | `partial_json` | a `tool_use` block's arguments, streaming as partial JSON |
+| `input_arg` | `arg_name`, `text` | one named argument large enough to warrant its own channel, such as a file's contents |
+| `output` | `stream` (`stdout` \| `stderr` \| `progress` \| `command`), `chunk` | live progress from a running tool |
+| `status` | `status`, `note` | a transitional state on an open `tool_use` block |
+
+### A text block, start to finish
+
+```
+event: block_start
+data: {"type":"block_start","seq":1,"ts":1757000000.1,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","path":[0],"parent_path":null,"kind":"text","metadata":{}}
+
+event: block_delta
+data: {"type":"block_delta","seq":2,"ts":1757000000.2,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","path":[0],"delta":{"channel":"text","text":"Hello"}}
+
+event: block_stop
+data: {"type":"block_stop","seq":3,"ts":1757000000.3,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","path":[0],"status":"ok","final":{"text":"Hello there."}}
+
+event: message_stop
+data: {"type":"message_stop","seq":9,"ts":1757000001.0,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","stop_reason":"end_turn","usage":{"input_tokens":412,"output_tokens":87,"cached_tokens":0,"cache_creation_tokens":0},"ttfb_ms":310.0,"total_ms":1840.0,"stall_count":0}
+```
+
+`block_stop.final` is shaped by the block's kind — `{"text"}` for text, `{"text", "signature"}` for thinking, and for `tool_use` a record of the call: `tool_name`, `call_id`, `input`, `output`, `is_error`, `duration_ms`, plus `images`, `warnings` and `progress` when the tool produced them. Rendering from `final` alone reproduces a completed turn, which is what makes a replayed stream look identical to a live one.
+
+## Client tools
+
+Declare the tools your app can run in `mcp_manifest`, and switch them on per end user with `enabled_mcp`. When the agent calls one, its `block_start` metadata carries `is_client_tool: true` and the block stops with `status: "awaiting_client_result"` — a pause, not an end.
+
+Execute the tool, then post the result to [Tool Result](/api-reference/chat/tool-result) with the `call_id` from the block's `final`. The job resumes on its own and the events continue on the same stream — do not create a second job. The same block path receives another `block_stop` with a terminal status once the result lands.
+
+## Job control
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /v1/jobs/{job_id}` | Poll status: `status`, timestamps, `error_message`, and `input_tokens` / `output_tokens`. |
+| `POST /v1/jobs/{job_id}/cancel` | Stop a running job. Returns `400` if it already finished, and `503` if the cancel was dispatched but no worker confirmed it — retry rather than assuming it stopped. |
+
+## Example
+
+<CodeGroup>
+```bash cURL
+JOB=$(curl -s -X POST https://api.astralform.ai/v1/jobs \
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello, how are you?"}' | jq -r .job_id)
+
+curl -N "https://api.astralform.ai/v1/jobs/$JOB/events" \
+  -H "Authorization: Bearer sk_xxxxxxxxxxxx"
+```
+
+```javascript JavaScript
+const { job_id } = await fetch("https://api.astralform.ai/v1/jobs", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer sk_xxxxxxxxxxxx",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ message: "Hello, how are you?" }),
+}).then((r) => r.json());
+
+let lastSeq = -1;
+const res = await fetch(
+  `https://api.astralform.ai/v1/jobs/${job_id}/events?after=${lastSeq}`,
+  { headers: { Authorization: "Bearer sk_xxxxxxxxxxxx" } },
+);
+
+for await (const event of parseSSE(res.body)) {
+  lastSeq = event.seq;                    // resume from here after a drop
+  if (event.type === "block_delta" && event.delta.channel === "text") {
+    process.stdout.write(event.delta.text);
+  }
+}
+```
+</CodeGroup>
+
+The SDKs do both steps for you: [`Astralform-iOS-SDK`](https://github.com/astralform-ai/Astralform-iOS-SDK) and [`@astralform/js`](https://github.com/astralform-ai/Astralform-JS-SDK) create the job, subscribe, and reconnect with `after` on their own.

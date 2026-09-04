@@ -98,7 +98,7 @@ A `"tool"` message's `content` is the tool's output; `tool_calls` says which too
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `call_id` | string | The call this message answers — the same id the [Stream](/api-reference/chat/stream) `tool_use` event carries as `id` and [Tool Result](/api-reference/chat/tool-result) takes as `tool_call_id` |
+| `call_id` | string | The call this message answers — the same id the [stream](/api-reference/chat/stream#the-block-protocol) puts in a `tool_use` block's `block_stop.final.call_id`, and the one [Tool Result](/api-reference/chat/tool-result) is submitted against |
 | `tool_name` | string | The tool that ran (e.g. `"read_file"`, `"capsule_run_code"`) |
 | `arguments` | object | The arguments the tool ran with, read from the assistant turn that requested the call — a turn the response omits when it carried no text, so it is not visible here. `{}` when that turn lies outside a `limit`ed window (on an older page than this one) |
 | `is_client_tool` | boolean | Always `false` in history, including for tools that ran on the client: the flag means "execute this now" on a live request and is not recorded with the result |
