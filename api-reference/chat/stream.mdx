@@ -97,7 +97,7 @@ Each frame's `event:` line is the event's `type`, and `data:` is the event as JS
 
 ```
 event: message_start
-data: {"type":"message_start","seq":0,"ts":1757000000.0,"job_id":"0b7c9d2e","turn_id":"turn_1","model":"claude-opus-5","agent_name":"support-agent","agent_display_name":"Customer Support","agent_avatar_url":null}
+data: {"type":"message_start","seq":0,"ts":1757000000.0,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","model":"claude-opus-5","agent_name":"support-agent","agent_display_name":"Customer Support","agent_avatar_url":null}
 ```
 
 The stream ends with a `done` frame carrying `{"data": "[DONE]"}`. A subscriber that reconnects to a job which already finished gets the whole thing replayed from the store and then that sentinel, so the same code path handles live and catch-up.
@@ -116,7 +116,7 @@ A turn is a sequence of **blocks** — text, thinking, or a tool call — each o
 | `stall` | No model event for longer than the stall threshold. Not fatal — the stream is still open. Surface a "slow" hint if you like. |
 | `retry` | A recoverable error triggered a retry, with `attempt`, `reason`, `backoff_ms` and the recovery `strategy`. |
 | `error` | A fatal error ended the stream, with a `code` and `message`. |
-| `keepalive` | Heartbeat from the subscriber every 45 seconds of silence. Ignore it; its arrival is how you know the connection is alive. |
+| `keepalive` | Heartbeat the server sends after 45 seconds of silence. Ignore it; its arrival is how you know the connection is alive. |
 | `custom` | A conversation-level event that is not part of a block — `todo_update`, `title_generated`, `context_update`, `workspace_ready` and similar. `name` says which; `data` carries its payload. |
 
 ### Delta channels
@@ -135,16 +135,16 @@ A turn is a sequence of **blocks** — text, thinking, or a tool call — each o
 
 ```
 event: block_start
-data: {"type":"block_start","seq":1,"ts":1757000000.1,"job_id":"0b7c9d2e","turn_id":"turn_1","path":[0],"parent_path":null,"kind":"text","metadata":{}}
+data: {"type":"block_start","seq":1,"ts":1757000000.1,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","path":[0],"parent_path":null,"kind":"text","metadata":{}}
 
 event: block_delta
-data: {"type":"block_delta","seq":2,"ts":1757000000.2,"job_id":"0b7c9d2e","turn_id":"turn_1","path":[0],"delta":{"channel":"text","text":"Hello"}}
+data: {"type":"block_delta","seq":2,"ts":1757000000.2,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","path":[0],"delta":{"channel":"text","text":"Hello"}}
 
 event: block_stop
-data: {"type":"block_stop","seq":3,"ts":1757000000.3,"job_id":"0b7c9d2e","turn_id":"turn_1","path":[0],"status":"ok","final":{"text":"Hello there."}}
+data: {"type":"block_stop","seq":3,"ts":1757000000.3,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","path":[0],"status":"ok","final":{"text":"Hello there."}}
 
 event: message_stop
-data: {"type":"message_stop","seq":9,"ts":1757000001.0,"job_id":"0b7c9d2e","turn_id":"turn_1","stop_reason":"end_turn","usage":{"input_tokens":412,"output_tokens":87,"cached_tokens":0,"cache_creation_tokens":0},"ttfb_ms":310.0,"total_ms":1840.0,"stall_count":0}
+data: {"type":"message_stop","seq":9,"ts":1757000001.0,"job_id":"0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55","turn_id":"turn_1","stop_reason":"end_turn","usage":{"input_tokens":412,"output_tokens":87,"cached_tokens":0,"cache_creation_tokens":0},"ttfb_ms":310.0,"total_ms":1840.0,"stall_count":0}
 ```
 
 `block_stop.final` is shaped by the block's kind — `{"text"}` for text, `{"text", "signature"}` for thinking, and for `tool_use` a record of the call: `tool_name`, `call_id`, `input`, `output`, `is_error`, `duration_ms`, plus `images`, `warnings` and `progress` when the tool produced them. Rendering from `final` alone reproduces a completed turn, which is what makes a replayed stream look identical to a live one.
@@ -196,25 +196,6 @@ for await (const event of parseSSE(res.body)) {
   if (event.type === "block_delta" && event.delta.channel === "text") {
     process.stdout.write(event.delta.text);
   }
-}
-```
-
-```swift Swift
-for try await event in client.streamChat(
-    conversationId: "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
-    message: "Hello, how are you?"
-) {
-    switch event {
-    case .blockDelta(let delta):
-        if case .text(let text) = delta { print(text, terminator: "") }
-    case .blockStop(let block):
-        // a tool_use block awaiting a client result pauses here
-        break
-    case .messageStop:
-        print("\n[Done]")
-    case .error(let error):
-        print("Error: \(error)")
-    }
 }
 ```
 </CodeGroup>
