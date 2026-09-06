@@ -134,13 +134,6 @@
             ]
           },
           {
-            "group": "Tools",
-            "pages": [
-              "api-reference/tools/list",
-              "api-reference/tools/mcp"
-            ]
-          },
-          {
             "group": "Skills",
             "pages": [
               "api-reference/skills/list",
@@ -228,6 +221,14 @@
     {
       "source": "/api-reference/conversations/get",
       "destination": "/api-reference/conversations/messages"
+    },
+    {
+      "source": "/api-reference/tools/list",
+      "destination": "/dashboard/platform-tools"
+    },
+    {
+      "source": "/api-reference/tools/mcp",
+      "destination": "/dashboard/mcp-servers"
     }
   ]
 }
