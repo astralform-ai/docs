@@ -14,8 +14,10 @@ Returns the agents configured for this project. Use the `name` of one as `agent_
 
 ## Response
 
-<ResponseField name="agents" type="array">
-  Array of agent objects
+A JSON array of agent objects.
+
+<ResponseField name="agent" type="object">
+  One entry of the array.
   <Expandable title="Agent object">
     <ResponseField name="id" type="string" required>
       The agent's id
@@ -68,6 +70,6 @@ curl -X GET https://api.astralform.ai/v1/agents \
   The response carries **one entry today** — the project's own agent row. Multi-agent discovery through this endpoint is not implemented; a client that needs to offer a choice cannot build it from here yet.
 </Note>
 
-- There is no enabled filter on this route — every configured agent is returned
+- No enabled filter is applied — the row is selected by project id, not by enablement
 - Use `agent_name` in [Stream a Chat](/api-reference/chat/stream) to route to a specific agent
 - If no `agent_name` is provided, the default agent (or supervisor) handles the request
