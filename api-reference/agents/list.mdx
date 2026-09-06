@@ -4,7 +4,7 @@ api: "GET /v1/agents"
 description: "Get available agents for the project."
 ---
 
-Returns enabled agents configured for this project. SDKs use this to discover available agents and route messages to specific ones.
+Returns the agents configured for this project. Use the `name` of one as `agent_name` when [creating a job](/api-reference/chat/stream) to route a message to it.
 
 ## Authentication
 
@@ -17,20 +17,20 @@ Returns enabled agents configured for this project. SDKs use this to discover av
 <ResponseField name="agents" type="array">
   Array of agent objects
   <Expandable title="Agent object">
-    <ResponseField name="name" type="string">
-      Agent identifier (lowercase with hyphens)
+    <ResponseField name="id" type="string" required>
+      The agent's id
     </ResponseField>
-    <ResponseField name="display_name" type="string">
-      Human-readable name (optional)
+    <ResponseField name="name" type="string" required>
+      Agent identifier (lowercase with hyphens) — this is what `agent_name` takes
     </ResponseField>
-    <ResponseField name="description" type="string">
-      What this agent specializes in (optional)
+    <ResponseField name="display_name" type="string | null" required>
+      Human-readable name, or `null`
     </ResponseField>
-    <ResponseField name="is_default" type="boolean">
-      Whether this is the project's default agent
+    <ResponseField name="avatar_url" type="string | null">
+      The agent's avatar, or `null`
     </ResponseField>
-    <ResponseField name="is_enabled" type="boolean">
-      Whether the agent is currently enabled
+    <ResponseField name="code_projects_enabled" type="boolean">
+      Whether this agent's tasks can name a repository — derived from an enabled `github` connector whose workspace holds an installation. Clients read it to decide whether to offer Projects and Tasks.
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -46,18 +46,11 @@ curl -X GET https://api.astralform.ai/v1/agents \
 ```json 200
 [
   {
+    "id": "3f9a1c72-5b84-4e10-a6d3-0c17e2b95f48",
     "name": "support-agent",
     "display_name": "Customer Support",
-    "description": "Handles customer inquiries, refunds, and account issues.",
-    "is_default": true,
-    "is_enabled": true
-  },
-  {
-    "name": "code-reviewer",
-    "display_name": "Code Reviewer",
-    "description": "Reviews code for bugs, security issues, and best practices.",
-    "is_default": false,
-    "is_enabled": true
+    "avatar_url": null,
+    "code_projects_enabled": false
   }
 ]
 ```
@@ -72,11 +65,9 @@ curl -X GET https://api.astralform.ai/v1/agents \
 ## Usage Notes
 
 <Note>
-  Call this endpoint directly rather than reading `session.agents` from the iOS SDK: its `AgentInfo` type cannot decode what this endpoint returns, and `ChatSession.fetchAgents` swallows the failure, so the collection is always empty.
-
-  The response fields documented below have also drifted from the implementation and are being corrected separately — trust the endpoint, not this schema, until that lands.
+  The response carries **one entry today** — the project's own agent row. Multi-agent discovery through this endpoint is not implemented; a client that needs to offer a choice cannot build it from here yet.
 </Note>
 
-- Only **enabled** agents are returned
+- There is no enabled filter on this route — every configured agent is returned
 - Use `agent_name` in [Stream a Chat](/api-reference/chat/stream) to route to a specific agent
 - If no `agent_name` is provided, the default agent (or supervisor) handles the request
