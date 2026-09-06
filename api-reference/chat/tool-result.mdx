@@ -1,76 +1,149 @@
 ---
 title: "Tool Result"
-description: "Submit the result of a client-side tool execution to continue the AI conversation flow."
-api: "POST https://api.astralform.ai/v1/tool-result"
+description: "Submit the results of client-side tool calls so a paused job resumes on the stream you are already reading."
+api: "POST /v1/tool-result"
 ---
 
 ## Overview
 
-When the AI requests a client-side tool (via a `tool_use` event), your app executes the tool locally and submits the result using this endpoint. The AI then continues processing with the tool's output.
+When the agent calls a tool your app declared in `mcp_manifest`, the `tool_use` block's `block_start` metadata carries `is_client_tool: true` and the block closes with `status: "awaiting_client_result"` — a pause, not an end. Run the tool locally and post its result here.
 
-## Request Body
+If the job is still waiting, it **resumes on its own** and its events continue on the SSE stream you are already subscribed to — this endpoint returns a small acknowledgement, not a stream, and the same block path later receives another `block_stop` with a terminal status.
+
+If the job is **no longer waiting** — it ended while the device was asleep, or the app came back to a finished turn — posting results alone leaves you watching a stream that will never emit again. Post them, then pick the turn up with a fresh job: `POST /v1/jobs` with `continue_from_message` set to the same `message_id` you sent here.
+
+See [Stream a Chat](/api-reference/chat/stream#client-tools) for where the pause appears in the block protocol.
+
+## Headers
+
+<ParamField header="Authorization" type="string" required>
+  Your project API key as a bearer token (`Bearer sk_xxxxxxxxxxxx`), or an end-user OAuth token.
+</ParamField>
+
+<ParamField header="X-Agent-ID" type="string">
+  Required only with an end-user token, which is not bound to an agent. Ignored with an API key.
+</ParamField>
+
+## Request body
+
+```json
+{
+  "conversation_id": "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
+  "message_id": "c41d7e69-8b02-4f5a-91d3-6a0e8c2b7f14",
+  "tool_results": [
+    {
+      "call_id": "call_9f2b7c",
+      "tool_name": "get_location",
+      "result": "{\"lat\": 37.7749, \"lon\": -122.4194}",
+      "is_error": false
+    }
+  ]
+}
+```
 
 <ParamField body="conversation_id" type="string" required>
-  The conversation ID where the tool was requested
+  The conversation the tool was called in.
 </ParamField>
 
-<ParamField body="tool_call_id" type="string" required>
-  The tool call ID from the `tool_use` event
+<ParamField body="message_id" type="string" required>
+  The message id that triggered the tool calls — the `message_id` returned when the job was created.
 </ParamField>
 
-<ParamField body="result" type="string" required>
-  The result of the tool execution (string or JSON)
+<ParamField body="tool_results" type="array" required>
+  The results, up to 50 per request. **Send every call the turn is waiting on in one request.** The first request to arrive resumes the turn with whatever results are stored at that moment, so answering three calls one at a time resumes the agent after the first, with the other two still unanswered.
 </ParamField>
+
+### Tool result object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `call_id` | string | Yes | The id of the call being answered, from the `tool_use` block's `block_stop.final.call_id`. Max 128 characters. |
+| `result` | string | Yes | The tool's output, as a string — serialize JSON yourself. Max 100,000 characters. |
+| `tool_name` | string | No | The tool that ran. Used for tracing; it does not select the call, `call_id` does. Max 256 characters. |
+| `is_error` | boolean | No | Whether `result` describes a failure. Defaults to `false`. |
 
 ## Response
 
-Returns a new SSE stream continuing the conversation.
-
-<ResponseExample>
+```json 200
+{
+  "status": "accepted"
+}
 ```
-event: content_block_delta
-data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Based on your location..."}}
 
-event: message_stop
-data: {"type":"message_stop"}
+The acknowledgement means the results were stored and the waiting job was signalled — not that the agent has finished with them. Everything after that arrives as events on the job stream.
+
+## Errors
+
+Errors come back as `{"detail": "…"}`. Unlike the voice endpoints, this one carries no machine-readable `error` code, so branch on the status and read `detail` for the specific cause.
+
+| Status | When |
+|--------|------|
+| `401` | The API key or end-user token is missing, invalid, revoked or expired. |
+| `403` | The conversation belongs to another project, or to another end user. |
+| `404` | No such conversation. |
+| `422` | The body failed schema validation — a `call_id` over 128 characters, a `result` over 100,000, a `tool_name` over 256, more than 50 results, or a missing required field. A client that truncates and retries should key off this, not `400`. |
+| `400` | A `call_id` is unknown or already consumed. Each id is validated against the job's pending-call allowlist and spent on first use, so a replayed or invented id is rejected rather than silently ignored. `detail` names the offending id. |
+
+## Reporting a failed tool
+
+Send the failure as the result and set `is_error`. The agent sees what went wrong and can adapt — it is a normal turn, not an aborted one.
+
+```json
+{
+  "conversation_id": "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
+  "message_id": "c41d7e69-8b02-4f5a-91d3-6a0e8c2b7f14",
+  "tool_results": [
+    {
+      "call_id": "call_9f2b7c",
+      "tool_name": "get_location",
+      "result": "Location access was denied by the user.",
+      "is_error": true
+    }
+  ]
+}
 ```
-</ResponseExample>
+
+Withholding it instead leaves the turn parked waiting on that call, so answer every call — including the ones that failed.
 
 ## Example
 
 <CodeGroup>
 ```bash cURL
-curl -N -X POST https://api.astralform.ai/v1/tool-result \
+curl -X POST https://api.astralform.ai/v1/tool-result \
   -H "Authorization: Bearer sk_xxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{
-    "conversation_id": "conv_abc123",
-    "tool_call_id": "tool_xyz789",
-    "result": "Calendar events for today:\n- 9:00 AM: Team standup"
+    "conversation_id": "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
+    "message_id": "c41d7e69-8b02-4f5a-91d3-6a0e8c2b7f14",
+    "tool_results": [
+      {"call_id": "call_9f2b7c", "tool_name": "get_location", "result": "{\"lat\": 37.7749}"}
+    ]
   }'
 ```
 
-```swift Swift
-case .toolUse(let tool):
-    let result = await executeClientTool(tool)
-    try await client.submitToolResult(
-        conversationId: conversationId,
-        toolCallId: tool.id,
-        result: result
-    )
+```javascript JavaScript
+// the block_stop event for a tool_use block that stopped with awaiting_client_result
+const output = await runLocalTool(event.final.tool_name, event.final.input);
+
+await fetch("https://api.astralform.ai/v1/tool-result", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer sk_xxxxxxxxxxxx",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    conversation_id: conversationId,
+    message_id: messageId,
+    tool_results: [
+      {
+        call_id: event.final.call_id,
+        tool_name: event.final.tool_name,
+        result: JSON.stringify(output),
+      },
+    ],
+  }),
+});
+// nothing more to do — the job resumes and the events keep arriving
+// on the stream already open at GET /v1/jobs/{job_id}/events
 ```
 </CodeGroup>
-
-## Error Handling
-
-If tool execution fails, submit an error result:
-
-```json
-{
-  "conversation_id": "conv_abc123",
-  "tool_call_id": "tool_xyz789",
-  "result": "Error: Calendar access was denied by the user"
-}
-```
-
-The AI will acknowledge the error and continue appropriately.
