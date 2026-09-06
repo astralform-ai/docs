@@ -72,7 +72,9 @@ curl -X GET https://api.astralform.ai/v1/agents \
 ## Usage Notes
 
 <Note>
-  Call this endpoint directly rather than reading `session.agents` from the iOS SDK. The SDK's `AgentInfo` requires `is_orchestrator` and `is_enabled`, which this response does not carry, so decoding fails and `ChatSession.fetchAgents` swallows the error — leaving the collection empty.
+  Call this endpoint directly rather than reading `session.agents` from the iOS SDK: its `AgentInfo` type cannot decode what this endpoint returns, and `ChatSession.fetchAgents` swallows the failure, so the collection is always empty.
+
+  The response fields documented below have also drifted from the implementation and are being corrected separately — trust the endpoint, not this schema, until that lands.
 </Note>
 
 - Only **enabled** agents are returned

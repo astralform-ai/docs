@@ -143,6 +143,7 @@ struct ChatView: View {
                 case .blockDelta(_, .text(let text)):
                     streaming += text
                 case .messageStop:
+                    transcript = session.messages
                     streaming = ""
                 default:
                     break
