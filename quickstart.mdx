@@ -70,7 +70,7 @@ try await session.send("Hello! What can you help me with?")
 session.unsubscribe(subscription)
 ```
 
-A `default` case is required: the session emits the whole [block protocol](/api-reference/chat/stream#the-block-protocol) plus conversation-level events, and more can be added without breaking your build.
+`send` returns once the turn is complete — it consumes the job's event stream before returning — so it is safe to unsubscribe on the next line. A `default` case is required: the session emits the whole [block protocol](/api-reference/chat/stream#the-block-protocol) plus conversation-level events, and more can be added without breaking your build.
 
 ## Step 5: Configure LLM Provider
 

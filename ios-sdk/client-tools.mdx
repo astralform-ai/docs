@@ -41,7 +41,7 @@ session.toolRegistry.registerTool(
 
 The handler is `([String: JSONValue]) async throws -> String` — return the result as a string and throw or return an error message if the tool fails. Either way the turn continues; see [Tool Result](/api-reference/chat/tool-result) for what the SDK posts on your behalf.
 
-Registered tools are advertised to the backend on `connect()`. `session.toggleClientTool(name:)` turns one on or off for the end user without unregistering it.
+The registry is read on **every message**, not at connect time — the manifest is attached to each job request — so tools can be registered at any point, before or after `connect()`. `session.toggleClientTool(name:)` turns one on or off for the end user without unregistering it.
 
 ## Example: Calendar Tool
 
@@ -107,19 +107,19 @@ _ = session.on { event in
 
 ## Built-in Tool Schemas
 
-Common client tool schemas you can use:
+Schemas you can copy. Each name carries the `mcp_` prefix the backend routes on; the calendar entry matches the handler registered above.
 
 ### Calendar Events
 ```json
 {
-  "name": "get_calendar_events",
-  "description": "Get events from the user's calendar",
+  "name": "mcp_get_calendar_events",
+  "description": "Read the user's calendar events for a given day.",
   "input_schema": {
     "type": "object",
     "properties": {
-      "start_date": {"type": "string"},
-      "end_date": {"type": "string"}
-    }
+      "date": {"type": "string", "description": "ISO 8601 date, e.g. 2026-09-06"}
+    },
+    "required": ["date"]
   }
 }
 ```
@@ -127,7 +127,7 @@ Common client tool schemas you can use:
 ### Contacts
 ```json
 {
-  "name": "search_contacts",
+  "name": "mcp_search_contacts",
   "description": "Search user's contacts by name",
   "input_schema": {
     "type": "object",
@@ -142,7 +142,7 @@ Common client tool schemas you can use:
 ### Location
 ```json
 {
-  "name": "get_current_location",
+  "name": "mcp_get_current_location",
   "description": "Get user's current GPS location",
   "input_schema": {
     "type": "object",

@@ -40,13 +40,6 @@ Returns enabled agents configured for this project. SDKs use this to discover av
 curl -X GET https://api.astralform.ai/v1/agents \
   -H "Authorization: Bearer sk_xxxxxxxxxxxx"
 ```
-
-```swift Swift
-// connect() populates the list; no separate call
-for agent in session.agents {
-    print("\(agent.name): \(agent.description ?? "")")
-}
-```
 </RequestExample>
 
 <ResponseExample>
@@ -77,6 +70,10 @@ for agent in session.agents {
 </ResponseExample>
 
 ## Usage Notes
+
+<Note>
+  Call this endpoint directly rather than reading `session.agents` from the iOS SDK. The SDK's `AgentInfo` requires `is_orchestrator` and `is_enabled`, which this response does not carry, so decoding fails and `ChatSession.fetchAgents` swallows the error — leaving the collection empty.
+</Note>
 
 - Only **enabled** agents are returned
 - Use `agent_name` in [Stream a Chat](/api-reference/chat/stream) to route to a specific agent

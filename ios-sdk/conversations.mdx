@@ -97,8 +97,13 @@ Older pages come from `session.loadOlderMessages()`, gated on `session.hasMoreMe
 Remove a conversation and its messages:
 
 ```swift
-try await session.renameConversation(id: id, title: "Weather chat")
 try await session.deleteConversation(id: id)
+```
+
+## Renaming a Conversation
+
+```swift
+try await session.renameConversation(id: id, title: "Weather chat")
 ```
 
 ## SwiftUI Integration
@@ -113,6 +118,7 @@ struct ChatView: View {
     @State private var streaming = ""
     @State private var input = ""
     @State private var isStreaming = false
+    @State private var subscription: UUID?
 
     var body: some View {
         VStack {
@@ -130,19 +136,22 @@ struct ChatView: View {
             }
             .padding()
         }
-        .task {
-            _ = session.on { event in
+        .onAppear {
+            guard subscription == nil else { return }
+            subscription = session.on { event in
                 switch event {
                 case .blockDelta(_, .text(let text)):
                     streaming += text
                 case .messageStop:
-                    transcript = session.messages
                     streaming = ""
-                    isStreaming = false
                 default:
                     break
                 }
             }
+        }
+        .onDisappear {
+            if let subscription { session.unsubscribe(subscription) }
+            subscription = nil
         }
     }
 
@@ -150,11 +159,11 @@ struct ChatView: View {
         let text = input
         input = ""
         isStreaming = true
+        defer { isStreaming = false }
         do {
             try await session.send(text)
             transcript = session.messages
         } catch {
-            isStreaming = false
             print("Error: \(error)")
         }
     }
