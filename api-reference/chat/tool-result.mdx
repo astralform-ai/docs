@@ -8,7 +8,9 @@ api: "POST /v1/tool-result"
 
 When the agent calls a tool your app declared in `mcp_manifest`, the `tool_use` block's `block_start` metadata carries `is_client_tool: true` and the block closes with `status: "awaiting_client_result"` — a pause, not an end. Run the tool locally and post its result here.
 
-The job then **resumes on its own**, and its events continue on the SSE stream you are already subscribed to. Do not create a second job: this endpoint returns a small acknowledgement, not a stream. The same block path later receives another `block_stop` with a terminal status.
+If the job is still waiting, it **resumes on its own** and its events continue on the SSE stream you are already subscribed to — this endpoint returns a small acknowledgement, not a stream, and the same block path later receives another `block_stop` with a terminal status.
+
+If the job is **no longer waiting** — it ended while the device was asleep, or the app came back to a finished turn — posting results alone leaves you watching a stream that will never emit again. Post them, then pick the turn up with a fresh job: `POST /v1/jobs` with `continue_from_message` set to the same `message_id` you sent here.
 
 See [Stream a Chat](/api-reference/chat/stream#client-tools) for where the pause appears in the block protocol.
 
@@ -48,7 +50,7 @@ See [Stream a Chat](/api-reference/chat/stream#client-tools) for where the pause
 </ParamField>
 
 <ParamField body="tool_results" type="array" required>
-  The results, up to 50 per request. Batch every call the turn is waiting on into one request rather than sending them one at a time.
+  The results, up to 50 per request. **Send every call the turn is waiting on in one request.** The first request to arrive resumes the turn with whatever results are stored at that moment, so answering three calls one at a time resumes the agent after the first, with the other two still unanswered.
 </ParamField>
 
 ### Tool result object
@@ -72,11 +74,15 @@ The acknowledgement means the results were stored and the waiting job was signal
 
 ## Errors
 
+Errors come back as `{"detail": "…"}`. Unlike the voice endpoints, this one carries no machine-readable `error` code, so branch on the status and read `detail` for the specific cause.
+
 | Status | When |
 |--------|------|
-| `400` | A `call_id` is unknown or already consumed. Each id is validated against the job's pending-call allowlist and spent on first use, so a replayed or invented id is rejected rather than silently ignored. |
+| `401` | The API key or end-user token is missing, invalid, revoked or expired. |
 | `403` | The conversation belongs to another project, or to another end user. |
 | `404` | No such conversation. |
+| `422` | The body failed schema validation — a `call_id` over 128 characters, a `result` over 100,000, a `tool_name` over 256, more than 50 results, or a missing required field. A client that truncates and retries should key off this, not `400`. |
+| `400` | A `call_id` is unknown or already consumed. Each id is validated against the job's pending-call allowlist and spent on first use, so a replayed or invented id is rejected rather than silently ignored. `detail` names the offending id. |
 
 ## Reporting a failed tool
 
@@ -116,8 +122,8 @@ curl -X POST https://api.astralform.ai/v1/tool-result \
 ```
 
 ```javascript JavaScript
-// `block` is the tool_use block that stopped with awaiting_client_result
-const output = await runLocalTool(block.final.tool_name, block.final.input);
+// the block_stop event for a tool_use block that stopped with awaiting_client_result
+const output = await runLocalTool(event.final.tool_name, event.final.input);
 
 await fetch("https://api.astralform.ai/v1/tool-result", {
   method: "POST",
@@ -130,8 +136,8 @@ await fetch("https://api.astralform.ai/v1/tool-result", {
     message_id: messageId,
     tool_results: [
       {
-        call_id: block.final.call_id,
-        tool_name: block.final.tool_name,
+        call_id: event.final.call_id,
+        tool_name: event.final.tool_name,
         result: JSON.stringify(output),
       },
     ],
