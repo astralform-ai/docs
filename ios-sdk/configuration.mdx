@@ -5,14 +5,25 @@ description: "Configure the Astralform iOS SDK client with your API key, base UR
 
 ## Basic Configuration
 
-Initialize the client with your API key:
+`ChatSession` is the app-facing entry point; `AuthMode` decides who it speaks as.
 
 ```swift
 import Astralform
 
-let client = AstralformClient(
-    baseURL: URL(string: "https://api.astralform.ai")!,
-    apiKey: "your-api-key"
+let session = ChatSession(
+    authMode: .apiKey(
+        AstralformApiKeyConfig(apiKey: "sk_xxxxxxxxxxxx", userId: "user-42")
+    )
+)
+```
+
+Use `.apiKey` when your own backend holds the key and you supply the end user's id. For an end user signed in through OAuth, pass their token instead:
+
+```swift
+let session = ChatSession(
+    authMode: .userToken(
+        AstralformUserTokenConfig(accessToken: accessToken, agentId: agentId)
+    )
 )
 ```
 
@@ -23,21 +34,30 @@ let client = AstralformClient(
 For self-hosted deployments:
 
 ```swift
-let client = AstralformClient(
-    baseURL: URL(string: "https://your-server.com")!,
-    apiKey: "your-api-key"
+let session = ChatSession(
+    authMode: .apiKey(
+        AstralformApiKeyConfig(
+            apiKey: "sk_xxxxxxxxxxxx",
+            userId: "user-42",
+            base: AstralformBaseConfig(baseURL: URL(string: "https://your-server.com")!)
+        )
+    )
 )
 ```
 
 ### Request Timeout
 
-Configure the default timeout for API requests:
+`timeoutMs` covers REST calls only — it does not apply to uploads or to the SSE stream. Default is 30,000.
 
 ```swift
-let client = AstralformClient(
-    baseURL: URL(string: "https://api.astralform.ai")!,
-    apiKey: "your-api-key",
-    timeout: 60 // seconds
+let session = ChatSession(
+    authMode: .apiKey(
+        AstralformApiKeyConfig(
+            apiKey: "sk_xxxxxxxxxxxx",
+            userId: "user-42",
+            base: AstralformBaseConfig(timeoutMs: 60_000)
+        )
+    )
 )
 ```
 

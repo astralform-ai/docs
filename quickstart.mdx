@@ -29,16 +29,20 @@ Add Astralform to your Xcode project using Swift Package Manager:
 
 ## Step 3: Configure the Client
 
-Initialize the Astralform client with your API key:
+`ChatSession` is the app-facing entry point: it owns the connection, the conversation list, the message history and your client tools.
 
 ```swift
 import Astralform
 
-let client = AstralformClient(
-    baseURL: URL(string: "https://api.astralform.ai")!,
-    apiKey: "your-api-key"
+let session = ChatSession(
+    authMode: .apiKey(
+        AstralformApiKeyConfig(apiKey: "sk_xxxxxxxxxxxx", userId: "user-42")
+    )
 )
+try await session.connect()
 ```
+
+`userId` identifies the end user this session speaks for; each one gets its own conversations and memory.
 
 <Warning>
   Never hardcode API keys in production. Use environment variables or secure storage.
@@ -46,28 +50,27 @@ let client = AstralformClient(
 
 ## Step 4: Send Your First Message
 
-Create a conversation and send a message:
+Subscribe first, then send — the response arrives as events on the session, not as a return value. `send` creates a conversation for you when there isn't one yet.
 
 ```swift
-// Create a new conversation
-let conversation = try await client.createConversation()
-
-// Send a message and stream the response
-for try await event in client.streamChat(
-    conversationId: conversation.id,
-    message: "Hello! What can you help me with?"
-) {
+let subscription = session.on { event in
     switch event {
-    case .contentBlock(let text):
+    case .blockDelta(_, .text(let text)):
         print(text, terminator: "")
     case .messageStop:
         print("\n[Done]")
-    case .toolUse(let tool):
-        // Handle client-side tool calls if needed
+    case .error(let code, let message, _):
+        print("Error \(code): \(message)")
+    default:
         break
     }
 }
+
+try await session.send("Hello! What can you help me with?")
+session.unsubscribe(subscription)
 ```
+
+A `default` case is required: the session emits the whole [block protocol](/api-reference/chat/stream#the-block-protocol) plus conversation-level events, and more can be added without breaking your build.
 
 ## Step 5: Configure LLM Provider
 

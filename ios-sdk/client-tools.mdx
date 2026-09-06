@@ -5,7 +5,9 @@ description: "Enable client-side MCP tools to give your AI access to device capa
 
 ## Overview
 
-Client tools run on the iOS device and give the AI access to local capabilities. When the AI needs device data, it sends a `tool_use` event, your app executes the tool locally, and sends the result back.
+Client tools run on the iOS device and give the AI access to local capabilities. You register a handler with the session's tool registry; when the agent calls the tool, **the SDK runs your handler and submits the result for you** — there is nothing to catch and nothing to post.
+
+Tool names must start with `mcp_` for the backend to route them.
 
 ## Architecture
 
@@ -13,111 +15,83 @@ Client tools run on the iOS device and give the AI access to local capabilities.
   <img src="/images/tool-flow.svg" alt="Client Tool Execution Flow" />
 </Frame>
 
-## Handling Tool Requests
+## Registering a Tool
 
 ```swift
-for try await event in client.streamChat(
-    conversationId: conversationId,
-    message: "What's on my calendar today?"
-) {
-    switch event {
-    case .toolUse(let tool):
-        let result = await executeClientTool(tool)
-        try await client.submitToolResult(
-            conversationId: conversationId,
-            toolCallId: tool.id,
-            result: result
-        )
-
-    case .contentBlock(let text):
-        print(text, terminator: "")
-
-    default:
-        break
+session.toolRegistry.registerTool(
+    name: "mcp_get_calendar_events",
+    description: "Read the user's calendar events for a given day.",
+    inputSchema: [
+        "type": .string("object"),
+        "properties": .object([
+            "date": .object([
+                "type": .string("string"),
+                "description": .string("ISO 8601 date, e.g. 2026-09-06"),
+            ])
+        ]),
+        "required": .array([.string("date")]),
+    ]
+) { arguments in
+    guard case .string(let date)? = arguments["date"] else {
+        return "Missing required argument: date"
     }
+    return await getCalendarEvents(on: date)
 }
 ```
 
+The handler is `([String: JSONValue]) async throws -> String` — return the result as a string and throw or return an error message if the tool fails. Either way the turn continues; see [Tool Result](/api-reference/chat/tool-result) for what the SDK posts on your behalf.
+
+Registered tools are advertised to the backend on `connect()`. `session.toggleClientTool(name:)` turns one on or off for the end user without unregistering it.
+
 ## Example: Calendar Tool
+
+The registry dispatches by name, so each tool is just its handler — no central `switch`.
 
 ```swift
 import EventKit
 
-func executeClientTool(_ tool: ToolCall) async -> String {
-    switch tool.name {
-    case "get_calendar_events":
-        return await getCalendarEvents(tool.input)
-    case "get_contacts":
-        return await getContacts(tool.input)
-    default:
-        return "Unknown tool: \(tool.name)"
-    }
-}
-
-func getCalendarEvents(_ input: [String: Any]) async -> String {
+func getCalendarEvents(on date: String) async -> String {
     let store = EKEventStore()
 
-    // Request permission
-    guard try? await store.requestFullAccessToEvents() == true else {
+    guard (try? await store.requestFullAccessToEvents()) == true else {
         return "Calendar access denied"
     }
 
-    // Get today's events
+    let iso = DateFormatter()
+    iso.dateFormat = "yyyy-MM-dd"
+    guard let day = iso.date(from: date) else {
+        return "Could not parse date: \(date)"
+    }
+
     let calendar = Calendar.current
-    let start = calendar.startOfDay(for: Date())
+    let start = calendar.startOfDay(for: day)
     let end = calendar.date(byAdding: .day, value: 1, to: start)!
 
-    let predicate = store.predicateForEvents(
-        withStart: start,
-        end: end,
-        calendars: nil
-    )
-
+    let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
     let events = store.events(matching: predicate)
 
     let formatted = events.map { event in
         "\(event.title ?? "Untitled"): \(event.startDate.formatted())"
     }.joined(separator: "\n")
 
-    return formatted.isEmpty ? "No events today" : formatted
+    return formatted.isEmpty ? "No events on \(date)" : formatted
 }
 ```
 
-## Registering Available Tools
+## Watching a Tool Run
 
-Tell the backend which client tools are available:
+Tool execution surfaces as an ordinary `tool_use` block, so a UI can show progress without participating in the call:
 
 ```swift
-let tools: [[String: Any]] = [
-    [
-        "name": "get_calendar_events",
-        "description": "Get events from the user's calendar",
-        "input_schema": [
-            "type": "object",
-            "properties": [
-                "date": ["type": "string", "description": "Date in YYYY-MM-DD format"]
-            ]
-        ]
-    ],
-    [
-        "name": "get_contacts",
-        "description": "Search the user's contacts",
-        "input_schema": [
-            "type": "object",
-            "properties": [
-                "query": ["type": "string", "description": "Name to search for"]
-            ]
-        ]
-    ]
-]
-
-// Include in chat request
-for try await event in client.streamChat(
-    conversationId: conversationId,
-    message: message,
-    clientTools: tools
-) {
-    // ...
+_ = session.on { event in
+    switch event {
+    case .blockStart(let block) where block.kind == .toolUse:
+        print("running \(block.metadata)")
+    case .blockStop(let block):
+        print("finished \(block.path) status \(block.status)")
+    default:
+        break
+    }
 }
 ```
 

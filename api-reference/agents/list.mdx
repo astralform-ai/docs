@@ -42,8 +42,8 @@ curl -X GET https://api.astralform.ai/v1/agents \
 ```
 
 ```swift Swift
-let agents = try await astralform.getAgents()
-for agent in agents {
+// connect() populates the list; no separate call
+for agent in session.agents {
     print("\(agent.name): \(agent.description ?? "")")
 }
 ```

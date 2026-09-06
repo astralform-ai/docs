@@ -161,15 +161,15 @@ Click **Delete** on an agent card and confirm.
 SDKs can discover available agents and route messages to specific ones:
 
 ```swift
-// List available agents
-let agents = try await astralform.getAgents()
+// connect() populates the agent list
+for agent in session.agents where agent.isEnabled {
+    print("\(agent.name): \(agent.displayName ?? agent.name)")
+}
 
-// Send to a specific agent
-try await client.streamChat(
-    conversationId: "conv_123",
-    message: "Review this code",
-    agentName: "code-reviewer"
-)
+// Route a message to one of them
+var options = SendOptions()
+options.agentName = "code-reviewer"
+try await session.send("Review this code", options: options)
 ```
 
 See the [Agents API](/api-reference/agents/list) for details.

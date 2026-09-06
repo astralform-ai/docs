@@ -78,15 +78,14 @@ curl -X GET "https://api.astralform.ai/v1/conversations?limit=10" \
 ### Swift
 
 ```swift
-let conversations = try await client.listConversations(
-    limit: 10,
-    offset: 0
-)
+_ = try await session.loadMoreConversations()
 
-for conv in conversations {
+for conv in session.conversations {
     print("\(conv.id): \(conv.messageCount) messages")
 }
 ```
+
+`loadMoreConversations` pages for you — it appends the next page to `session.conversations` and returns what it added, with `session.hasMoreConversations` saying whether more remain.
 
 ## Pagination
 
