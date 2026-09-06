@@ -8,138 +8,165 @@ description: "Create, manage, and stream AI conversations using the Astralform i
 Start a new conversation:
 
 ```swift
-let conversation = try await client.createConversation()
-print("Created conversation: \(conversation.id)")
+let id = try await session.createNewConversation()
+print("Created conversation: \(id)")
 ```
+
+You rarely need this — `send` creates one on the first message when the session has none.
 
 ## Streaming Chat
 
 Send a message and receive streaming responses:
 
+Register a handler, then send. Events arrive on the session for as long as it is connected — including events from a turn started on another device.
+
 ```swift
-for try await event in client.streamChat(
-    conversationId: conversation.id,
-    message: "What's the weather like today?"
-) {
+_ = session.on { event in
     switch event {
-    case .contentBlock(let text):
+    case .messageStart(let start):
+        print("model: \(start.model)")
+
+    case .blockDelta(_, .text(let text)):
         // Append text to your UI
         print(text, terminator: "")
 
-    case .toolUse(let tool):
-        // Handle client-side tool calls
-        print("Tool requested: \(tool.name)")
+    case .blockDelta(_, .thinking(let text)):
+        print("[thinking] \(text)")
 
-    case .messageStop:
-        // Message complete
-        print("\n[Done]")
+    case .blockStop(let block):
+        print("closed \(block.path) status \(block.status)")
 
-    case .error(let error):
-        print("Error: \(error)")
+    case .messageStop(let stop):
+        print("\n[Done] \(stop.stopReason)")
+
+    default:
+        break
     }
 }
+
+try await session.send("What's the weather like today?")
 ```
 
 ## Event Types
 
+`ChatEvent` mirrors the wire protocol one-for-one — see [Stream a Chat](/api-reference/chat/stream#the-block-protocol) for what each carries.
+
 | Event | Description |
 |-------|-------------|
-| `contentBlock` | Text content from the AI response |
-| `toolUse` | Client-side tool call request |
-| `messageStop` | End of message stream |
-| `error` | Error during streaming |
+| `messageStart(WireMessageStart)` | A turn begins; carries the model and the answering agent |
+| `blockStart(WireBlockStart)` | A block opens — `text`, `thinking` or `tool_use` |
+| `blockDelta(path:delta:)` | Incremental content; `delta` is `.text`, `.thinking`, `.input`, `.output`, … |
+| `blockStop(WireBlockStop)` | A block closes with its terminal status and `final` content |
+| `messageStop(WireMessageStop)` | The turn ends, with `stopReason` and token usage |
+| `error(code:message:blockPath:)` | A fatal error ended the turn |
+| `stall` / `retry` / `keepalive` | Reliability signals; the stream is still open |
+| `todoUpdate`, `titleGenerated`, `toolApprovalRequested`, … | Conversation-level events |
+
+The enum is non-exhaustive in practice, so always include a `default` case.
 
 ## Listing Conversations
 
 Get all conversations:
 
 ```swift
-let conversations = try await client.listConversations()
+_ = try await session.loadMoreConversations()
 
-for conv in conversations {
-    print("\(conv.id): \(conv.createdAt)")
+for conv in session.conversations {
+    print("\(conv.id): \(conv.title) — \(conv.messageCount) messages")
 }
 ```
+
+`loadMoreConversations` appends the next page to `session.conversations` and returns what it added; `session.hasMoreConversations` says whether to keep going.
 
 ## Getting Conversation History
 
 Retrieve messages from a conversation:
 
 ```swift
-let messages = try await client.getConversation(id: conversation.id)
+try await session.loadConversation(id: id)
 
-for message in messages {
+for message in session.messages {
     print("[\(message.role)]: \(message.content)")
 }
 ```
+
+Older pages come from `session.loadOlderMessages()`, gated on `session.hasMoreMessages`.
 
 ## Deleting a Conversation
 
 Remove a conversation and its messages:
 
 ```swift
-try await client.deleteConversation(id: conversation.id)
+try await session.deleteConversation(id: id)
+```
+
+## Renaming a Conversation
+
+```swift
+try await session.renameConversation(id: id, title: "Weather chat")
 ```
 
 ## SwiftUI Integration
 
-Example chat view:
+`ChatSession` is `@MainActor` but not `@Observable`, so mirror what you render into `@State` from the event handler:
 
 ```swift
 struct ChatView: View {
-    @State private var messages: [Message] = []
-    @State private var input = ""
-    @State private var isLoading = false
+    let session: ChatSession
 
-    let client: AstralformClient
-    let conversationId: String
+    @State private var transcript: [Message] = []
+    @State private var streaming = ""
+    @State private var input = ""
+    @State private var isStreaming = false
+    @State private var subscription: UUID?
 
     var body: some View {
         VStack {
             ScrollView {
-                ForEach(messages) { message in
-                    MessageBubble(message: message)
+                ForEach(transcript) { message in
+                    Text(message.content)
                 }
+                if !streaming.isEmpty { Text(streaming) }
             }
 
             HStack {
                 TextField("Message", text: $input)
-                Button("Send") {
-                    Task { await sendMessage() }
-                }
-                .disabled(isLoading)
+                Button("Send") { Task { await send() } }
+                    .disabled(isStreaming || input.isEmpty)
             }
             .padding()
         }
-    }
-
-    func sendMessage() async {
-        let userMessage = input
-        input = ""
-        isLoading = true
-
-        messages.append(Message(role: .user, content: userMessage))
-        var assistantContent = ""
-
-        do {
-            for try await event in client.streamChat(
-                conversationId: conversationId,
-                message: userMessage
-            ) {
+        .onAppear {
+            guard subscription == nil else { return }
+            subscription = session.on { event in
                 switch event {
-                case .contentBlock(let text):
-                    assistantContent += text
+                case .blockDelta(_, .text(let text)):
+                    streaming += text
                 case .messageStop:
-                    messages.append(Message(role: .assistant, content: assistantContent))
+                    transcript = session.messages
+                    streaming = ""
                 default:
                     break
                 }
             }
+        }
+        .onDisappear {
+            if let subscription { session.unsubscribe(subscription) }
+            subscription = nil
+        }
+    }
+
+    private func send() async {
+        let text = input
+        input = ""
+        isStreaming = true
+        defer { isStreaming = false }
+        do {
+            try await session.send(text)
+            transcript = session.messages
         } catch {
             print("Error: \(error)")
         }
-
-        isLoading = false
     }
 }
 ```

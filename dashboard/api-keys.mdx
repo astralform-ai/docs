@@ -35,9 +35,10 @@ There is no separate test environment — a key is either live or revoked.
 Send the key as a bearer token on every API request:
 
 ```swift
-let client = AstralformClient(
-    baseURL: URL(string: "https://api.astralform.ai")!,
-    apiKey: "sk_xxxxxxxxxxxx"
+let session = ChatSession(
+    authMode: .apiKey(
+        AstralformApiKeyConfig(apiKey: "sk_xxxxxxxxxxxx", userId: "user-42")
+    )
 )
 ```
 

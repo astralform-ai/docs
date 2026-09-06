@@ -40,13 +40,6 @@ Returns enabled agents configured for this project. SDKs use this to discover av
 curl -X GET https://api.astralform.ai/v1/agents \
   -H "Authorization: Bearer sk_xxxxxxxxxxxx"
 ```
-
-```swift Swift
-let agents = try await astralform.getAgents()
-for agent in agents {
-    print("\(agent.name): \(agent.description ?? "")")
-}
-```
 </RequestExample>
 
 <ResponseExample>
@@ -77,6 +70,12 @@ for agent in agents {
 </ResponseExample>
 
 ## Usage Notes
+
+<Note>
+  Call this endpoint directly rather than reading `session.agents` from the iOS SDK: its `AgentInfo` type cannot decode what this endpoint returns, and `ChatSession.fetchAgents` swallows the failure, so the collection is always empty.
+
+  The response fields documented below have also drifted from the implementation and are being corrected separately — trust the endpoint, not this schema, until that lands.
+</Note>
 
 - Only **enabled** agents are returned
 - Use `agent_name` in [Stream a Chat](/api-reference/chat/stream) to route to a specific agent
