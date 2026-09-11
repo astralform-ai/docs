@@ -7,7 +7,7 @@ description: "Connect Sentry so your agents can find, read and resolve productio
 
 The Sentry connector gives an agent your organization's issues as tools. A debugging agent can search for unresolved errors, read the latest event's stack trace, cross-reference the code through the [GitHub connector](/dashboard/github), and mark the issue resolved once the fix ships.
 
-Sentry is an **API-key connector**: one personal token, encrypted and stored per project, shared by every run of the project's agents.
+Sentry is an **API-key connector**: one personal token, encrypted and stored per project, used by every agent the connector is assigned to.
 
 ## 1. Create a token
 
@@ -16,7 +16,7 @@ Sentry is an **API-key connector**: one personal token, encrypted and stored per
 3. Copy the token. It starts with `sntryu_`.
 
 <Warning>
-  Use a **personal** token. Organization tokens (`sntrys_…`) only carry the CI scopes Sentry uses for release and source-map uploads, so every tool would answer with a permission error.
+  Use a **personal** token. Organization tokens (`sntrys_…`) only carry the CI scopes Sentry uses for release and source-map uploads, so the issue tools would answer with a permission error, even if listing projects appears to work.
 </Warning>
 
 ## 2. Connect
@@ -35,7 +35,7 @@ Sentry is an **API-key connector**: one personal token, encrypted and stored per
 | `sentry_get_issue` | Read one issue by short ID (`BACKEND-3P`) or numeric ID: counts, first/last seen, releases, and the latest event's innermost stack frames, tags, breadcrumbs and request. |
 | `sentry_update_issue` | Resolve, reopen, ignore or assign an issue. `resolvedInNextRelease` is the right status when the fix is merged but not yet deployed — Sentry reopens the issue if the error survives the release. |
 
-`sentry_update_issue` is the one write, and it is governed like other write tools: in **supervised** mode the agent asks before changing an issue's status.
+`sentry_update_issue` is the one write, and it is governed by the agent's [Autonomy](/dashboard/permissions) setting like any other write tool: a **Supervised** agent shows an approval card before changing an issue's status in chat, and fails the call outright in a headless routine.
 
 Results are trimmed for the model — a raw Sentry event is tens of kilobytes; the agent gets the short ID, the counts, the last stack frames with their source line, the tags and the newest breadcrumbs.
 
