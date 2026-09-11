@@ -49,6 +49,7 @@
               "dashboard/connectors",
               "dashboard/github",
               "dashboard/telegram",
+              "dashboard/sentry",
               "dashboard/skills"
             ]
           },

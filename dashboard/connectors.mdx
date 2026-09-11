@@ -55,6 +55,7 @@ Remote MCP connectors connect to external MCP servers over HTTP. No additional c
 | Notion | OAuth | Productivity | `notion_search`, `notion_get_page`, `notion_create_page` |
 | GitHub | GitHub App | Development | `github_list_repos`, `github_search_issues` |
 | Telegram | API Key | Communication | `telegram_send_message`, `telegram_get_me`, `telegram_get_updates` |
+| Sentry | API Key | Development | `sentry_list_projects`, `sentry_search_issues`, `sentry_get_issue`, `sentry_update_issue` |
 
 <Note>
   **GitHub** is more than these two tools — the same connector lets an agent answer `@astralform-agent` on an issue or pull request, do the work, and open a PR. See the dedicated [GitHub guide](/dashboard/github).
@@ -62,6 +63,10 @@ Remote MCP connectors connect to external MCP servers over HTTP. No additional c
 
 <Note>
   **Telegram** is a full two-way channel — deliver routine results to a chat or channel and run an interactive chatbot. See the dedicated [Telegram guide](/dashboard/telegram).
+</Note>
+
+<Note>
+  **Sentry** turns an agent into a debugger for production errors — search issues, read the latest stack trace, resolve once fixed. See the dedicated [Sentry guide](/dashboard/sentry).
 </Note>
 
 ## Enabling a Connector

@@ -1,0 +1,68 @@
+---
+title: "Sentry"
+description: "Connect Sentry so your agents can find, read and resolve production errors — with the stack trace, tags and breadcrumbs of the latest event."
+---
+
+## Overview
+
+The Sentry connector gives an agent your organization's issues as tools. A debugging agent can search for unresolved errors, read the latest event's stack trace, cross-reference the code through the [GitHub connector](/dashboard/github), and mark the issue resolved once the fix ships.
+
+Sentry is an **API-key connector**: one personal token, encrypted and stored per project, shared by every run of the project's agents.
+
+## 1. Create a token
+
+1. In Sentry, open your account menu → **User settings → Personal Tokens** and create a token.
+2. Give it the scopes `org:read`, `project:read` and `event:read`. Add `event:write` if agents should be able to resolve, ignore or assign issues.
+3. Copy the token. It starts with `sntryu_`.
+
+<Warning>
+  Use a **personal** token. Organization tokens (`sntrys_…`) only carry the CI scopes Sentry uses for release and source-map uploads, so every tool would answer with a permission error.
+</Warning>
+
+## 2. Connect
+
+1. Go to **Project Settings → Connectors** and enable **Sentry**.
+2. Paste the personal token.
+3. Choose the agent access policy (see [Access](#access)).
+4. Click **Save**.
+
+## Agent tools
+
+| Tool | Purpose |
+|------|---------|
+| `sentry_list_projects` | List projects with their organization slug. The agent calls this first when it doesn't know your slugs. |
+| `sentry_search_issues` | Search issues in an organization with Sentry's search syntax, e.g. `is:unresolved level:error environment:production`. |
+| `sentry_get_issue` | Read one issue by short ID (`BACKEND-3P`) or numeric ID: counts, first/last seen, releases, and the latest event's innermost stack frames, tags, breadcrumbs and request. |
+| `sentry_update_issue` | Resolve, reopen, ignore or assign an issue. `resolvedInNextRelease` is the right status when the fix is merged but not yet deployed — Sentry reopens the issue if the error survives the release. |
+
+`sentry_update_issue` is the one write, and it is governed like other write tools: in **supervised** mode the agent asks before changing an issue's status.
+
+Results are trimmed for the model — a raw Sentry event is tens of kilobytes; the agent gets the short ID, the counts, the last stack frames with their source line, the tags and the newest breadcrumbs.
+
+### In the sandbox
+
+When the agent has a sandbox, the same functions are available as `capsule.connectors.sentry_*` inside `capsule_run_code`, and the token is exported as `SENTRY_AUTH_TOKEN` for scripts.
+
+## Access
+
+Sentry uses the standard connector [access policy](/dashboard/connectors#access-policy) — **Auto-allow** (recommended), **Ask user**, or **Block** — set in the connector's own settings. Disabling the connector removes the tools immediately.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `Invalid token` | The token is not a personal token, or it was revoked. Create a new `sntryu_…` token and update the connector. |
+| `You do not have permission to perform this action` on `sentry_update_issue` | Add the `event:write` scope to the token. |
+| `Sentry issue 'X' not found in organization 'Y'` | Check the organization slug with `sentry_list_projects`, and pass the short ID exactly as Sentry shows it. |
+| `sentry_list_projects` returns nothing | The token needs `org:read` and `project:read`. |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Connectors" icon="plug" href="/dashboard/connectors">
+    How connectors and access policies work
+  </Card>
+  <Card title="GitHub" icon="github" href="/dashboard/github">
+    Let the same agent read the code and open the fix
+  </Card>
+</CardGroup>
