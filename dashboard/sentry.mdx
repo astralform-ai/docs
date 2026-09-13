@@ -1,47 +1,43 @@
 ---
 title: "Sentry"
-description: "Connect Sentry so your agents can find, read and resolve production errors — with the stack trace, tags and breadcrumbs of the latest event."
+description: "Connect your Sentry account so your agents can search, read and resolve production errors through Sentry's own MCP server."
 ---
 
 ## Overview
 
-The Sentry connector gives an agent your organization's issues as tools. A debugging agent can search for unresolved errors, read the latest event's stack trace, cross-reference the code through the [GitHub connector](/dashboard/github), and mark the issue resolved once the fix ships.
+Sentry is a **remote MCP connector**: the agent's tools come from Sentry's hosted MCP server, and each team member connects their own Sentry account through Sentry's OAuth. Nothing is pasted and no token is stored by hand. A debugging agent can search unresolved issues, read an issue with its latest event, cross-reference the code through the [GitHub connector](/dashboard/github), and update the issue once the fix ships.
 
-Sentry is an **API-key connector**: one personal token, encrypted and stored per project, used by every agent the connector is assigned to.
+## 1. Enable the connector
 
-## 1. Create a token
+1. Go to **Project Settings → Connectors** and enable **Sentry**. There is nothing to enter.
+2. Choose the agent access policy (see [Access](#access)).
 
-1. In Sentry, open your account menu → **User settings → Personal Tokens** and create a token.
-2. Give it the scopes `org:read`, `project:read` and `event:read`. Add `event:write` if agents should be able to resolve, ignore or assign issues.
-3. Copy the token. It starts with `sntryu_`.
+## 2. Connect your account
 
-<Warning>
-  Use a **personal** token. Organization tokens (`sntrys_…`) only carry the CI scopes Sentry uses for release and source-map uploads, so the issue tools would answer with a permission error, even if listing projects appears to work.
-</Warning>
+1. Open the Sentry connector and click **Connect**.
+2. A Sentry consent screen opens in a popup. Pick the organization and approve the scopes Sentry asks for (`org:read`, `project:write`, `team:write`, `event:write` — the set its MCP server declares).
+3. The popup closes on its own and the connector shows your connection.
 
-## 2. Connect
+Each member connects individually; an agent uses the connection of the member who is chatting with it. Connections refresh themselves and can be revoked from the same card.
 
-1. Go to **Project Settings → Connectors** and enable **Sentry**.
-2. Paste the personal token.
-3. Choose the agent access policy (see [Access](#access)).
-4. Click **Save**.
+<Note>
+  Routines and goals run under no member, so today they have no Sentry connection. A follow-up lets a member lend their connection to an agent's routines; until then, Sentry tools work in interactive chat.
+</Note>
 
 ## Agent tools
 
+The tools are **discovered from Sentry's server** the first time a member connects, cached for an hour, and listed on the connector page from then on. They carry the `sentry_` prefix, so the connector's access policy governs all of them. Sentry's current server offers, among others:
+
 | Tool | Purpose |
 |------|---------|
-| `sentry_list_projects` | List projects with their organization slug. The agent calls this first when it doesn't know your slugs. |
-| `sentry_search_issues` | Search issues in an organization with Sentry's search syntax, e.g. `is:unresolved level:error environment:production`. |
-| `sentry_get_issue` | Read one issue by short ID (`BACKEND-3P`) or numeric ID: counts, first/last seen, releases, and the latest event's innermost stack frames, tags, breadcrumbs and request. |
-| `sentry_update_issue` | Resolve, reopen, ignore or assign an issue. `resolvedInNextRelease` is the right status when the fix is merged but not yet deployed — Sentry reopens the issue if the error survives the release. |
+| `sentry_find_organizations`, `sentry_find_projects` | Discover the slugs the other tools take. |
+| `sentry_search_issues` | Search issues with Sentry's search syntax. |
+| `sentry_search_events` | Search events and errors, including natural-language queries. |
+| `sentry_get_sentry_resource` | Read one issue, event or trace in detail. |
+| `sentry_update_issue` | Resolve, reopen, archive or assign an issue. |
+| `sentry_analyze_issue_with_seer` | Ask Sentry's Seer for a root-cause analysis. |
 
-`sentry_update_issue` is the one write, and it is governed by the agent's [Autonomy](/dashboard/permissions) setting like any other write tool: a **Supervised** agent shows an approval card before changing an issue's status in chat, and fails the call outright in a headless routine.
-
-Results are trimmed for the model — a raw Sentry event is tens of kilobytes; the agent gets the short ID, the counts, the last stack frames with their source line, the tags and the newest breadcrumbs.
-
-### In the sandbox
-
-When the agent has a sandbox, the same functions are available as `capsule.connectors.sentry_*` inside `capsule_run_code`, and the token is exported as `SENTRY_AUTH_TOKEN` for scripts.
+The write tools (`sentry_update_issue`, `sentry_analyze_issue_with_seer`, `sentry_execute_sentry_tool` and the `create_*` tools) are governed as writes by the agent's [Autonomy](/dashboard/permissions) setting: a **Supervised** agent shows an approval card before running one in chat, and fails the call outright in a headless routine. The exact list is whatever the server lists; check the connector page after connecting.
 
 ## Access
 
@@ -51,10 +47,10 @@ Sentry uses the standard connector [access policy](/dashboard/connectors#access-
 
 | Symptom | Fix |
 |---------|-----|
-| `Invalid token` | The token is not a personal token, or it was revoked. Create a new `sntryu_…` token and update the connector. |
-| `You do not have permission to perform this action` on `sentry_update_issue` | Add the `event:write` scope to the token. |
-| `Sentry issue 'X' not found in organization 'Y'` | Check the organization slug with `sentry_list_projects`, and pass the short ID exactly as Sentry shows it. |
-| `sentry_list_projects` returns nothing | The token needs `org:read` and `project:read`. |
+| The popup never returns | Check the browser did not block it; the card offers a click-through link while it waits. |
+| A tool answers "the Sentry connection was rejected — reconnect it in the dashboard" | Your grant expired or was revoked on Sentry's side. Click **Reconnect**. |
+| "Tools are discovered from the server when a member connects" and no list appears | Nobody has connected yet, or the last discovery failed; connect (or reconnect) and reload. |
+| "Failed to complete authorization" after consenting | Sentry's authorization server refused the exchange. Try **Connect** again — the connector re-registers with Sentry if needed. |
 
 ## Next Steps
 

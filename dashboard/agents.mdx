@@ -1,17 +1,17 @@
 ---
 title: "Agents"
-description: "Configure your AI through agents — each with its own LLM, skills, MCP servers, and tools."
+description: "Configure your AI through agents — each with its own LLM, skills, connectors, and tools."
 ---
 
 ## Overview
 
 Agents are the central building block in Astralform. Every project has a **Main Agent** that handles all requests by default. You can create additional specialized agents and use a supervisor to route messages automatically.
 
-All configuration — LLM provider, skills, MCP servers, and platform tools — is managed through agent detail pages.
+All configuration — LLM provider, skills, connectors, and platform tools — is managed through agent detail pages.
 
 ## Main Agent
 
-Every project starts with a **Main Agent**. It auto-inherits all project resources (skills, MCP servers, tools), so single-agent setups require no extra configuration.
+Every project starts with a **Main Agent**. It auto-inherits all project resources (skills, connectors, tools), so single-agent setups require no extra configuration.
 
 - The Main Agent cannot be deleted
 - New resources added to the project are automatically available to the Main Agent
@@ -63,18 +63,6 @@ Assign skills so the agent has access to specialized capabilities.
 For the Main Agent, all project skills are auto-assigned.
 
 See [Skills](/dashboard/skills) for the SKILL.md format and best practices.
-
-### MCP Tab
-
-Assign MCP servers so the agent can use external tools and databases.
-
-1. On the **MCP** tab, see assigned and available servers
-2. Click **Assign** or **Unassign** to manage assignments
-3. Click **Add New Server** to create and assign a server
-
-For the Main Agent, all project MCP servers are auto-assigned.
-
-See [MCP Servers](/dashboard/mcp-servers) for server configuration and examples.
 
 ### Tools Tab
 
