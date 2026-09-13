@@ -8,6 +8,10 @@ api: "GET https://api.astralform.ai/v1/agent/status"
 
 Check whether the agent can take a chat turn before starting one. An agent is ready once its team has connected at least one [model provider](/dashboard/llm-providers). The model itself is not part of the status: it is chosen per turn or by the agent's conversation model, and the models on offer come from `GET /v1/models`. iOS clients should call this on app launch to show appropriate UI when no provider is connected.
 
+Ready means a turn can start, not that every turn will succeed. A request that names no model, in a new conversation, on an agent with no conversation model still returns `400` — send `provider` and `model`, or set the agent's [conversation model](/dashboard/llm-providers#choose-the-model).
+
+When the credential's agent doesn't exist, the response has `is_ready` and `llm_configured` both `false`, the message `No agent configured.`, and empty `capabilities`.
+
 ## Response
 
 <ResponseField name="is_ready" type="boolean">

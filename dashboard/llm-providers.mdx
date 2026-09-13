@@ -31,7 +31,7 @@ Only team **owners and admins** see the Model providers page.
 1. Open the account menu at the bottom of the sidebar → **Model providers**.
 2. Under **Available**, find the provider and click **Configure**.
 3. Paste the **API Key**. Azure OpenAI also needs a **Base URL**: your resource's endpoint.
-4. Pick a **Chat model** and click **Test**. Astralform sends that model a short prompt with your key and reports whether it answered.
+4. Pick a **Chat model** and click **Test**. Astralform sends that model a short prompt with your key and reports whether it answered. Fireworks AI and Azure OpenAI have no catalog, so type the model name instead (for Azure OpenAI, the deployment name), and [register it](#registering-models) after saving so agents can pick it.
 5. Click **Save**. The provider moves to **Configured**.
 
 The key is write-only. To replace it, open **Configure** again and type the new key; **Save** stays disabled until you do. **Delete Key** removes it, except while routines still use the provider: the dashboard refuses and names those routines.
@@ -81,10 +81,10 @@ If none of these applies, the turn fails with `400`: `No model specified and thi
 
 ## Reasoning effort
 
-Models differ in how much control they give over reasoning, so each model advertises its own **ladder**, some subset of **Off**, **Minimal**, **Low**, **Medium**, **High**, **Extra high** and **Max**. The picker offers only the rungs of the selected model, and a model with no ladder shows no effort control at all.
+Models differ in how much control they give over reasoning, so each model advertises its own **ladder**, some subset of **Off**, **Minimal**, **Low**, **Medium**, **High**, **Extra high** and **Max**. The picker offers **Model default** plus the rungs of the selected model, and a model with no ladder shows no effort control at all.
 
 - **Model default** sends no effort, and the provider decides.
-- **Off** is an explicit request not to reason. It is not the same as the default, because many models reason unless told otherwise.
+- **Off** is an explicit request not to reason, sent as `reasoning_effort: "none"`. It is not the same as the default, because many models reason unless told otherwise.
 - A saved effort that the selected model doesn't offer (after switching the agent to a different model, for example) is never sent as-is. The turn runs at the model's default instead.
 
 ## Speech-to-text from the same key
