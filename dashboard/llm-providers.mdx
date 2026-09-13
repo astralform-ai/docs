@@ -1,136 +1,121 @@
 ---
-title: "LLM Providers"
-description: "Configure OpenAI, Anthropic, Groq, or Ollama as your AI model provider for Astralform projects."
+title: "Model Providers"
+description: "Connect model providers with your team's own keys, choose the model each agent uses, and set how hard it reasons."
 ---
 
-## Supported Providers
+## Overview
 
-Astralform supports multiple LLM providers:
+Astralform runs every model on **your own provider key**. A team owner or admin connects each provider once, on the team's **Model providers** page. The key is encrypted and stored for the whole team, not per agent, and it is never shown again: the page only displays a hint of it. Every agent in the team can then use the models of any connected provider.
 
-| Provider | Models | Best For |
-|----------|--------|----------|
-| **OpenAI** | GPT-4o, GPT-4o-mini | General purpose, vision |
-| **Anthropic** | Claude Sonnet 4, Claude Haiku | Long context, reasoning |
-| **Groq** | Llama 3, Mixtral | Fast inference |
-| **Ollama** | Any local model | Self-hosted, privacy |
+Which model a turn runs on is a separate decision, made by the request, the conversation or the agent's **conversation model**. See [Choose the model](#choose-the-model).
 
-## Configuration
+## Providers
 
-LLM providers are configured per agent through the agent detail page:
+| Provider | Needs | Models |
+|----------|-------|--------|
+| **Anthropic**, **OpenAI**, **Google AI Studio**, **xAI (Grok)**, **Mistral AI**, **DeepSeek**, **Cohere**, **Groq**, **Together AI**, **OpenRouter**, **NVIDIA**, **MiniMax**, **Moonshot AI**, **Moonshot Coding**, **Z.AI**, **Z.AI Coding Plan**, **Ollama Cloud** | API key | Astralform's curated catalog |
+| **Fireworks AI** | API key | Models you [register](#registering-models) |
+| **Azure OpenAI** | API key and your resource's endpoint URL | Deployments you [register](#registering-models) |
+| **Self-hosted endpoint**: any OpenAI-compatible server, such as llama.cpp, vLLM, Ollama or a proxy | Base URL, API key and a name | Models you [discover or register](#registering-models) |
 
-1. Go to **Agents** and click an agent
-2. On the **Model** tab, select your provider
-3. Enter the provider API key
-4. Choose a model
-5. Click **Save**
-
-Each agent can have its own LLM provider and model. If a named agent has no LLM configured, it inherits from the Main Agent.
-
-See [Agents](/dashboard/agents) for more on agent configuration.
-
-## OpenAI
-
-```json
-{
-  "provider": "openai",
-  "api_key": "sk-...",
-  "model": "gpt-4o"
-}
-```
-
-**Available Models:**
-- `gpt-4o` - Most capable
-- `gpt-4o-mini` - Faster, cheaper
-- `gpt-4-turbo` - Large context window
-
-## Anthropic
-
-```json
-{
-  "provider": "anthropic",
-  "api_key": "sk-ant-...",
-  "model": "claude-sonnet-4-20250514"
-}
-```
-
-**Available Models:**
-- `claude-sonnet-4-20250514` - Best balance
-- `claude-haiku-3-5-20241022` - Fast and efficient
-
-## Groq
-
-```json
-{
-  "provider": "groq",
-  "api_key": "gsk_...",
-  "model": "llama-3.3-70b-versatile"
-}
-```
-
-**Available Models:**
-- `llama-3.3-70b-versatile` - Most capable
-- `llama-3.1-8b-instant` - Fastest
-- `mixtral-8x7b-32768` - Good balance
-
-## Ollama (Self-Hosted)
-
-For local models:
-
-```json
-{
-  "provider": "ollama",
-  "base_url": "http://localhost:11434",
-  "model": "llama3.2"
-}
-```
+Astralform maintains the catalog by hand and changes it as providers ship and retire models, so this page does not list them. The model picker in the dashboard is the current list, and API clients read the same list from [`GET /v1/models`](#for-api-clients).
 
 <Note>
-  Ollama requires the model to be running on your server. No API key needed.
+  **Ollama Cloud** is Ollama's hosted service and needs an Ollama API key. To use an Ollama server you run yourself, add it as a [self-hosted endpoint](#self-hosted-endpoints).
 </Note>
 
-## Model Parameters
+## Connect a provider
 
-Fine-tune model behavior:
+Only team **owners and admins** see the Model providers page.
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `temperature` | Randomness (0-2) | 0.7 |
-| `max_tokens` | Maximum response length | 4096 |
-| `top_p` | Nucleus sampling | 1.0 |
+1. Open the account menu at the bottom of the sidebar → **Model providers**.
+2. Under **Available**, find the provider and click **Configure**.
+3. Paste the **API Key**. Azure OpenAI also needs a **Base URL**: your resource's endpoint.
+4. Pick a **Chat model** and click **Test**. Astralform sends that model a short prompt with your key and reports whether it answered.
+5. Click **Save**. The provider moves to **Configured**.
 
-## Fallback Configuration
+The key is write-only. To replace it, open **Configure** again and type the new key; **Save** stays disabled until you do. **Delete Key** removes it, except while routines still use the provider: the dashboard refuses and names those routines.
 
-Configure a fallback provider for reliability:
+### Self-hosted endpoints
 
-```json
-{
-  "primary": {
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-20250514"
-  },
-  "fallback": {
-    "provider": "openai",
-    "model": "gpt-4o"
-  }
-}
-```
+1. On **Model providers**, click **Add endpoint** under **Self-hosted endpoints**.
+2. Enter the server's **Base URL**, its **API key** and a **Name**. The name becomes the endpoint's identifier (`custom:<slug>`) and can't be changed afterwards.
+3. Save it, then add its models as described in [Registering models](#registering-models).
 
-## Cost Optimization
+<Warning>
+  The base URL must be a public `http` or `https` address. Astralform connects to it from its own servers and refuses anything that resolves to a private or loopback address, such as `localhost`, `127.0.0.1` or `192.168.x.x`, so a server that only listens on your own machine can't be connected directly. Put it behind a public URL first.
+</Warning>
 
-Tips for reducing costs:
+### Registering models
 
-1. Use smaller models for simple tasks
-2. Set appropriate `max_tokens` limits
-3. Use Groq for high-volume, simple queries
-4. Consider Ollama for development
+Fireworks AI, Azure OpenAI and self-hosted endpoints have no catalog, so you tell Astralform which models to offer. Open the provider's **Configure** dialog and use **Team models**:
+
+- **Discover models** (self-hosted endpoints) asks the server what it serves. It reads the `/models` list, then LiteLLM's `/model/info` or llama.cpp's `/props` for details, and lets you pick which models to add.
+- Otherwise, add a model by hand. Enter its **Model** name (for Azure OpenAI, the deployment name), its **Context window**, whether it reasons (**Thinking**), and whether it supports **Tools** and **Vision**, then click **Register**.
+
+The context window is required. Astralform budgets every conversation against it, and a model without one can't be used. Registered models only appear in pickers while the team holds a key for their provider.
+
+## Choose the model
+
+### The agent's conversation model
+
+Open the agent → **Settings** → **Agent settings** → **Conversation model**:
+
+| Field | What it sets |
+|-------|--------------|
+| **Model** | The provider and model the agent uses when a request doesn't name one. **None (resolved at run time)** leaves the agent without a default. |
+| **Reasoning effort** | How hard the model reasons. See [Reasoning effort](#reasoning-effort). |
+| **Temperature** | 0–2. Leave it empty for the provider's default. Some models don't accept a temperature, and on those it is ignored. |
+
+Routines use the same three fields in the routine editor.
+
+### How a turn picks its model
+
+Each turn resolves its model in this order:
+
+1. **The request.** `provider` and `model` on [`POST /v1/jobs`](/api-reference/chat/stream), always supplied together. An explicit choice wins, even partway through a conversation.
+2. **The conversation.** The model the conversation's previous turn used. A `reasoning_effort` or `temperature` sent with this turn still applies.
+3. **The agent.** Its conversation model, as long as that provider's key is still connected.
+
+If none of these applies, the turn fails with `400`: `No model specified and this agent has no conversation model set. Choose a model per request, or set the agent's conversation model.`
+
+## Reasoning effort
+
+Models differ in how much control they give over reasoning, so each model advertises its own **ladder**, some subset of **Off**, **Minimal**, **Low**, **Medium**, **High**, **Extra high** and **Max**. The picker offers only the rungs of the selected model, and a model with no ladder shows no effort control at all.
+
+- **Model default** sends no effort, and the provider decides.
+- **Off** is an explicit request not to reason. It is not the same as the default, because many models reason unless told otherwise.
+- A saved effort that the selected model doesn't offer (after switching the agent to a different model, for example) is never sent as-is. The turn runs at the model's default instead.
+
+## Speech-to-text from the same key
+
+A **Groq** or **OpenAI** key also serves speech-to-text, and so can a self-hosted endpoint. Voice input is set up per agent; see [Voice](/dashboard/voice).
+
+## For API clients
+
+- **`GET /v1/models`** lists the models of every provider your team has connected, registered models included. Each entry carries `provider`, `model`, `context_window`, `tools`, `vision` and `thinking_control`, which holds the model's effort ladder and its default. Build a model picker from it.
+- **`POST /v1/jobs`** accepts `provider`, `model`, `reasoning_effort` and `temperature` for each turn. See [Stream chat](/api-reference/chat/stream).
+- **[`GET /v1/agent/status`](/api-reference/status/agent)** reports `is_ready: false` until the team has connected at least one provider.
+- From Claude Code, the [Astralform plugin](/plugin/mcp-tools#llm-configuration) can connect provider keys and set the conversation model.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `No model specified and this agent has no conversation model set…` | Set the agent's [conversation model](#the-agents-conversation-model), or send `provider` and `model` with the request. |
+| `The agent's conversation model uses '…', which is no longer connected…` | Reconnect that provider's key, or choose a model from a connected provider. |
+| **Test** says `Connection failed. Check your API key and try again.` | The key is wrong or revoked, or it has no access to the selected model. |
+| `No known context window for model '…'` | The request named a model Astralform has no context window for, typically an unregistered model on a self-hosted endpoint. [Register](#registering-models) it with its context window, or choose a catalog model. |
+| `URL points to private or internal address` | The base URL resolves to a private or loopback address. Use a public URL. |
+| `Cannot delete: routines using this provider: …` | Move those routines to another provider's model first, then delete the key. |
 
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/dashboard/agents">
-    Configure agents with LLM, skills, and tools
+    Set up an agent's skills, tools and conversation model
   </Card>
-  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
-    Add server-side tools
+  <Card title="Voice" icon="microphone" href="/dashboard/voice">
+    Add voice input with the same provider keys
   </Card>
 </CardGroup>

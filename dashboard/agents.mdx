@@ -7,7 +7,7 @@ description: "Configure your AI through agents — each with its own LLM, skills
 
 Agents are the central building block in Astralform. Every project has a **Main Agent** that handles all requests by default. You can create additional specialized agents and use a supervisor to route messages automatically.
 
-All configuration — LLM provider, skills, MCP servers, and platform tools — is managed through agent detail pages.
+All configuration — the conversation model, skills, MCP servers, and platform tools — is managed through agent detail pages. Model provider keys are the exception: they belong to the team, on [Model Providers](/dashboard/llm-providers).
 
 ## Main Agent
 
@@ -19,36 +19,25 @@ Every project starts with a **Main Agent**. It auto-inherits all project resourc
 
 ## Agent Detail Page
 
-Click any agent from the agents list to open its detail page. Configuration is organized into five tabs:
+Click any agent from the agents list to open its detail page.
 
 Approval behavior — whether the agent runs tools on its own or asks first — is set separately on the agent's [Permissions](/dashboard/permissions) page.
 
-### Model Tab
+### Conversation model
 
-Configure the LLM provider, model, and generation parameters for this agent.
+The model an agent uses when a request doesn't name one is its **conversation model**, set under **Settings** → **Agent settings** → **Conversation model**:
 
-1. Go to **Agents** and click an agent
-2. On the **Model** tab, select a provider (OpenAI, Anthropic, Groq, Ollama)
-3. Choose a model and enter the provider API key
-4. Configure additional model parameters as needed
-5. Click **Save**
+| Field | What it sets |
+|-------|--------------|
+| **Model** | Provider and model. **None (resolved at run time)** leaves the agent without a default, so a new conversation must name its model in the request. |
+| **Reasoning effort** | How hard the model reasons, from the rungs that model offers. **Model default** leaves it to the provider. |
+| **Temperature** | 0–2. Empty uses the provider's default. |
 
-| Field | Description | Default |
-|-------|-------------|---------|
-| Provider / Model | LLM provider and model selection | Inherited from Main Agent |
-| `temperature` | Controls output randomness (0.0 = deterministic, 2.0 = maximum randomness) | Provider default |
-| `thinking_effort` | Reasoning depth for thinking-enabled models: `low`, `medium`, or `high` | `medium` |
-| `auto_spawn_enabled` | Enables dynamic subagent spawning for complex multi-step tasks | `false` |
-| `sandbox_template` | VM template for the agent's Capsule sandbox: `base`, `browser`, `code-interpreter-v1`, `desktop` | `base` |
-| `sandbox_envs` | Encrypted environment variables injected into the sandbox (key-value pairs) | -- |
-
-If no LLM is configured on a named agent, it inherits the project's LLM settings from the Main Agent.
-
-See [LLM Providers](/dashboard/llm-providers) for provider details and available models.
+Only providers the team has connected appear here. See [Model Providers](/dashboard/llm-providers) for connecting providers and for how a turn picks its model.
 
 #### Auto-Capsule
 
-Agents with non-system skills automatically get a Capsule sandbox -- no manual sandbox configuration needed. The sandbox is an isolated Firecracker microVM provisioned using the agent's `sandbox_template`. Configure sandbox behavior via the `sandbox_template` and `sandbox_envs` fields above.
+Agents with non-system skills automatically get a Capsule sandbox -- no manual sandbox configuration needed. The sandbox is an isolated Firecracker microVM.
 
 See [Templates](/dashboard/capsule/templates) for the template catalog and [Pods](/dashboard/capsule/pods) for sandbox lifecycle.
 
@@ -181,8 +170,8 @@ See the [Agents API](/api-reference/agents/list) for details.
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="LLM Providers" icon="microchip" href="/dashboard/llm-providers">
-    Learn about supported LLM providers and models
+  <Card title="Model Providers" icon="microchip" href="/dashboard/llm-providers">
+    Connect providers and choose the agent's model
   </Card>
   <Card title="Skills" icon="sparkles" href="/dashboard/skills">
     Add specialized capabilities to agents

@@ -13,7 +13,7 @@ recording ──▶ speech-to-text channels ──▶ transcript ──▶ polis
                  in order, until one answers)
 ```
 
-The **Voice** section of an agent picks both halves. Keys stay in [LLM Providers](/dashboard/llm-providers); voice settings only reference them, and the feature cannot be turned on until both halves have a connected key. Clients never learn which vendor or model you chose — they only learn that voice input is available.
+The **Voice** section of an agent picks both halves. Keys stay in [Model Providers](/dashboard/llm-providers); voice settings only reference them, and the feature cannot be turned on until both halves have a connected key. Clients never learn which vendor or model you chose — they only learn that voice input is available.
 
 ## Configuration
 
@@ -56,7 +56,7 @@ Use the arrows to reorder; order is priority. Duplicate provider + model pairs a
 
 ### Live channels
 
-A **live** channel streams partial text while the user is still talking instead of transcribing on stop. **OpenAI Realtime** is one — it uses the OpenAI key already in LLM Providers and offers `gpt-live-transcribe` (partials as the audio arrives) plus `gpt-transcribe` and `gpt-4o-mini-transcribe` (a transcript after stop) — and a custom endpoint that speaks the same dialect can be marked **Realtime** on its row (**This endpoint speaks**); its realtime URL is derived from the base URL you connected, and it must resolve to a public host. Live rows carry a **Live** badge.
+A **live** channel streams partial text while the user is still talking instead of transcribing on stop. **OpenAI Realtime** is one — it uses the OpenAI key already in Model Providers and offers `gpt-live-transcribe` (partials as the audio arrives) plus `gpt-transcribe` and `gpt-4o-mini-transcribe` (a transcript after stop) — and a custom endpoint that speaks the same dialect can be marked **Realtime** on its row (**This endpoint speaks**); its realtime URL is derived from the base URL you connected, and it must resolve to a public host. Live rows carry a **Live** badge.
 
 A live channel is used only when it is the [Primary](#speech-to-text-channels) channel: clients read `supports_streaming` from [`/v1/voice/config`](/api-reference/voice/config), mint a ticket and open the socket described on [Live Transcription](/api-reference/voice/stream). Keep at least one ordinary channel in the list, and put it below the live one: the enable switch needs a batch channel (the web client and older app builds only speak batch), and a live session that fails falls back to those batch channels with the audio the client buffered. **Test** on a live row opens a session, sends a quarter second of silence and expects a transcript back.
 
