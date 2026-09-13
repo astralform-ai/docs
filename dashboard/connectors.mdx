@@ -1,18 +1,18 @@
 ---
 title: "Connectors"
-description: "Integrate OAuth, API key, and GitHub App services so your agents can access external tools on behalf of end users."
+description: "Integrate OAuth, API key, GitHub App and remote MCP services so your agents can access external tools on behalf of end users."
 ---
 
 ## Overview
 
-Connectors let you integrate third-party services into your AI agents. Unlike MCP servers (which run server-side with your credentials), connectors support **end-user authentication** - each user connects their own account via OAuth or API key.
+Connectors let you integrate third-party services into your AI agents. Every connector runs on the backend; they differ in **where the credential comes from**:
 
-| Feature | MCP Servers | Connectors |
-|---------|-------------|------------|
-| Auth model | Developer credentials | End-user OAuth/API keys |
-| Runs on | Backend (stdio/SSE) | Backend (API proxy) |
-| Use case | Databases, internal APIs | User-facing services (Slack, Notion) |
-| Setup | Command + env vars | OAuth app, API key, or nothing at all (GitHub App) |
+| Kind | Credential | Who connects |
+|------|------------|--------------|
+| OAuth | Your own OAuth app (client ID + secret) | Each member, through the provider's consent screen |
+| API key | One key you paste | The project, shared by every run |
+| GitHub App | Astralform's GitHub App, installed on your account | The workspace, once |
+| Remote MCP | None — the service's own MCP server issues the grant | Each member, through the service's consent screen |
 
 ## Connector Types
 
@@ -45,7 +45,10 @@ Repository access is minted per run, scoped to the single repository being worke
 
 ### Remote MCP Connectors
 
-Remote MCP connectors connect to external MCP servers over HTTP. No additional credentials are needed beyond the server URL.
+A remote MCP connector points at a service's hosted [MCP](https://modelcontextprotocol.io) server. You enter nothing: each member clicks **Connect** and authorizes through the service's own OAuth, and the agent's tools are discovered from the server. See [Remote MCP connectors](/dashboard/mcp-servers).
+
+**Setup requirements:**
+- None. Enable it, then each member connects.
 
 ## Available Connectors
 
@@ -55,7 +58,7 @@ Remote MCP connectors connect to external MCP servers over HTTP. No additional c
 | Notion | OAuth | Productivity | `notion_search`, `notion_get_page`, `notion_create_page` |
 | GitHub | GitHub App | Development | `github_list_repos`, `github_search_issues` |
 | Telegram | API Key | Communication | `telegram_send_message`, `telegram_get_me`, `telegram_get_updates` |
-| Sentry | API Key | Development | `sentry_list_projects`, `sentry_search_issues`, `sentry_get_issue`, `sentry_update_issue` |
+| Sentry | Remote MCP (OAuth) | Development | Discovered from `https://mcp.sentry.dev/mcp` — `sentry_search_issues`, `sentry_search_events`, `sentry_update_issue`, … |
 
 <Note>
   **GitHub** is more than these two tools — the same connector lets an agent answer `@astralform-agent` on an issue or pull request, do the work, and open a PR. See the dedicated [GitHub guide](/dashboard/github).
@@ -66,7 +69,7 @@ Remote MCP connectors connect to external MCP servers over HTTP. No additional c
 </Note>
 
 <Note>
-  **Sentry** turns an agent into a debugger for production errors — search issues, read the latest stack trace, resolve once fixed. See the dedicated [Sentry guide](/dashboard/sentry).
+  **Sentry** turns an agent into a debugger for production errors — each member connects their own Sentry account through Sentry's OAuth, and the tools come from Sentry's MCP server. See the dedicated [Sentry guide](/dashboard/sentry).
 </Note>
 
 ## Enabling a Connector
@@ -225,7 +228,7 @@ Tokens are automatically refreshed when possible. If refresh fails:
   <Card title="Agents" icon="robot" href="/dashboard/agents">
     Assign connectors to specific agents
   </Card>
-  <Card title="MCP Servers" icon="server" href="/dashboard/mcp-servers">
-    Add server-side MCP integrations
+  <Card title="Remote MCP connectors" icon="server" href="/dashboard/mcp-servers">
+    Hosted MCP servers with per-member OAuth
   </Card>
 </CardGroup>

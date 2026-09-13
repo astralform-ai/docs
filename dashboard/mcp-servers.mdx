@@ -1,147 +1,44 @@
 ---
-title: "MCP Servers"
-description: "Connect Model Context Protocol (MCP) servers to give your AI access to databases, APIs, and external services."
+title: "Remote MCP Connectors"
+description: "Hosted MCP servers as connectors: each member connects through the server's own OAuth, and the agent's tools are discovered from the server."
 ---
 
 ## Overview
 
-MCP (Model Context Protocol) servers provide tools that run on the backend. Unlike client tools that run on the iOS device, MCP tools run server-side with access to databases, APIs, and other services.
+Many services publish a hosted [Model Context Protocol](https://modelcontextprotocol.io) server — Sentry, Linear, Notion, GitHub, Stripe and others. Astralform connects to them as **remote MCP connectors**: a catalog entry names the server, each member authorizes their own account through the server's OAuth, and the agent gets the tools the server lists.
 
-## Adding an MCP Server
+This is the same way Claude, Codex and Cursor connect to those services. Nothing runs inside Astralform for the integration, and nothing is pasted: the server's own authorization server issues the grant.
 
-MCP servers are added and assigned through the agent detail page:
+## How a connection works
 
-1. Go to **Agents** and click an agent
-2. On the **MCP** tab, click **Add New Server**
-3. Enter the server configuration
-4. Click **Save**
+1. An admin enables the connector for a project. No credentials are entered.
+2. A member clicks **Connect** on the connector page. Astralform discovers the server's authorization server (per the MCP authorization spec), registers itself with it once, and opens the consent screen in a popup.
+3. The member approves. The grant is stored encrypted, per member, and refreshed automatically.
+4. On the member's next conversation the agent's tools are **discovered from the server**, cached for an hour, and listed on the connector page.
 
-The server is added to the project pool and assigned to the agent. Other agents can then assign the same server from their MCP tab.
+Tools carry the connector's slug as a prefix (`sentry_search_issues`), so the connector's [access policy](/dashboard/connectors#access-policy) governs all of them, and the write tools follow the agent's [Autonomy](/dashboard/permissions) setting.
 
-See [Agents](/dashboard/agents) for more on resource assignment.
+## Available servers
 
-## Configuration Format
+| Connector | Server | Guide |
+|-----------|--------|-------|
+| Sentry | `https://mcp.sentry.dev/mcp` | [Sentry](/dashboard/sentry) |
 
-```json
-{
-  "name": "postgres",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-postgres"],
-  "env": {
-    "DATABASE_URL": "postgresql://user:pass@localhost:5432/db"
-  }
-}
-```
+Servers are added to the catalog by Astralform. To request one, open an issue with the server's URL; a server has to speak streamable HTTP and the MCP authorization spec (protected-resource metadata, dynamic client registration, PKCE).
 
-## Supported Server Types
+## Limits
 
-### Database Servers
-
-**PostgreSQL**
-```json
-{
-  "name": "postgres",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-postgres"],
-  "env": {
-    "DATABASE_URL": "postgresql://..."
-  }
-}
-```
-
-**SQLite**
-```json
-{
-  "name": "sqlite",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "/data/app.db"]
-}
-```
-
-### API Servers
-
-**GitHub**
-```json
-{
-  "name": "github",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-github"],
-  "env": {
-    "GITHUB_TOKEN": "ghp_..."
-  }
-}
-```
-
-**Slack**
-```json
-{
-  "name": "slack",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-slack"],
-  "env": {
-    "SLACK_BOT_TOKEN": "xoxb-..."
-  }
-}
-```
-
-## Environment Variables
-
-Store sensitive values securely:
-
-1. Go to **Project Settings > Secrets**
-2. Add environment variables
-3. Reference them in MCP config: `$SECRET_NAME`
-
-```json
-{
-  "name": "postgres",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-postgres"],
-  "env": {
-    "DATABASE_URL": "$POSTGRES_URL"
-  }
-}
-```
-
-## Tool Discovery
-
-After adding an MCP server, its tools are automatically available to agents it's assigned to.
-
-Example tools from a PostgreSQL server:
-- `query` - Run SQL queries
-- `list_tables` - List all tables
-- `describe_table` - Get table schema
-
-## Best Practices
-
-| Do | Don't |
-|----|-------|
-| Use secrets for credentials | Hardcode passwords in config |
-| Limit database permissions | Give full admin access |
-| Test locally first | Deploy untested servers |
-| Monitor tool usage | Ignore usage patterns |
-
-## Troubleshooting
-
-### Server Not Connecting
-
-1. Check that the command exists and is executable
-2. Verify environment variables are set correctly
-3. Check server logs in **Project Settings > Logs**
-
-### Tools Not Appearing
-
-1. Wait 30 seconds for tool discovery
-2. Refresh the MCP Servers page
-3. Check the server's tool definitions
+- Grants are per member. Routines, goals and reminders run under no member, so they have no connection until a member lends theirs: **Use my connection for routines and goals** on the connector page makes that member's grant the agent's fallback. A member who connected their own account keeps acting as themselves; only runs with no grant of their own fall back.
+- Only the server's **tools** are used; resources, prompts and sampling are not.
+- Self-hosted MCP servers and developer-supplied URLs are not supported yet.
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Agents" icon="robot" href="/dashboard/agents">
-    Assign MCP servers to specific agents
+  <Card title="Connectors" icon="plug" href="/dashboard/connectors">
+    How connectors and access policies work
   </Card>
-  <Card title="Client Tools" icon="mobile" href="/ios-sdk/client-tools">
-    Add device-side tools
+  <Card title="Sentry" icon="bug" href="/dashboard/sentry">
+    The first remote MCP connector
   </Card>
 </CardGroup>
