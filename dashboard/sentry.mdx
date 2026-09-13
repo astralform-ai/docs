@@ -15,7 +15,7 @@ Sentry is a **remote MCP connector**: the agent's tools come from Sentry's hoste
 ## 2. Connect your account
 
 1. Open the Sentry connector and click **Connect**.
-2. A Sentry consent screen opens in a popup. Pick the organization and approve the scopes Sentry asks for (`org:read`, `project:write`, `team:write`, `event:write` — the set its MCP server declares).
+2. A Sentry consent screen opens in a popup. Pick the organization and the permissions the agent may use: **Inspect Issues & Events** (on by default) covers the read tools, **Triage Issues** lets agents resolve, assign and archive issues, and **Seer** enables the root-cause analysis tool. **Manage Projects & Teams** is not needed for debugging — leave it off unless agents should create projects, teams or DSNs.
 3. The popup closes on its own and the connector shows your connection.
 
 Each member connects individually; an agent uses the connection of the member who is chatting with it. Connections refresh themselves and can be revoked from the same card.
@@ -26,7 +26,7 @@ Each member connects individually; an agent uses the connection of the member wh
 
 ## Agent tools
 
-The tools are **discovered from Sentry's server** the first time a member connects, cached for an hour, and listed on the connector page from then on. They carry the `sentry_` prefix, so the connector's access policy governs all of them. Sentry's current server offers, among others:
+The tools are **discovered from Sentry's server** the first time an agent runs for a connected member (not on Connect itself), cached for an hour, and listed on the connector page from then on. They carry the `sentry_` prefix, so the connector's access policy governs all of them. Sentry's current server offers, among others:
 
 | Tool | Purpose |
 |------|---------|
@@ -37,7 +37,7 @@ The tools are **discovered from Sentry's server** the first time a member connec
 | `sentry_update_issue` | Resolve, reopen, archive or assign an issue. |
 | `sentry_analyze_issue_with_seer` | Ask Sentry's Seer for a root-cause analysis. |
 
-The write tools (`sentry_update_issue`, `sentry_analyze_issue_with_seer`, `sentry_execute_sentry_tool` and the `create_*` tools) are governed as writes by the agent's [Autonomy](/dashboard/permissions) setting: a **Supervised** agent shows an approval card before running one in chat, and fails the call outright in a headless routine. The exact list is whatever the server lists; check the connector page after connecting.
+The write tools (`sentry_update_issue`, `sentry_analyze_issue_with_seer`, and `sentry_execute_sentry_tool`, the executor that reaches the rest of Sentry's tool catalog) are governed as writes by the agent's [Autonomy](/dashboard/permissions) setting: a **Supervised** agent shows an approval card before running one in chat, and fails the call outright in a headless routine. The exact list is whatever the server lists; check the connector page once an agent has run for a connected member.
 
 ## Access
 
@@ -49,7 +49,7 @@ Sentry uses the standard connector [access policy](/dashboard/connectors#access-
 |---------|-----|
 | The popup never returns | Check the browser did not block it; the card offers a click-through link while it waits. |
 | A tool answers "the Sentry connection was rejected — reconnect it in the dashboard" | Your grant expired or was revoked on Sentry's side. Click **Reconnect**. |
-| "Tools are discovered from the server when a member connects" and no list appears | Nobody has connected yet, or the last discovery failed; connect (or reconnect) and reload. |
+| "Tools are discovered from the server the first time an agent runs for a connected member" and no list appears | No agent has run for a connected member yet, or the last discovery failed; start a conversation with the agent and reload. |
 | "Failed to complete authorization" after consenting | Sentry's authorization server refused the exchange. Try **Connect** again — the connector re-registers with Sentry if needed. |
 
 ## Next Steps
