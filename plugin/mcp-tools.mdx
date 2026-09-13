@@ -69,7 +69,7 @@ These tools manage the agent's **conversation model** — the model it uses when
 
 | Tool | Description |
 |------|-------------|
-| `astralform_list_llm_providers` | List available providers (OpenAI, Anthropic, Groq, Ollama) |
+| `astralform_list_llm_providers` | List the model providers Astralform supports, with each one's catalog models |
 | `astralform_get_llm_config` | Get the agent's conversation model, and whether its provider key is connected |
 | `astralform_set_llm_config` | Set the agent's conversation model (provider + model, optional reasoning effort and temperature) |
 | `astralform_delete_llm_config` | Clear the conversation model |
@@ -81,7 +81,7 @@ These tools manage the agent's **conversation model** — the model it uses when
 ### Example: Configure LLM
 
 ```
-Store my Anthropic key, then set claude-sonnet-4-20250514 as my agent's model
+Store my Anthropic key, then set claude-sonnet-5 as my agent's model
 ```
 
 Claude will call `astralform_set_provider_key` first, then `astralform_set_llm_config` with the provider and model.

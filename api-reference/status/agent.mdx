@@ -1,12 +1,16 @@
 ---
 title: "Agent Status"
-description: "Check if an agent is ready for chat with a configured LLM provider."
+description: "Check whether an agent is ready for chat — its team has connected a model provider — and what it can do right now."
 api: "GET https://api.astralform.ai/v1/agent/status"
 ---
 
 ## Overview
 
-Check if the agent has a valid LLM configuration before starting a chat. iOS clients should call this on app launch to show appropriate UI when no LLM is configured.
+Check whether the agent can take a chat turn before starting one. An agent is ready once its team has connected at least one [model provider](/dashboard/llm-providers). The model itself is not part of the status: it is chosen per turn or by the agent's conversation model, and the models on offer come from `GET /v1/models`. iOS clients should call this on app launch to show appropriate UI when no provider is connected.
+
+Ready means a turn can start, not that every turn will succeed. A request that names no model, in a new conversation, on an agent with no conversation model still returns `400` — send `provider` and `model`, or set the agent's [conversation model](/dashboard/llm-providers#choose-the-model).
+
+When the credential's agent doesn't exist, the response has `is_ready` and `llm_configured` both `false`, the message `No agent configured.`, and empty `capabilities`.
 
 ## Response
 
@@ -15,19 +19,15 @@ Check if the agent has a valid LLM configuration before starting a chat. iOS cli
 </ResponseField>
 
 <ResponseField name="llm_configured" type="boolean">
-  Whether an LLM provider has been configured in the dashboard.
-</ResponseField>
-
-<ResponseField name="llm_provider" type="string">
-  The configured LLM provider (e.g., `"openai"`, `"anthropic"`, `"groq"`).
-</ResponseField>
-
-<ResponseField name="llm_model" type="string">
-  The configured model name (e.g., `"gpt-4o"`, `"claude-sonnet-4-20250514"`).
+  Whether the agent's team has connected at least one model provider.
 </ResponseField>
 
 <ResponseField name="message" type="string">
-  Human-readable status message.
+  Human-readable status: `Agent is ready for chat.`, `No model provider connected. Connect one in the dashboard.`, or `No agent configured.`
+</ResponseField>
+
+<ResponseField name="ui_components" type="object">
+  Which UI protocol, if any, the agent may emit through `render_surface` / `update_surface`: `enabled` (boolean), `protocol` (string or `null`) and `mime_type` (string or `null`). The client picks a matching renderer.
 </ResponseField>
 
 <ResponseField name="capabilities" type="array">
@@ -39,9 +39,8 @@ Check if the agent has a valid LLM configuration before starting a chat. iOS cli
 {
   "is_ready": true,
   "llm_configured": true,
-  "llm_provider": "openai",
-  "llm_model": "gpt-4o",
   "message": "Agent is ready for chat.",
+  "ui_components": { "enabled": false, "protocol": null, "mime_type": null },
   "capabilities": [
     { "key": "image", "enabled": false },
     { "key": "skills", "enabled": true },
@@ -52,13 +51,12 @@ Check if the agent has a valid LLM configuration before starting a chat. iOS cli
 }
 ```
 
-```json Not Configured
+```json No Provider Connected
 {
   "is_ready": false,
   "llm_configured": false,
-  "llm_provider": null,
-  "llm_model": null,
-  "message": "No LLM configured. Please configure an LLM provider in the dashboard.",
+  "message": "No model provider connected. Connect one in the dashboard.",
+  "ui_components": { "enabled": false, "protocol": null, "mime_type": null },
   "capabilities": []
 }
 ```

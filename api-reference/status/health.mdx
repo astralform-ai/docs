@@ -18,16 +18,11 @@ Simple health check endpoint to verify the API server is running. No authenticat
   API server version (e.g., `"0.1.0"`).
 </ResponseField>
 
-<ResponseField name="ollama_connected" type="boolean">
-  Whether Ollama (local LLM) is reachable. May be `false` if using cloud providers only.
-</ResponseField>
-
 <ResponseExample>
 ```json
 {
   "status": "ok",
-  "version": "0.1.0",
-  "ollama_connected": false
+  "version": "0.1.0"
 }
 ```
 </ResponseExample>

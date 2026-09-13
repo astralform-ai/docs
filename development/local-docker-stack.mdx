@@ -134,14 +134,6 @@ versions. The compose file binds publishes to `127.0.0.1:PORT:PORT`
 explicitly so browsers fall back to IPv4 cleanly. If you remove the
 `127.0.0.1:` prefix, curl needs `-4` to reach the service.
 
-### Backend logs say "no LLM configured"
-
-Project-level LLM config (used by the suggestion-generation hook and a few
-admin paths) is separate from the per-agent LLM config (used by the actual
-chat turn). An agent's response can still stream successfully even while
-the project shows `is_ready=false` — they pull credentials from different
-tables. The "no LLM configured" warning in logs is harmless on its own.
-
 ## Host-side fallback
 
 The standalone scripts at `scripts/dev-backend.sh` and

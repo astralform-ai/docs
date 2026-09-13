@@ -59,7 +59,7 @@ POST https://api.astralform.ai/v1/jobs
 | `goal` | string | No | Start a durable long-horizon goal and run this turn under it. Omit for an ordinary turn. |
 | `goal_id` | string | No | Resume an existing goal by id. Ignored when `goal` is also set — a new goal wins. |
 | `cadence` | object | No | How often a **new** goal continues: `{"mode": "immediate" \| "interval" \| "cron" \| "self_paced", "interval_seconds": …, "cron": "…", "timezone": "UTC"}`. Ignored without `goal`. |
-| `provider`, `model` | string | No | Pick the model for this turn. Supply both or neither; omitted, the turn inherits the thread's last model. An explicit choice is recorded, so later omitted-model turns inherit it. |
+| `provider`, `model` | string | No | Pick the model for this turn. Supply both or neither; omitted, the turn inherits the thread's last model, else the agent's [conversation model](/dashboard/llm-providers#choose-the-model). If neither exists, the request returns `400`. An explicit choice is recorded, so later omitted-model turns inherit it. |
 | `reasoning_effort` | string | No | One rung of the model's ladder (see `thinking_control` on `GET /v1/models`). Omit for the model's default — `"none"` is an explicit request *not* to think, which is not the same thing. |
 | `temperature` | number | No | 0–2. Omit for the provider default. |
 | `mcp_manifest` | array | No | Tool definitions the client can execute itself. See [Client tools](#client-tools). |
