@@ -5,13 +5,13 @@ description: "How an agent's sandboxes start, stop and are secured, and where to
 
 ## Overview
 
-Every agent can run code in an isolated Capsule sandbox, with nothing to switch on. A sandbox starts the first time a run calls a code or desktop tool: one per [environment](/dashboard/capsule/templates) per conversation.
+Every agent can run code in an isolated Capsule sandbox, with nothing to switch on. A sandbox starts the first time a run calls a code or desktop tool: one per [environment](/dashboard/capsule/templates) per run.
 
 ## Lifecycle
 
-1. **Start**: the first code or desktop tool call in a run creates the sandbox, in the environment that tool needs.
+1. **Start**: the first code or desktop tool call in a run creates the sandbox, in the environment that tool needs. Every later call of that kind in the same run uses the same sandbox.
 2. **Work**: the agent runs shell commands, code and file operations inside it.
-3. **Stop**: when the run ends, the agent releases the sandbox, and it shuts down after 300 seconds idle. The next run starts a fresh one.
+3. **Stop**: when the run ends, the agent lets go of the sandbox. The next run, even in the same conversation, starts a fresh one, so files left in a sandbox don't carry over. The released sandbox shuts down after 300 seconds idle.
 
 A routine can keep its code sandbox's files from one run to the next. Set `persist_sandbox: true` on the routine through the API.
 

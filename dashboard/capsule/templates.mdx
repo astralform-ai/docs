@@ -28,12 +28,12 @@ A Jupyter-powered sandbox with stateful code execution and rich output:
 A full Ubuntu desktop with VNC streaming, Chrome, Firefox and VS Code. The agent drives it through screenshot, mouse and keyboard tools, for GUI interaction, visual verification and computer use.
 
 <Note>
-  The `base` and `browser` images from earlier versions are retired. Nothing provisions them.
+  The `base` and `browser` system images from earlier versions are retired. No agent is given one.
 </Note>
 
 ## Custom templates
 
-**Capsule** → **Templates** → **New Template** builds a custom image from a base image and a setup command, up to five per agent.
+**Capsule** → **Templates** → **New Template** builds a custom image, up to five per agent. You start from one of E2B's images (**E2B Base**, **Python**, **Node.js** or **Ubuntu**) and add a setup command.
 
 <Warning>
   No agent runs on a custom template yet. The sandbox environment is always chosen by the tool, as described above.
