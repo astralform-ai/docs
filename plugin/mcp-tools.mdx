@@ -7,7 +7,7 @@ description: "Complete reference for Astralform MCP tools available through the 
 
 The Astralform connector exposes the MCP tools below, which Claude can use to manage your Astralform projects. They are invoked automatically when you ask Claude to perform Astralform operations, on any surface where you've [added the connector](/plugin/connect).
 
-A **project** here is what the dashboard calls an **agent**: the workspace, and the one agent that runs in it. Most tools take its id as `agent_id`.
+A **project** here is what the dashboard calls an **agent**: one record, with one id. The tools say "project" where they were named before the rename, and every tool's `agent_id` is that same project id.
 
 ## Authentication
 
@@ -121,7 +121,7 @@ Memory is always on; `is_enabled` is accepted but ignored. Pointing an agent's e
 Have my agent recall up to 10 memories per turn
 ```
 
-## Memory
+## Your Memories
 
 Your own long-term memories on an agent, as the agent sees them in your conversations. These are scoped to you, the signed-in developer, never another user.
 
@@ -197,7 +197,7 @@ Import the PDF processing skill from https://raw.githubusercontent.com/example/s
 
 ## Agents
 
-A project holds exactly one agent. To create or delete an agent, create or delete the project with the [Projects](#projects) tools.
+The project and its agent are one record, so there is always exactly one agent. To create or delete an agent, create or delete the project with the [Projects](#projects) tools.
 
 | Tool | Description |
 |------|-------------|
