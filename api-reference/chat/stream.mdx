@@ -28,7 +28,7 @@ POST https://api.astralform.ai/v1/jobs
 ### Headers
 
 <ParamField header="Authorization" type="string" required>
-  Your project API key as a bearer token (`Bearer sk_xxxxxxxxxxxx`), or an end-user OAuth token.
+  The agent's API key as a bearer token (`Bearer sk_xxxxxxxxxxxx`), or an end-user OAuth token.
 </ParamField>
 
 <ParamField header="X-Agent-ID" type="string">
@@ -49,7 +49,7 @@ POST https://api.astralform.ai/v1/jobs
 |-------|------|----------|-------------|
 | `message` | string | Yes¹ | The user's message. Max 100,000 characters. |
 | `conversation_id` | string | No | Conversation to append to. A new one is created when omitted, and its id comes back on the response. |
-| `agent_name` | string | No | Route to a specific agent. Lowercase, hyphen-separated. Omit to use the project's default agent. |
+| `agent_name` | string | No | The agent's own `name`. The API key already identifies the agent, so this is optional; any other name returns `404`. |
 | `continue_from_message` | string | No | Message id to continue from, for picking a turn back up after tool results when no job is still waiting on them. One of this or `message` is required. |
 | `resend_from` | string | No | Message id to branch from — truncates the conversation after it and re-runs. |
 | `upload_ids` | string[] | No | Conversation upload asset ids to attach to this turn. |

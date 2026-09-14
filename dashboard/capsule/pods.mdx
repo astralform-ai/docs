@@ -1,29 +1,34 @@
 ---
 title: "Pods"
-description: "Manage active sandbox pods for your agents."
+description: "How an agent's sandboxes start, stop and are secured, and where to watch them."
 ---
 
 ## Overview
 
-Astralform uses **auto-capsule** -- agents with non-system skills automatically get an isolated Capsule sandbox (Firecracker microVM). No manual configuration needed.
+Every agent can run code in an isolated Capsule sandbox, with nothing to switch on. A sandbox starts the first time a run calls a code or desktop tool: one per [environment](/dashboard/capsule/templates) per run.
 
-## How It Works
+## Lifecycle
 
-When an agent with skills processes a conversation turn:
-1. A sandbox is provisioned using the agent's `sandbox_template` (default: `base`)
-2. A shared `/workspace` filesystem is mounted via S3
-3. The agent runs tools (shell, code, files) inside the sandbox
-4. On completion, the sandbox remains active for subsequent turns
+1. **Start**: the first code or desktop tool call in a run creates the sandbox, in the environment that tool needs. Every later call of that kind in the same run uses the same sandbox.
+2. **Work**: the agent runs shell commands, code and file operations inside it.
+3. **Stop**: when the run ends, the agent lets go of the sandbox. The next run, even in the same conversation, starts a fresh one, so files left in a sandbox don't carry over. The released sandbox shuts down after 300 seconds idle.
 
-## Agent Configuration
+A routine can keep its code sandbox's files from one run to the next. Set `persist_sandbox: true` on the routine through the API.
 
-Configure sandbox behavior per agent:
+## Network access and secrets
 
-| Field | Description | Default |
-|-------|-------------|---------|
-| `sandbox_template` | VM template: `base`, `browser`, `code-interpreter-v1`, `desktop` | `base` |
-| `sandbox_envs` | Encrypted environment variables injected into the VM | -- |
+- **Network access** is set on **Capsule** → **Settings**:
+  - **Off**: no external host is reachable.
+  - **Full**: unrestricted internet access.
+  - **Custom**: only the domains you list, with `*.` wildcards, IPv4 addresses or CIDR ranges.
 
-## Session Management
+  New agents start on **Custom**, allowing `pypi.org`, `files.pythonhosted.org` and `registry.npmjs.org`.
+- **Environment variables and secrets** are set on **Settings** → **Environment**.
 
-View active sessions, uptime, and command history in the Capsule > Sandboxes dashboard page. Use the MCP tools `astralform_list_capsule_sessions` and `astralform_get_capsule_stats` for programmatic access.
+Network access is enforced in every [Autonomy](/dashboard/permissions) mode.
+
+## Watching sandboxes
+
+**Capsule** → **Pods** lists the agent's sandboxes with their state, snapshot, command count, last event, creation time and duration. You can filter by state and template. Open one to see its overview, a live terminal while it runs, and its command history.
+
+For programmatic access, use the MCP tools `astralform_list_capsule_sessions` and `astralform_get_capsule_stats`.

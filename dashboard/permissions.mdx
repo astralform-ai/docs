@@ -33,7 +33,7 @@ In both modes, a **Deny** rule always blocks a tool, and the Capsule isolation b
 
 These are the real guardrails — they apply in every Autonomy mode:
 
-- **Capsule sandbox** — shell and code tools run inside an ephemeral, isolated Capsule microVM (configured per agent via `sandbox_template`). A rogue command only affects that throwaway sandbox. See [Pods](/dashboard/capsule/pods).
+- **Capsule sandbox** — shell and code tools run inside an ephemeral, isolated Capsule sandbox, in the environment the tool needs ([Templates](/dashboard/capsule/templates)). A rogue command only affects that throwaway sandbox. See [Pods](/dashboard/capsule/pods).
 - **Network egress** — off / allowlist / full. Off or allowlist means an autonomous agent can't reach the open internet or exfiltrate data.
 - **Connector scope** — an agent only sees the [connectors](/dashboard/connectors) (and their secrets) you grant it.
 - **Deny rules** — a hard ceiling. A tool matched by a Deny rule never runs, in any mode.
