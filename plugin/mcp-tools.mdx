@@ -95,7 +95,7 @@ Clearing the model leaves the agent with no default: every request must then nam
 | Tool | Description |
 |------|-------------|
 | `astralform_get_search_settings` | Get web search configuration |
-| `astralform_set_search_settings` | Turn web search on or off (`is_enabled`), and choose its provider: `ddgs` (DuckDuckGo, no API key), `google` or `bing` (each needs an API key). `max_results` is 1–10; `deep_research` sets the research tool's budgets. |
+| `astralform_set_search_settings` | Turn web search on or off (`is_enabled`). `provider` accepts only `ddgs` (DuckDuckGo, no API key); any other value is refused. `max_results` is 1–10; `deep_research` sets the research tool's budgets. |
 
 ### Example: Enable Search
 
@@ -103,7 +103,7 @@ Clearing the model leaves the agent with no default: every request must then nam
 Enable web search for my project
 ```
 
-Claude will call `astralform_set_search_settings`. The default provider, `ddgs`, needs no API key; the others take one.
+Claude will call `astralform_set_search_settings`. Search runs on DuckDuckGo (`ddgs`), which needs no API key.
 
 ## Memory Settings
 
