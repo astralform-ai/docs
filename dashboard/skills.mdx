@@ -19,9 +19,9 @@ Skills are added through the agent detail page:
    - **Custom** - Write SKILL.md content directly
    - **URL** - Import from a GitHub raw URL
 
-The skill is added to the project pool and assigned to the agent. Other agents can then assign the same skill from their Skills tab.
+The skill is installed on this agent. There is no separate assignment step: an agent's skills are the ones installed on it.
 
-See [Agents](/dashboard/agents) for more on resource assignment.
+See [Agents](/dashboard/agents) for the rest of what an agent configures.
 
 ## SKILL.md Format
 
@@ -56,19 +56,17 @@ Instructions for the AI agent on how to handle PDF files...
 
 | Field | Description |
 |-------|-------------|
-| `runtime` | Execution environment: `workspace` provisions a sandbox automatically |
+| `runtime` | Accepted for compatibility, but has no effect: a skill doesn't need it to run code (see [Running code](#running-code)) |
 | `metadata.version` | Semantic version (e.g., "1.0.0") |
 | `metadata.author` | Skill author name |
 | `metadata.command` | `"false"` to keep the skill out of the `/` menus (default `"true"`); see [Slash Commands](#slash-commands) |
 | `metadata.command-hint` | Argument hint shown after `/<name>` in menus, e.g. `"<url>"` |
 
-## Auto-Capsule
+## Running code
 
-Skills with `runtime: workspace` in their frontmatter automatically provision a sandbox for their agent (auto-capsule). No manual sandbox configuration needed.
+A skill doesn't provision a sandbox, and doesn't need to. Every agent can already run code in an isolated Capsule sandbox, which starts the first time a run calls a code or desktop tool. A skill that needs to execute code, run shell commands or work with files simply has the agent call those tools.
 
-When an agent with non-system skills processes a request, an isolated Capsule sandbox (Firecracker microVM) is automatically created. The agent can then execute code, run shell commands, and manage files inside the sandbox.
-
-See [Pods](/dashboard/capsule/pods) for sandbox lifecycle and management, and [Templates](/dashboard/capsule/templates) for the available templates.
+See [Pods](/dashboard/capsule/pods) for how sandboxes start and stop, and [Templates](/dashboard/capsule/templates) for the two environments.
 
 ## How Skills Work
 
@@ -221,7 +219,7 @@ description: Reviews code for bugs, security issues, and style violations using 
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/dashboard/agents">
-    Assign skills to specific agents
+    Everything else an agent configures
   </Card>
   <Card title="Remote MCP connectors" icon="server" href="/dashboard/mcp-servers">
     Connect external tools and databases
