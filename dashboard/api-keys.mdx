@@ -5,13 +5,13 @@ description: "Generate, rotate, and manage API keys for authenticating your iOS 
 
 ## Overview
 
-API keys authenticate requests from your iOS app to Astralform. Each project can have multiple API keys for different environments or purposes.
+API keys authenticate requests from your iOS app to Astralform. Each key belongs to one agent, and an agent can have several — for different environments or purposes.
 
 ## Generating an API Key
 
-1. Open your project in the dashboard
-2. Go to **Settings > API Keys**
-3. Click **Generate New Key**
+1. Open your agent in the dashboard
+2. Go to **Settings** → **API Keys**
+3. Create a key in the **Create API Key** dialog
 4. Copy the key immediately - it won't be shown again
 
 <Warning>
@@ -74,17 +74,17 @@ If a key is compromised:
 | Do | Don't |
 |----|-------|
 | Store keys in secure storage (Keychain) | Hardcode keys in source code |
-| Use different keys per environment | Share keys across projects |
+| Use different keys per environment | Share keys across agents |
 | Rotate keys regularly | Commit keys to version control |
 | Revoke unused keys | Leave old keys active |
 
 ## Rate Limits
 
-Rate limits apply **per project, per operation** — not as a single per-key quota — with
+Rate limits apply **per agent, per operation** — not as a single per-key quota — with
 optional **per-API-key caps** for fine-grained control (for example, throttling a
 staging key without affecting production). See [Rate Limits](/dashboard/rate-limits) for
 the full model: usage, self-caps, per-key caps, and higher ceilings for verified
-projects.
+agents.
 
 ## Next Steps
 

@@ -1,11 +1,11 @@
 ---
 title: "Teams"
-description: "Organize developers and projects under teams with role-based access control."
+description: "Organize developers and agents under teams with role-based access control."
 ---
 
 ## Overview
 
-Teams group projects and control who can access and manage them. Every project belongs to a team, and every team belongs to an [organization](/enterprise/organizations) — the top-level tenant in Astralform (Organization → Team → Project).
+Teams group agents and control who can access and manage them. Every agent belongs to a team, and every team belongs to an [organization](/enterprise/organizations) — the top-level tenant in Astralform (Organization → Team → Agent).
 
 When you create an account, a personal organization and a default team inside it are created automatically.
 
@@ -14,8 +14,8 @@ When you create an account, a personal organization and a default team inside it
 | Role | Permissions |
 |------|-------------|
 | **Owner** | Full control — manage members, transfer ownership, delete team |
-| **Admin** | Create projects, manage members (cannot add admins or delete team) |
-| **Member** | Access team projects, view members |
+| **Admin** | See and manage every agent in the team, manage members (cannot add admins or delete team) |
+| **Member** | Create agents, and see and manage the ones they created; view members |
 
 ## Creating a Team
 
@@ -49,10 +49,10 @@ Upload a custom team icon (PNG, JPEG, or WebP, max 256 KB) from team settings.
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Projects" icon="folder" href="/dashboard/projects">
-    Create projects under your team
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Create agents under your team
   </Card>
   <Card title="API Keys" icon="key" href="/dashboard/api-keys">
-    Generate project API keys
+    Generate an agent's API keys
   </Card>
 </CardGroup>

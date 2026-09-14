@@ -6,13 +6,13 @@ description: "Monitor how close each operation is to its limit, cap your own usa
 ## Overview
 
 Astralform rate-limits each SDK operation (sending a conversation turn, submitting a
-tool result, creating a sandbox, etc.) per project. Limits protect platform stability
+tool result, creating a sandbox, etc.) per agent. Limits protect platform stability
 and protect **you** from a runaway loop or an abusive end-user quietly running up your
 bill.
 
-The **Rate Limits** page (dashboard → **Rate Limits**) shows every operation's limit,
-current usage, and recent throttling — and lets project owners/admins tune the limits
-they care about.
+The **Rate limits** page (the account menu at the bottom of the sidebar → **Rate limits**)
+shows every operation's limit, current usage, and recent throttling — and lets team
+owners and admins tune the limits they care about.
 
 ## Reading the page
 
@@ -31,7 +31,7 @@ of its budget — the one most likely to throttle next.
 ## Self-caps: lower a limit yourself
 
 Team **owners** and **admins** can cap any operation *below* its ceiling — useful to
-bound spend or to stop one integration from consuming a project's whole budget.
+bound spend or to stop one integration from consuming an agent's whole budget.
 
 1. On the **Rate Limits** page, click the edit icon on an operation.
 2. Enter a value **below** the ceiling and **Save cap**.
@@ -44,17 +44,17 @@ bound spend or to stop one integration from consuming a project's whole budget.
 
 ### Cap a specific API key
 
-In the edit dialog, switch **Apply to** from *Whole project* to a specific API key to
+In the edit dialog, switch **Apply to** from *Whole agent* to a specific API key to
 cap just that key — for example, to throttle a staging key without affecting production.
-A per-key cap applies on top of the project limit (whichever is stricter wins) and must
-be below the project's current effective limit.
+A per-key cap applies on top of the agent's limit (whichever is stricter wins) and must
+be below the agent's current effective limit.
 
-## Higher limits for verified projects
+## Higher limits for verified agents
 
-Projects with a valid payment method on file and billing enabled are **verified** and
-automatically get higher ceilings (a multiple of the base limit) across every
-operation — no request needed. Add a payment method to your project's billing to unlock
-them; the Rate Limits page shows whether the higher limits are active.
+An agent is **verified** when its team's organization has an active or trialing
+subscription. A card on file alone doesn't count. Verified agents automatically get
+higher ceilings (a multiple of the base limit) across every operation — no request
+needed — and the Rate limits page shows whether the higher limits are active.
 
 ## Requesting an increase
 
@@ -82,7 +82,7 @@ key's quota so you can back off before its own `429`.
   <Card title="API Keys" icon="key" href="/dashboard/api-keys">
     Generate and manage the keys these limits apply to
   </Card>
-  <Card title="Projects" icon="folder" href="/dashboard/projects">
-    Rate limits are scoped per project
+  <Card title="Agents" icon="robot" href="/dashboard/agents">
+    Rate limits apply per agent
   </Card>
 </CardGroup>
