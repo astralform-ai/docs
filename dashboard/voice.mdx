@@ -18,7 +18,7 @@ The **Voice** section of an agent picks both halves. Keys stay in [Model Provide
 ## Configuration
 
 1. Connect a speech-to-text provider (Groq or OpenAI, or a custom OpenAI-compatible endpoint) and a polish LLM provider in **Model Providers**.
-2. Go to **Agents**, open the agent, and choose **Voice** in the Build group.
+2. Open the agent and choose **Voice** in the **Build** group.
 3. **Speech-to-text** — add a channel and pick its provider and model. Groq's `whisper-large-v3-turbo` is the fast default; a custom endpoint takes a model name or **Discover models**. Add a fallback channel if you have a second key — see [Speech-to-text channels](#speech-to-text-channels).
 4. **Polish** — pick the provider and model that rewrite the transcript. Leave **Let the model think first** off unless you want a reasoning model's full pass; it adds 40–70 seconds before the first word.
 5. Press **Test** on each speech-to-text channel and on the polish card. A channel is probed with a quarter second of silence; polish with a one-token completion.
@@ -97,4 +97,4 @@ The end-user API exposes the pipeline without any provider details:
 [AstralChat](/astralchat/overview#voice-input), the reference web client, ships this pipeline end to
 end; its page describes what the microphone does from the user's side.
 
-`/v1/voice/transcriptions`, `/v1/voice/polish` and `/v1/voice/stream/ticket` are rate-limited per project and can be tuned under [Rate Limits](/dashboard/rate-limits) as the `voice.transcribe`, `voice.polish` and `voice.stream` operations.
+`/v1/voice/transcriptions`, `/v1/voice/polish` and `/v1/voice/stream/ticket` are rate-limited per agent and can be tuned under [Rate Limits](/dashboard/rate-limits) as the `voice.transcribe`, `voice.polish` and `voice.stream` operations.

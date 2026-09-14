@@ -25,8 +25,8 @@ Real-time web search and page reading, exposed to the agent as two tools:
 | Bing | Required | Microsoft Bing Web Search API. |
 
 **Configuration:**
-1. Go to **Agents**, click an agent, and open the **Search** page.
-2. Toggle **Enable Search** on.
+1. Open the agent and choose **Search** in the **Build** group.
+2. Toggle **Enable search** on.
 3. Keep the default DuckDuckGo provider, or switch to Google or Bing and enter that provider's API key.
 
 When search is enabled, the tools are always available to the agent — it decides per task whether a quick lookup is enough or a topic needs several searches and full-page reads.
@@ -49,11 +49,10 @@ Each budget is clamped to a hard cap (shown next to the field); a larger value s
 
 ## Enabling Platform Tools
 
-1. Go to **Agents** and click an agent.
-2. Open the **Search** page.
-3. Toggle **Enable Search** on, pick a provider, and (optionally) adjust the Deep Research budgets.
+1. Open the agent and choose **Search** in the **Build** group.
+2. Toggle **Enable search** on, pick a provider, and (optionally) adjust the Deep Research budgets.
 
-See [Agents](/dashboard/agents) for more on assigning capabilities to named agents.
+See [Agents](/dashboard/agents) for everything else an agent configures.
 
 ## Tool Behavior
 
@@ -82,7 +81,7 @@ Always search the web for current information when asked about:
 Provider API keys (Google, Bing) are stored encrypted and never exposed to clients.
 
 **To update a key:**
-1. Go to **Agents**, click an agent, and open the **Search** page.
+1. Open the agent and choose **Search** in the **Build** group.
 2. Switch to the provider and enter the new API key.
 3. The key is saved encrypted at rest.
 
