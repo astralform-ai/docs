@@ -16,18 +16,15 @@ Real-time web search and page reading, exposed to the agent as two tools:
 - `web_search` — search the web and return titles, URLs, and snippets.
 - `web_read` — fetch and extract the readable text of a page.
 
-**Providers:**
+**Provider:** web search runs on DuckDuckGo. It needs no API key and no setup.
 
-| Provider | API key | Notes |
-|----------|---------|-------|
-| DuckDuckGo | Not required | Default. Privacy-focused, no setup. |
-| Google | Required | Google Custom Search JSON API. |
-| Bing | Required | Microsoft Bing Web Search API. |
+<Note>
+Google and Bing are no longer offered. Microsoft retired the Bing Search APIs on August 11, 2025, and Google's Custom Search JSON API is closed to new customers and shuts down on January 1, 2027. An agent that was set to either one already searched through DuckDuckGo, and its settings now say so.
+</Note>
 
 **Configuration:**
 1. Open the agent and choose **Search** in the **Build** group.
 2. Toggle **Enable search** on.
-3. Keep the default DuckDuckGo provider, or switch to Google or Bing and enter that provider's API key.
 
 When search is enabled, the tools are always available to the agent — it decides per task whether a quick lookup is enough or a topic needs several searches and full-page reads.
 
@@ -50,7 +47,7 @@ Each budget is clamped to a hard cap (shown next to the field); a larger value s
 ## Enabling Platform Tools
 
 1. Open the agent and choose **Search** in the **Build** group.
-2. Toggle **Enable search** on, pick a provider, and (optionally) adjust the Deep Research budgets.
+2. Toggle **Enable search** on and, optionally, adjust the Deep Research budgets.
 
 See [Agents](/dashboard/agents) for everything else an agent configures.
 
@@ -75,15 +72,6 @@ Always search the web for current information when asked about:
 - Prices and availability
 - Weather and forecasts
 ```
-
-## API Key Management
-
-Provider API keys (Google, Bing) are stored encrypted and never exposed to clients.
-
-**To update a key:**
-1. Open the agent and choose **Search** in the **Build** group.
-2. Switch to the provider and enter the new API key.
-3. The key is saved encrypted at rest.
 
 ## Cost Considerations
 
