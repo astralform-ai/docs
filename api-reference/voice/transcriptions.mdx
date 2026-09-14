@@ -22,7 +22,7 @@ Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are 
 | `hotwords` | string | No | The user's own vocabulary, comma-separated — not the agent's, which the server already holds. A word cannot itself contain a comma. |
 | `language` | string | No | ISO 639-1 hint (`en`, `zh`). Omit for auto-detection. |
 
-The server merges the project vocabulary with these words, project words first, cuts the result once at the 240-character budget, and sends that same prompt to whichever channel takes the recording.
+The server merges the agent's vocabulary with these words, the agent's words first, cuts the result once at the 240-character budget, and sends that same prompt to whichever channel takes the recording.
 
 ```bash
 curl -X POST https://api.astralform.ai/v1/voice/transcriptions \
