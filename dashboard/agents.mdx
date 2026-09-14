@@ -41,19 +41,11 @@ Everything lives in the agent's sidebar:
 | **Settings** | **Permissions** | Whether the agent runs tools on its own or asks first, and tool rules. See [Permissions](/dashboard/permissions). |
 | | **Environment** | Environment variables and secrets |
 | | **API Keys** | Keys your app uses to call this agent. See [API Keys](/dashboard/api-keys). |
-| | **Agent settings** | The conversation model, streaming thresholds, conversation titles, and deleting the agent |
+| | **Agent settings** | Streaming thresholds, conversation titles, and deleting the agent |
 
-### Conversation model
+### Models
 
-The model an agent uses when a request doesn't name one is its **conversation model**, set under **Settings** → **Agent settings** → **Conversation model**:
-
-| Field | What it sets |
-|-------|--------------|
-| **Model** | Provider and model. **None (resolved at run time)** leaves the agent without a default, so a new conversation must name its model in the request. |
-| **Reasoning effort** | How hard the model reasons, from the rungs that model offers. **Model default** leaves it to the provider. |
-| **Temperature** | 0–2. Empty uses the provider's default. |
-
-Only providers the team has connected appear here. See [Model Providers](/dashboard/llm-providers) for connecting providers and for how a turn picks its model.
+An agent has no model of its own. Each place that runs it names the model it runs on: the chat's model picker or the API request, a routine or reminder, a [Telegram](/dashboard/telegram) or [GitHub](/dashboard/github) connector, and a curated knowledge ingest. See [Choose the model](/dashboard/llm-providers#choose-the-model).
 
 ### Sandbox
 

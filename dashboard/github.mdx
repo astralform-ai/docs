@@ -41,7 +41,9 @@ This is a **workspace** action. You do it once per GitHub account, not once per 
 
 ### 2. Turn on the agents that should answer
 
-The agent you installed from is turned on automatically. For every other agent, open its **Connectors** page, add **GitHub**, and the card will already say your workspace is connected — click **Use GitHub for this agent** and you are done. No second install, no second authorization.
+The agent you installed from is turned on automatically. For every other agent, open its **Connectors** page, add **GitHub**, and the card will already say your workspace is connected — click **Use GitHub for this agent**. No second install, no second authorization.
+
+Then give each agent the model it answers with: on its GitHub card, under **Model**, pick one and click **Save model**. An agent without a model replies to a mention that none is set, and a new model applies from the next mention.
 
 <Note>
   Each agent is opted in individually on purpose. Without that step, every agent in your workspace would answer the moment somebody wrote its name into a workflow file — including one you never meant to expose.
@@ -178,6 +180,10 @@ Check `permissions: id-token: write` is on the job. The action names this explic
 2. Confirm the commenter is an `OWNER`, `MEMBER` or `COLLABORATOR`.
 3. Confirm the agent named in `agent:` has GitHub **turned on** — open its Connectors page and check the card does not say *"Your workspace is already connected"* with an un-clicked button.
 4. Confirm `agent:` matches the agent's name in the dashboard exactly — names resolve only inside the GitHub account that owns the repository.
+
+### The agent replies that no model is set
+
+Open the agent's **Connectors** page, pick a model under **Model** on its GitHub card, click **Save model**, and mention the agent again. If it says its provider isn't connected, reconnect that provider's key on **Model providers**, or pick another model.
 
 ### A second agent asks me to install again
 

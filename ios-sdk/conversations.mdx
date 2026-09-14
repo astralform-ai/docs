@@ -44,7 +44,11 @@ _ = session.on { event in
     }
 }
 
-try await session.send("What's the weather like today?")
+// The first message of a conversation names its model; later ones may omit it.
+try await session.send(
+    "What's the weather like today?",
+    options: SendOptions(provider: "anthropic", model: "claude-sonnet-5")
+)
 ```
 
 ## Event Types
@@ -162,7 +166,9 @@ struct ChatView: View {
         isStreaming = true
         defer { isStreaming = false }
         do {
-            try await session.send(text)
+            try await session.send(
+                text, options: SendOptions(provider: "anthropic", model: "claude-sonnet-5")
+            )
             transcript = session.messages
         } catch {
             print("Error: \(error)")

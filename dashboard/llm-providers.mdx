@@ -1,13 +1,13 @@
 ---
 title: "Model Providers"
-description: "Connect model providers with your team's own keys, choose the model each agent uses, and set how hard it reasons."
+description: "Connect model providers with your team's own keys, choose the model each surface runs on, and set how hard it reasons."
 ---
 
 ## Overview
 
 Astralform runs every model on **your own provider key**. A team owner or admin connects each provider once, on the team's **Model providers** page. The key is encrypted and stored for the whole team, not per agent, and it is never shown again: the page only displays a hint of it. Every agent in the team can then use the models of any connected provider.
 
-Which model a turn runs on is a separate decision, made by the request, the conversation or the agent's **conversation model**. See [Choose the model](#choose-the-model).
+Which model a turn runs on is a separate decision, made where the turn starts: an agent has no model of its own. See [Choose the model](#choose-the-model).
 
 ## Providers
 
@@ -57,27 +57,33 @@ The context window is required. Astralform budgets every conversation against it
 
 ## Choose the model
 
-### The agent's conversation model
+An agent has no default model. Each surface that runs an agent names the model it runs on:
 
-Open the agent → **Settings** → **Agent settings** → **Conversation model**:
+| Surface | Where the model is set |
+|---------|------------------------|
+| **Chat and the API** | The chat's model picker, or `provider` and `model` on [`POST /v1/jobs`](/api-reference/chat/stream). A conversation's first message must name one; later messages reuse it unless they name another. |
+| **Routines and reminders** | The routine or reminder editor. A routine without a model doesn't run. |
+| **[Telegram](/dashboard/telegram) and [GitHub](/dashboard/github)** | The **Model** card on the connector's page. The bot doesn't answer until it has a model, and a change applies from the next message. |
+| **Curated knowledge** | The model picker on the **Knowledge** page's **Curated** card, chosen for each ingest. A retry reuses the ingest's model. |
+| **Memory consolidation** | The model of the job whose completion triggered it. A scheduled or manual run uses the end user's most recent job's model, and skips merging when there isn't one. |
+| **Goals** | A goal started with `/goal` in Telegram runs on the channel's model. Any other goal continues on its conversation's model. |
+
+Where a surface offers a model picker, it has the same three fields:
 
 | Field | What it sets |
 |-------|--------------|
-| **Model** | The provider and model the agent uses when a request doesn't name one. **None (resolved at run time)** leaves the agent without a default. |
+| **Model** | The provider and model. Only providers the team has connected appear. |
 | **Reasoning effort** | How hard the model reasons. See [Reasoning effort](#reasoning-effort). |
 | **Temperature** | 0–2. Leave it empty for the provider's default. Some models don't accept a temperature, and on those it is ignored. |
 
-Routines use the same three fields in the routine editor.
-
 ### How a turn picks its model
 
-Each turn resolves its model in this order:
+Each chat or API turn resolves its model in this order:
 
 1. **The request.** `provider` and `model` on [`POST /v1/jobs`](/api-reference/chat/stream), always supplied together. An explicit choice wins, even partway through a conversation.
 2. **The conversation.** The model the conversation's previous turn used. A `reasoning_effort` or `temperature` sent with this turn still applies.
-3. **The agent.** Its conversation model, as long as that provider's key is still connected.
 
-If none of these applies, the turn fails with `400`: `No model specified and this agent has no conversation model set. Choose a model per request, or set the agent's conversation model.`
+A new conversation has no previous turn, so its first message must name its model. One that doesn't is refused with `400` before the conversation is created: `A new conversation must name its model: pass provider and model. Later messages in the conversation may omit them and reuse its model.`
 
 ## Reasoning effort
 
@@ -85,7 +91,7 @@ Models differ in how much control they give over reasoning, so each model advert
 
 - **Model default** sends no effort, and the provider decides.
 - **Off** is an explicit request not to reason, sent as `reasoning_effort: "none"`. It is not the same as the default, because many models reason unless told otherwise.
-- A saved effort that the selected model doesn't offer (after switching the agent to a different model, for example) is never sent as-is. The turn runs at the model's default instead.
+- A saved effort that the selected model doesn't offer (after switching to a different model, for example) is never sent as-is. The turn runs at the model's default instead.
 
 ## Speech-to-text from the same key
 
@@ -96,14 +102,15 @@ A **Groq** or **OpenAI** key also serves speech-to-text, and so can a self-hoste
 - **`GET /v1/models`** lists the models of every provider your team has connected, registered models included. Each entry carries `provider`, `model`, `context_window`, `tools`, `vision` and `thinking_control`, which holds the model's effort ladder and its default. Build a model picker from it.
 - **`POST /v1/jobs`** accepts `provider`, `model`, `reasoning_effort` and `temperature` for each turn. See [Stream chat](/api-reference/chat/stream).
 - **[`GET /v1/agent/status`](/api-reference/status/agent)** reports `is_ready: false` until the team has connected at least one provider.
-- From Claude Code, the [Astralform plugin](/plugin/mcp-tools#llm-configuration) can connect provider keys and set the conversation model.
+- From Claude Code, the [Astralform plugin](/plugin/mcp-tools#provider-keys) can connect provider keys and set a Telegram or GitHub connector's model.
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
-| `No model specified and this agent has no conversation model set…` | Set the agent's [conversation model](#the-agents-conversation-model), or send `provider` and `model` with the request. |
-| `The agent's conversation model uses '…', which is no longer connected…` | Reconnect that provider's key, or choose a model from a connected provider. |
+| `A new conversation must name its model…` | Send `provider` and `model` with the conversation's first message. |
+| Telegram or GitHub replies `No model is set for this … connector yet` | Pick a model on the connector's page, under **Model**. |
+| Telegram or GitHub replies `…its provider isn't connected` | Reconnect that provider's key, or pick another model on the connector's page. |
 | **Test** says `Connection failed. Check your API key and try again.` | The key is wrong or revoked, or it has no access to the selected model. |
 | `No known context window for model '…'` | The request named a model Astralform has no context window for, typically an unregistered model on a self-hosted endpoint. [Register](#registering-models) it with its context window, or choose a catalog model. |
 | `URL points to private or internal address` | The base URL resolves to a private or loopback address. Use a public URL. |
@@ -113,7 +120,7 @@ A **Groq** or **OpenAI** key also serves speech-to-text, and so can a self-hoste
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/dashboard/agents">
-    Set up an agent's skills, tools and conversation model
+    Set up an agent's skills, tools and connectors
   </Card>
   <Card title="Voice" icon="microphone" href="/dashboard/voice">
     Add voice input with the same provider keys
