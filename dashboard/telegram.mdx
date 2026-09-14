@@ -26,6 +26,9 @@ The Telegram connector is an **API-key connector** — the bot token is encrypte
 2. Paste the **bot token** from BotFather.
 3. Choose the agent access policy (see [Access](#access)).
 4. Click **Save**.
+5. On the connector's page, under **Model**, pick the model the bot answers with and click **Save model**.
+
+The bot doesn't answer until it has a model. A message sent before then gets a reply saying no model is set. A new model applies from the next message.
 
 <Note>
   Connecting the bot registers a webhook automatically the first time you link a chat, so Telegram delivers `/start` and incoming messages to your agent. This requires the API to be reachable at a public HTTPS URL (it is, in production).
@@ -65,7 +68,7 @@ Telegram's 4096-character message limit.
 Any user who direct-messages the bot gets a reply from your agent:
 
 1. The user opens the bot in Telegram and sends a message.
-2. Your agent runs the message as a conversation turn.
+2. Your agent runs the message as a conversation turn, on the model set under **Model** on the connector's page.
 3. The reply is sent back in the same chat.
 
 Each chat keeps its own conversation, so the agent remembers previous turns. Messages sent in groups and channels are treated as delivery destinations, not chat prompts.
@@ -77,7 +80,7 @@ The bot understands slash commands. Type `/` in Telegram to see the menu, or sen
 | Command | What it does |
 |---------|--------------|
 | `/new` | Start a fresh conversation (clears the current context). |
-| `/goal <objective>` | Start an autonomous goal the agent pursues on its own; it reports back in this chat when done. `/tasks` shows its status, and you can pause it from the dashboard. |
+| `/goal <objective>` | Start an autonomous goal the agent pursues on its own, on the bot's model; it reports back in this chat when done. `/tasks` shows its status, and you can pause it from the dashboard. |
 | `/tasks` | List the goals you've started in this chat. |
 | `/help` | Show the commands, including the agent's skills. |
 | `/<skill>` | Run one of the agent's enabled [skills](/dashboard/skills) — e.g. `/youtube https://…`. |
@@ -110,6 +113,8 @@ When the connector is enabled, agents also get raw Telegram tools:
 |---------|-----|
 | Enrollment link expired | Links last 30 minutes — click **Link a chat** again. |
 | Bot never replies to a DM | Confirm the Telegram connector is enabled on the agent. |
+| Bot replies `No model is set for this Telegram connector yet` | Pick a model under **Model** on the connector's page. |
+| Bot replies that its provider isn't connected | Reconnect that provider's key on **Model providers**, or pick another model on the connector's page. |
 | Routine didn't deliver | Check the routine has a delivery target that is a linked chat, and that the connector is enabled. |
 | "Too fast" reply | The per-chat rate limit kicked in — wait a moment and retry. |
 

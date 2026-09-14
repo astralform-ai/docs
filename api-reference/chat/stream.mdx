@@ -39,9 +39,9 @@ POST https://api.astralform.ai/v1/jobs
 
 ```json
 {
-  "conversation_id": "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
   "message": "What's the weather like today?",
-  "agent_name": "support-agent"
+  "provider": "anthropic",
+  "model": "claude-sonnet-5"
 }
 ```
 
@@ -59,7 +59,7 @@ POST https://api.astralform.ai/v1/jobs
 | `goal` | string | No | Start a durable long-horizon goal and run this turn under it. Omit for an ordinary turn. |
 | `goal_id` | string | No | Resume an existing goal by id. Ignored when `goal` is also set — a new goal wins. |
 | `cadence` | object | No | How often a **new** goal continues: `{"mode": "immediate" \| "interval" \| "cron" \| "self_paced", "interval_seconds": …, "cron": "…", "timezone": "UTC"}`. Ignored without `goal`. |
-| `provider`, `model` | string | No | Pick the model for this turn. Supply both or neither; omitted, the turn inherits the thread's last model, else the agent's [conversation model](/dashboard/llm-providers#choose-the-model). If neither exists, the request returns `400`. An explicit choice is recorded, so later omitted-model turns inherit it. |
+| `provider`, `model` | string | On a new conversation² | The model for this turn, always supplied together. A conversation's first message must name one: without it the request returns `400` (`A new conversation must name its model: pass provider and model. Later messages in the conversation may omit them and reuse its model.`) and no conversation is created. Later messages may omit both to reuse the conversation's model. An explicit choice is recorded, so later omitted-model turns inherit it. See [Choose the model](/dashboard/llm-providers#choose-the-model). |
 | `reasoning_effort` | string | No | One rung of the model's ladder (see `thinking_control` on `GET /v1/models`). Omit for the model's default — `"none"` is an explicit request *not* to think, which is not the same thing. |
 | `temperature` | number | No | 0–2. Omit for the provider default. |
 | `mcp_manifest` | array | No | Tool definitions the client can execute itself. See [Client tools](#client-tools). |
@@ -67,6 +67,8 @@ POST https://api.astralform.ai/v1/jobs
 | `repository` | string | No | `owner/repo` the task belongs to. Required on the first turn of a conversation on a code-mode agent; ignored on chat-mode agents. |
 
 ¹ Either `message` or `continue_from_message` — a request with neither returns `400`.
+
+² Required on the first message of a conversation. Mid-conversation, omit both to reuse the model its previous turn ran on. An agent has no default model to fall back on.
 
 A message that begins with a slash is a [slash command](/api-reference/skills/commands): `/goal <objective>` and `/plan <request>` are resolved server-side into the fields above, and `/<skill-name>` seeds the turn with that skill. Nothing about the request changes.
 
@@ -169,7 +171,8 @@ Execute the tool, then post the result to [Tool Result](/api-reference/chat/tool
 JOB=$(curl -s -X POST https://api.astralform.ai/v1/jobs \
   -H "Authorization: Bearer sk_xxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
-  -d '{"message": "Hello, how are you?"}' | jq -r .job_id)
+  -d '{"message": "Hello, how are you?", "provider": "anthropic", "model": "claude-sonnet-5"}' \
+  | jq -r .job_id)
 
 curl -N "https://api.astralform.ai/v1/jobs/$JOB/events" \
   -H "Authorization: Bearer sk_xxxxxxxxxxxx"
@@ -182,7 +185,11 @@ const { job_id } = await fetch("https://api.astralform.ai/v1/jobs", {
     Authorization: "Bearer sk_xxxxxxxxxxxx",
     "Content-Type": "application/json",
   },
-  body: JSON.stringify({ message: "Hello, how are you?" }),
+  body: JSON.stringify({
+    message: "Hello, how are you?",
+    provider: "anthropic",
+    model: "claude-sonnet-5",
+  }),
 }).then((r) => r.json());
 
 let lastSeq = -1;

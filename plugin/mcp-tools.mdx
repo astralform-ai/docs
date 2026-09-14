@@ -65,31 +65,6 @@ Claude will select the team, call `astralform_create_project` with the `team_id`
   Full API keys are shown **only once** at creation. Store them securely.
 </Warning>
 
-## LLM Configuration
-
-These tools manage the agent's **conversation model** — the model it uses when a request doesn't name one.
-
-| Tool | Description |
-|------|-------------|
-| `astralform_list_llm_providers` | List the model providers Astralform supports, with each one's catalog models |
-| `astralform_get_llm_config` | Get the agent's conversation model, and whether its provider key is connected |
-| `astralform_set_llm_config` | Set the agent's conversation model (provider + model, optional reasoning effort and temperature) |
-| `astralform_delete_llm_config` | Clear the conversation model |
-
-<Note>
-  Provider API keys are held **per team**, in the Model Providers vault — not per agent. Connect the key with [`astralform_set_provider_key`](#provider-keys) *before* setting a model; `astralform_set_llm_config` refuses a provider whose key isn't connected, rather than saving a model that would fail at request time.
-</Note>
-
-### Example: Configure LLM
-
-```
-Store my Anthropic key, then set claude-sonnet-5 as my agent's model
-```
-
-Claude will call `astralform_set_provider_key` first, then `astralform_set_llm_config` with the provider and model.
-
-Clearing the model leaves the agent with no default: every request must then name a model explicitly, or the run fails.
-
 ## Search Settings
 
 | Tool | Description |
@@ -221,7 +196,7 @@ Claude will call `astralform_update_agent` with `autonomy_mode: "supervised"`.
 | `astralform_get_connector` | Get connector details by slug |
 | `astralform_list_project_connectors` | List connectors enabled for a project |
 | `astralform_enable_connector` | Enable a connector. OAuth connectors take a client ID and secret, API-key connectors an API key, and remote MCP connectors nothing. |
-| `astralform_update_project_connector` | Update a connector's configuration, or turn it on or off |
+| `astralform_update_project_connector` | Update a connector's configuration, or turn it on or off. For Telegram and GitHub it also sets the model the channel answers with: `llm_provider` and `llm_model` together, with optional `reasoning_effort` and `temperature`, or `clear_model` to remove it. |
 | `astralform_disable_connector` | Remove a connector (revokes user tokens) |
 
 ### Example: Enable Slack
@@ -248,13 +223,14 @@ Claude will call `astralform_list_connectors` and show the catalog with tool cou
 
 ## Provider Keys
 
-Provider keys belong to a team and are shared by every agent on it.
+Provider keys belong to a team and are shared by every agent on it. An agent has no model of its own: a request names its model, and a Telegram or GitHub connector carries its own, set with [`astralform_update_project_connector`](#connectors). See [Choose the model](/dashboard/llm-providers#choose-the-model).
 
 | Tool | Description |
 |------|-------------|
+| `astralform_list_llm_providers` | List the model providers Astralform supports, with each one's catalog models |
 | `astralform_list_provider_keys` | List your default team's stored provider keys (hints only) |
 | `astralform_set_provider_key` | Store a key for a provider. Requires the owner or admin role; `team_id` picks the team (default: your default team). Custom endpoints and Azure OpenAI also need `custom_base_url`. |
-| `astralform_delete_provider_key` | Remove a stored key. Requires the owner or admin role, and is refused while routines depend on the provider. Takes `team_id` like set, and `confirmed: true` to answer a guard that asks for confirmation. |
+| `astralform_delete_provider_key` | Remove a stored key. Requires the owner or admin role, and is refused while routines, or reminders that haven't fired yet, depend on the provider. Takes `team_id` like set, and `confirmed: true` to answer a guard that asks for confirmation. |
 | `astralform_test_provider_key` | Test your default team's stored key with a tiny request |
 
 ### Example: Store Provider Key
@@ -264,6 +240,14 @@ Save my OpenAI API key sk-xxx for Astralform
 ```
 
 Claude will call `astralform_set_provider_key` to securely store the key.
+
+### Example: Give a Telegram bot a model
+
+```
+Store my Anthropic key, then have my Telegram bot answer with claude-sonnet-5
+```
+
+Claude will call `astralform_set_provider_key` first, then `astralform_update_project_connector` with `llm_provider` and `llm_model`. A model whose provider isn't connected is refused rather than saved to fail at request time, so the key comes first.
 
 ## Capsule
 

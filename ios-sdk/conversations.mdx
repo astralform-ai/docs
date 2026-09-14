@@ -44,8 +44,25 @@ _ = session.on { event in
     }
 }
 
-try await session.send("What's the weather like today?")
+// The first message of a conversation names its model; later ones may omit it.
+try await session.send(
+    "What's the weather like today?",
+    options: SendOptions(provider: "anthropic", model: "claude-sonnet-5")
+)
 ```
+
+`send` takes a `SendOptions` for everything about the turn besides its text:
+
+| Field | What it sets |
+|-------|--------------|
+| `provider`, `model` | The model for this turn, always together. Required on a conversation's first message; omit both later to reuse the conversation's model. |
+| `reasoningEffort`, `temperature` | How hard the model reasons, one rung of its ladder, and the sampling temperature (0–2). Omit either for the model's default. |
+| `conversationId` | The conversation to send to. A new one is created when the session has none. |
+| `uploadIds` | Uploaded attachments for this turn. |
+| `enabledClientTools` | Which of the app's [client tools](/ios-sdk/client-tools) the end user has switched on. |
+| `planMode`, `imageMode`, `videoMode` | The turn's mode, as on [`POST /v1/jobs`](/api-reference/chat/stream). |
+| `goal` | Start a long-horizon goal and run this turn under it. |
+| `agentName` | The agent's own name. Optional: the key already identifies the agent. |
 
 ## Event Types
 
@@ -162,7 +179,9 @@ struct ChatView: View {
         isStreaming = true
         defer { isStreaming = false }
         do {
-            try await session.send(text)
+            try await session.send(
+                text, options: SendOptions(provider: "anthropic", model: "claude-sonnet-5")
+            )
             transcript = session.messages
         } catch {
             print("Error: \(error)")
