@@ -15,10 +15,11 @@ Every agent can run code in an isolated Capsule sandbox, with nothing to switch 
 
 ### Keeping files between routine runs
 
-A routine can keep its code sandbox's files from one run to the next. Turn on **Keep sandbox files between runs** when you create or edit the routine on the agent's **Routines** page, or set `persist_sandbox: true` on the routine through the API. It is off by default.
+A routine can keep its code sandbox from one run to the next: its files, and any process a run leaves running. Turn on **Keep sandbox files between runs** when you create or edit the routine on the agent's **Routines** page, or set `persist_sandbox: true` on the routine through the API. It is off by default.
 
-- **What carries over**: the code sandbox's whole filesystem, including installed packages, working files and anything the previous run left on disk. A desktop sandbox still starts fresh every run.
-- **What is fresh every run**: each run still starts a new sandbox, with the current environment variables, secrets and network access. Only the files come from the previous run.
+- **What carries over**: the code sandbox's whole filesystem, including installed packages, working files and anything the previous run left on disk. Files under `/workspace` are the exception: that directory is tied to the run's conversation rather than to the saved sandbox, so write anything you want next time somewhere else, such as your home directory, `/home/user`. A desktop sandbox still starts fresh every run.
+- **What is fresh every run**: the restored sandbox runs code in a fresh interpreter, with the current environment variables, secrets and network access. Variables from the previous run's code are gone.
+- **What else comes back**: a process the previous run left running in the background resumes too, still with that run's environment — so a secret you have since changed or revoked can still be live inside it. End long-running processes before the run finishes if you don't want them next time, or restart them to pick up the current values.
 - **When the files are saved**: after a run completes successfully. A run that fails, or that runs no code, leaves the last saved files in place.
 - **What discards them**: a second failed restore, at least 30 minutes after the first, with no successful restore in between. The next run then starts with an empty sandbox. An outage shorter than 30 minutes can't cost you the files, however often the routine runs. If the saved files are gone altogether, the run starts empty straight away.
 - **Turning it off**: deletes the saved files.
