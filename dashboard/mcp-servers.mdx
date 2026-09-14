@@ -11,7 +11,7 @@ This is the same way Claude, Codex and Cursor connect to those services. Nothing
 
 ## How a connection works
 
-1. An admin enables the connector for a project. No credentials are entered.
+1. Whoever manages the agent — its creator or a team owner or admin — enables the connector on it: open the agent, choose **Connectors** in the **Build** group, then the connector. No credentials are entered.
 2. A member clicks **Connect** on the connector page. Astralform discovers the server's authorization server (per the MCP authorization spec), registers itself with it once, and opens the consent screen in a popup.
 3. The member approves. The grant is stored encrypted, per member, and refreshed automatically.
 4. On the member's next conversation the agent's tools are **discovered from the server**, cached for an hour, and listed on the connector page.

@@ -10,7 +10,7 @@ Connectors let you integrate third-party services into your AI agents. Every con
 | Kind | Credential | Who connects |
 |------|------------|--------------|
 | OAuth | Your own OAuth app (client ID + secret) | Each member, through the provider's consent screen |
-| API key | One key you paste | The project, shared by every run |
+| API key | One key you paste | The agent, shared by every run |
 | GitHub App | Astralform's GitHub App, installed on your account | The workspace, once |
 | Remote MCP | None — the service's own MCP server issues the grant | Each member, through the service's consent screen |
 
@@ -76,11 +76,10 @@ A remote MCP connector points at a service's hosted [MCP](https://modelcontextpr
 
 ### Via Dashboard
 
-1. Go to **Project Settings > Connectors**
-2. Click **Enable** on a connector
-3. Enter the required credentials
-4. Configure auth settings (allow end-user auth, require auth)
-5. Click **Save**
+1. Open the agent and choose **Connectors** in the **Build** group.
+2. Choose the connector.
+3. OAuth, API-key and GitHub App connectors open an **Add** dialog: enter the credentials and click **Enable**. A remote MCP connector needs none and is enabled directly.
+4. Open the connector afterwards to change its settings.
 
 ### Via Claude Code Plugin
 
@@ -184,19 +183,15 @@ astralform_disable_connector with project_id, connector_id
   For **GitHub** the two actions have different blast radii. **Uninstall** removes this agent's connector and nothing else — the workspace stays connected and the other agents carry on. **Disconnect**, next to the account on the card, stops **every** GitHub-enabled agent in the workspace, and the confirmation says how many that is. Neither removes the App from your account or organization; that is yours to do on GitHub, and the card links you there. See [GitHub](/dashboard/github#turning-it-off).
 </Warning>
 
-## Assigning to Agents
+## Connectors Belong to the Agent
 
-Connectors can be assigned to specific agents in multi-agent setups:
-
-1. Go to **Agents** and click an agent
-2. On the **Connectors** tab, assign available connectors
-3. Only assigned connectors' tools will be available to that agent
+A connector is enabled on the agent that uses it, and its tools are available to that agent's runs. There is no separate assignment step.
 
 ## Security Best Practices
 
 | Practice | Details |
 |----------|---------|
-| Dedicated OAuth apps | Create separate OAuth apps per project, not shared |
+| Dedicated OAuth apps | Create separate OAuth apps per agent, not shared |
 | Minimum scopes | Request only the permissions your agent needs |
 | Rotate credentials | Periodically rotate client secrets and API keys |
 | Separate environments | Use different OAuth apps for dev and production |

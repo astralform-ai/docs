@@ -27,7 +27,7 @@ Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are 
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `hotwords` | string[] | No | The user's own vocabulary — not the project's, which the server already holds and merges in first. The merged list is cut to the same 240-character biasing budget as the batch route, project words first, so words past it never reach the vendor. |
+| `hotwords` | string[] | No | The user's own vocabulary — not the agent's, which the server already holds and merges in first. The merged list is cut to the same 240-character biasing budget as the batch route, the agent's words first, so words past it never reach the vendor. |
 | `language` | string | No | ISO 639-1 hint. Omit for auto-detection. |
 
 ```json
@@ -42,7 +42,7 @@ A ticket is valid for 60 seconds and is spent by the first handshake that presen
 | Status | `error` | Meaning |
 |--------|---------|---------|
 | 409 | `voice_not_ready` | Voice input is disabled, or the channel the route would use is not a live one — the same state `/v1/voice/config` reports as `supports_streaming: false`. Fall back to [`POST /v1/voice/transcriptions`](/api-reference/voice/transcriptions). |
-| 429 | — | The project's `voice.stream` rate limit: one ticket is one live recording. |
+| 429 | — | The agent's `voice.stream` rate limit: one ticket is one live recording. |
 | 503 | `voice_stream_unavailable` | Tickets cannot be minted right now. Fall back to the batch route. |
 
 ## Step 2 — dial the socket

@@ -36,7 +36,6 @@
             "group": "Dashboard",
             "pages": [
               "dashboard/teams",
-              "dashboard/projects",
               "dashboard/api-keys",
               "dashboard/rate-limits",
               "dashboard/agents",
@@ -203,6 +202,10 @@
     }
   },
   "redirects": [
+    {
+      "source": "/dashboard/projects",
+      "destination": "/dashboard/agents"
+    },
     {
       "source": "/api-reference/status/project",
       "destination": "/api-reference/status/agent"

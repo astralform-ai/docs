@@ -26,7 +26,7 @@ Accepts an API key or an end-user OAuth token with `X-Agent-ID`; both forms are 
 |-------|------|----------|-------------|
 | `text` | string | Yes | The transcript, up to 16 000 characters. |
 | `mode` | string | Yes | `light`, `structured` or `formal`. `raw` is refused with 400 — it never calls the model. |
-| `hotwords` | string[] | No | The user's own vocabulary — not the project's, which the server already holds and splices into the prompt first. |
+| `hotwords` | string[] | No | The user's own vocabulary — not the agent's, which the server already holds and splices into the prompt first. |
 
 ## Response
 
@@ -68,4 +68,4 @@ Closing the connection cancels the upstream request, so an abandoned rewrite sto
 |--------|---------|---------|
 | 400 | `unsupported_mode` | `mode` is `raw` or unknown. |
 | 409 | `voice_not_ready` | Voice input is disabled, or the polish provider has lost its key. |
-| 429 | — | The project's `voice.polish` rate limit. |
+| 429 | — | The agent's `voice.polish` rate limit. |

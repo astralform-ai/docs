@@ -1,15 +1,15 @@
 ---
 title: "List Skills"
 api: "GET /v1/skills"
-description: "Get enabled skills for the project."
+description: "Get the enabled skills of the agent an API key belongs to."
 ---
 
-Returns metadata for all enabled skills configured for this project. The agent uses this to know which skills are available.
+Returns metadata for all enabled skills installed on this agent. The agent uses this to know which skills are available.
 
 ## Authentication
 
 <ParamField header="Authorization" type="string" required>
-  Your project API key as a bearer token: `Bearer sk_xxxxxxxxxxxx`
+  The agent's API key as a bearer token: `Bearer sk_xxxxxxxxxxxx`
 </ParamField>
 
 ## Response
