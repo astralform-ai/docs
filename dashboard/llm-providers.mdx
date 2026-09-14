@@ -102,7 +102,7 @@ A **Groq** or **OpenAI** key also serves speech-to-text, and so can a self-hoste
 - **`GET /v1/models`** lists the models of every provider your team has connected, registered models included. Each entry carries `provider`, `model`, `context_window`, `tools`, `vision` and `thinking_control`, which holds the model's effort ladder and its default. Build a model picker from it.
 - **`POST /v1/jobs`** accepts `provider`, `model`, `reasoning_effort` and `temperature` for each turn. See [Stream chat](/api-reference/chat/stream).
 - **[`GET /v1/agent/status`](/api-reference/status/agent)** reports `is_ready: false` until the team has connected at least one provider.
-- From Claude Code, the [Astralform plugin](/plugin/mcp-tools#provider-keys) can connect provider keys and set a Telegram or GitHub connector's model.
+- From Claude Code, the Astralform plugin can [connect provider keys](/plugin/mcp-tools#provider-keys) and [set a Telegram or GitHub connector's model](/plugin/mcp-tools#connectors).
 
 ## Troubleshooting
 
