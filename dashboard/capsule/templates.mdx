@@ -33,8 +33,4 @@ A full Ubuntu desktop with VNC streaming, Chrome, Firefox and VS Code. The agent
 
 ## Custom templates
 
-**Capsule** → **Templates** → **New Template** builds a custom image, up to five per agent. You start from one of E2B's images (**E2B Base**, **Python**, **Node.js** or **Ubuntu**) and add a setup command.
-
-<Warning>
-  No agent runs on a custom template yet. The sandbox environment is always chosen by the tool, as described above.
-</Warning>
+Custom template builds have been retired. **Capsule** → **Templates** now lists the two environments above, read-only. A custom build never completed, and no agent could have run on one: the sandbox environment is always chosen by the tool, and a build from a plain base image lacks the Jupyter server the code tools need and the desktop stack the desktop tools need.
