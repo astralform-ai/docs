@@ -249,7 +249,7 @@ Provider keys belong to a team and are shared by every agent on it.
 |------|-------------|
 | `astralform_list_provider_keys` | List your default team's stored provider keys (hints only) |
 | `astralform_set_provider_key` | Store a key for a provider. Requires the owner or admin role; `team_id` picks the team (default: your default team). Custom endpoints and Azure OpenAI also need `custom_base_url`. |
-| `astralform_delete_provider_key` | Remove a stored key. Requires the owner or admin role, and is refused while routines depend on the provider. Takes `team_id` like set, and `confirmed: true` to answer a guard that asks for confirmation. |
+| `astralform_delete_provider_key` | Remove a stored key. Requires the owner or admin role, and is refused while routines, or reminders that haven't fired yet, depend on the provider. Takes `team_id` like set, and `confirmed: true` to answer a guard that asks for confirmation. |
 | `astralform_test_provider_key` | Test your default team's stored key with a tiny request |
 
 ### Example: Store Provider Key

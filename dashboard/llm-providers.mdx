@@ -34,7 +34,7 @@ Only team **owners and admins** see the Model providers page.
 4. Pick a **Chat model** and click **Test**. Astralform sends that model a short prompt with your key and reports whether it answered. Fireworks AI and Azure OpenAI have no catalog, so type the model name instead (for Azure OpenAI, the deployment name), and [register it](#registering-models) after saving so agents can pick it.
 5. Click **Save**. The provider moves to **Configured**.
 
-The key is write-only. To replace it, open **Configure** again and type the new key; **Save** stays disabled until you do. **Delete Key** removes it, except while routines still use the provider: the dashboard refuses and names those routines.
+The key is write-only. To replace it, open **Configure** again and type the new key; **Save** stays disabled until you do. **Delete Key** removes it, except while routines, or reminders that haven't fired yet, use the provider: the dashboard refuses and names them.
 
 ### Self-hosted endpoints
 
@@ -114,7 +114,7 @@ A **Groq** or **OpenAI** key also serves speech-to-text, and so can a self-hoste
 | **Test** says `Connection failed. Check your API key and try again.` | The key is wrong or revoked, or it has no access to the selected model. |
 | `No known context window for model '…'` | The request named a model Astralform has no context window for, typically an unregistered model on a self-hosted endpoint. [Register](#registering-models) it with its context window, or choose a catalog model. |
 | `URL points to private or internal address` | The base URL resolves to a private or loopback address. Use a public URL. |
-| `Cannot delete: routines using this provider: …` | Move those routines to another provider's model first, then delete the key. |
+| `Cannot delete: routines or reminders use this provider: …` | Move those routines and reminders to another provider's model first, then delete the key. |
 
 ## Next Steps
 
