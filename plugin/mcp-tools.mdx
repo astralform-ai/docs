@@ -5,7 +5,9 @@ description: "Complete reference for Astralform MCP tools available through the 
 
 ## Overview
 
-The Astralform connector exposes 58 MCP tools that Claude can use to manage your Astralform projects. These are invoked automatically when you ask Claude to perform Astralform operations, on any surface where you've [added the connector](/plugin/connect).
+The Astralform connector exposes the MCP tools below, which Claude can use to manage your Astralform projects. They are invoked automatically when you ask Claude to perform Astralform operations, on any surface where you've [added the connector](/plugin/connect).
+
+A **project** here is what the dashboard calls an **agent**: one record, with one id. The tools say "project" where they were named before the rename, and every tool's `agent_id` is that same project id.
 
 ## Authentication
 
@@ -37,7 +39,7 @@ Claude will call `astralform_list_teams` and display your teams with roles.
 
 | Tool | Description |
 |------|-------------|
-| `astralform_list_projects` | List all your projects (includes team info) |
+| `astralform_list_projects` | List the projects in a team (requires `team_id`). Members see the ones they created; team owners and admins see all. |
 | `astralform_get_project` | Get project details by ID (includes team_id) |
 | `astralform_create_project` | Create a new project under a team (requires `team_id`) |
 | `astralform_update_project` | Update project name |
@@ -93,7 +95,7 @@ Clearing the model leaves the agent with no default: every request must then nam
 | Tool | Description |
 |------|-------------|
 | `astralform_get_search_settings` | Get web search configuration |
-| `astralform_set_search_settings` | Configure search provider, max results, API key |
+| `astralform_set_search_settings` | Turn web search on or off (`is_enabled`), and choose its provider: `ddgs` (DuckDuckGo, no API key), `google` or `bing` (each needs an API key). `max_results` is 1–10; `deep_research` sets the research tool's budgets. |
 
 ### Example: Enable Search
 
@@ -101,32 +103,38 @@ Clearing the model leaves the agent with no default: every request must then nam
 Enable web search for my project
 ```
 
-Claude will call `astralform_set_search_settings` with the provider and API key.
+Claude will call `astralform_set_search_settings`. The default provider, `ddgs`, needs no API key; the others take one.
 
 ## Memory Settings
 
 | Tool | Description |
 |------|-------------|
 | `astralform_get_memory_settings` | Get memory configuration |
-| `astralform_set_memory_settings` | Configure retrieval, extraction, limits |
+| `astralform_set_memory_settings` | Configure retrieval, extraction and limits (`retrieval_limit` is 1–20 memories per turn), or point the agent's end-user memory at an external provider |
+| `astralform_test_memory_settings` | Probe the agent's memory provider, or a proposed provider and key before you save them |
 
-### Example: Enable Memory
+Memory is always on; `is_enabled` is accepted but ignored. Pointing an agent's end-user memory at an external provider needs a team owner or admin, and `egress_acknowledged: true` to confirm what leaves Astralform — see [Memory Providers](/dashboard/memory-providers).
+
+### Example: Recall More Memories
 
 ```
-Enable memory for my project with 10 memories per turn
+Have my agent recall up to 10 memories per turn
 ```
 
-## Guard Rails
+## Your Memories
+
+Your own long-term memories on an agent, as the agent sees them in your conversations. These are scoped to you, the signed-in developer, never another user.
 
 | Tool | Description |
 |------|-------------|
-| `astralform_get_guardrails_settings` | Get guard rails configuration |
-| `astralform_set_guardrails_settings` | Configure PII detection and execution limits |
+| `astralform_memory_search` | Search your memories on an agent, ranked by relevance |
+| `astralform_memory_add` | Save a memory for the agent to recall in your later conversations |
+| `astralform_memory_list` | Browse your memories on an agent, newest first, plus facts shared at the agent and team scope |
 
-### Example: Enable PII Detection
+### Example: Save a Memory
 
 ```
-Enable PII detection for my project to redact emails and credit cards
+Remember on my support agent that I prefer answers in British English
 ```
 
 ## Environment Variables
@@ -144,7 +152,7 @@ Set STRIPE_SECRET_KEY for my project
 ```
 
 <Warning>
-  Values are encrypted at rest and never returned in responses. Cannot delete vars required by skills assigned to agents.
+  Values are encrypted at rest and never returned in responses. A variable that an installed skill lists as required can't be deleted.
 </Warning>
 
 ## Marketplace
@@ -170,8 +178,8 @@ Search the marketplace for PDF processing skills
 | `astralform_create_skill_from_url` | Import a skill from a URL |
 | `astralform_update_skill` | Update a skill's content and/or its `command_mode` (whether it is a slash command) |
 | `astralform_delete_skill` | Delete a skill from a project |
-| `astralform_toggle_skill` | Enable/disable a skill |
-| `astralform_refresh_skill` | Refresh a URL-sourced skill |
+| `astralform_toggle_skill` | Turn a skill on or off (flips its current state) |
+| `astralform_refresh_skill` | Re-fetch a catalog, marketplace or URL skill from its source, keeping its id and enabled state |
 
 ### Example: Add a Skill
 
@@ -189,32 +197,31 @@ Import the PDF processing skill from https://raw.githubusercontent.com/example/s
 
 ## Agents
 
+The project and its agent are one record, so there is always exactly one agent. To create or delete an agent, create or delete the project with the [Projects](#projects) tools.
+
 | Tool | Description |
 |------|-------------|
-| `astralform_list_agents` | List agents configured for a project |
-| `astralform_get_agent` | Get agent details including resource assignments |
-| `astralform_create_agent` | Create a new agent with name, LLM, and resources |
-| `astralform_update_agent` | Update an agent's configuration or resources |
-| `astralform_delete_agent` | Delete an agent (cannot delete default) |
-| `astralform_toggle_agent` | Enable/disable an agent |
+| `astralform_list_agents` | List the project's agent (always one) |
+| `astralform_get_agent` | Get the agent's name, display name, system prompt and autonomy mode |
+| `astralform_update_agent` | Update the agent's name, display name, system prompt or autonomy mode |
 
-### Example: Create an Agent
+### Example: Update an Agent
 
 ```
-Create a support agent for my project that handles customer inquiries, assign it the customer-faq skill
+Make my support agent supervised, so it asks before running tools
 ```
 
-Claude will call `astralform_create_agent` with the name, description, and skill assignments.
+Claude will call `astralform_update_agent` with `autonomy_mode: "supervised"`.
 
 ## Connectors
 
 | Tool | Description |
 |------|-------------|
-| `astralform_list_connectors` | List available connectors (Slack, Notion, GitHub) |
+| `astralform_list_connectors` | List available connectors, optionally filtered by category or type (`oauth`, `api_key`, `remote_mcp`, `github_app`) |
 | `astralform_get_connector` | Get connector details by slug |
 | `astralform_list_project_connectors` | List connectors enabled for a project |
-| `astralform_enable_connector` | Enable a connector with credentials |
-| `astralform_update_project_connector` | Update connector configuration |
+| `astralform_enable_connector` | Enable a connector. OAuth connectors take a client ID and secret, API-key connectors an API key, and remote MCP connectors nothing. |
+| `astralform_update_project_connector` | Update a connector's configuration, or turn it on or off |
 | `astralform_disable_connector` | Remove a connector (revokes user tokens) |
 
 ### Example: Enable Slack
@@ -241,12 +248,14 @@ Claude will call `astralform_list_connectors` and show the catalog with tool cou
 
 ## Provider Keys
 
+Provider keys belong to a team and are shared by every agent on it.
+
 | Tool | Description |
 |------|-------------|
-| `astralform_list_provider_keys` | List stored model provider API keys |
-| `astralform_set_provider_key` | Store an API key for a provider (OpenAI, Anthropic, etc.) |
-| `astralform_delete_provider_key` | Remove a stored provider key |
-| `astralform_test_provider_key` | Test that a stored provider key is valid |
+| `astralform_list_provider_keys` | List your default team's stored provider keys (hints only) |
+| `astralform_set_provider_key` | Store a key for a provider. Requires the owner or admin role; `team_id` picks the team (default: your default team). Custom endpoints and Azure OpenAI also need `custom_base_url`. |
+| `astralform_delete_provider_key` | Remove a stored key. Requires the owner or admin role, and is refused while routines depend on the provider. Takes `team_id` like set, and `confirmed: true` to answer a guard that asks for confirmation. |
+| `astralform_test_provider_key` | Test your default team's stored key with a tiny request |
 
 ### Example: Store Provider Key
 
