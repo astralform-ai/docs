@@ -20,7 +20,7 @@ A routine can keep its code sandbox's files from one run to the next. Turn on **
 - **What carries over**: the code sandbox's whole filesystem, including installed packages, working files and anything the previous run left on disk. A desktop sandbox still starts fresh every run.
 - **What is fresh every run**: each run still starts a new sandbox, with the current environment variables, secrets and network access. Only the files come from the previous run.
 - **When the files are saved**: after a run completes successfully. A run that fails, or that runs no code, leaves the last saved files in place.
-- **What discards them**: failing to restore them on two runs in a row. The next run then starts with an empty sandbox. If the saved files are gone altogether, the run starts empty straight away.
+- **What discards them**: failing to restore them again at least 30 minutes after a first failure, with no successful restore in between. The next run then starts with an empty sandbox. An outage shorter than 30 minutes can't cost you the files, however often the routine runs. If the saved files are gone altogether, the run starts empty straight away.
 - **Turning it off**: deletes the saved files.
 
 ## Network access and secrets
