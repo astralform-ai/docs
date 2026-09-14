@@ -1,23 +1,40 @@
 ---
 title: "Templates"
-description: "Available sandbox templates and custom template management."
+description: "The two sandbox environments agents run in, Code and Desktop, and how Astralform picks between them."
 ---
 
-## Available Templates
+## Overview
 
-| Template | Includes | Use Case |
-|----------|----------|----------|
-| `base` | Python 3.11, Node.js 20, rclone, CLI tools | General-purpose coding and automation |
-| `browser` | Base + Chromium + xvfb | Headless browser automation, web scraping |
-| `code-interpreter-v1` | Jupyter + pandas, numpy, matplotlib, scikit-learn | Data science, visualization, analysis |
-| `desktop` | Full Ubuntu desktop with VNC, Chrome, VS Code | GUI automation, computer-use agents |
+An agent doesn't choose a sandbox template: the tool it calls does. Code tools run in the **Code** environment, and desktop tools run in the **Desktop** environment. There is nothing to configure per agent.
 
-## Template Assignment
+| Environment | Image | Started by |
+|-------------|-------|------------|
+| **Code** | `code-interpreter-v1` | `capsule_run_code` and the other code tools |
+| **Desktop** | `desktop` | The `desktop_*` computer-use tools |
 
-Set the template per agent in the agent configuration:
+A conversation can hold one sandbox of each kind at the same time.
 
-1. Navigate to **Agent Team** > select an agent
-2. Under **Model** tab, set `sandbox_template`
-3. Save changes
+## Code
 
-The template determines which VM image is used when the agent's sandbox is provisioned.
+A Jupyter-powered sandbox with stateful code execution and rich output:
+
+- 2 vCPU, 4 GB RAM, about 6.9 GB of free disk
+- pandas, numpy, matplotlib, scikit-learn and 30+ other data-science packages
+- `ffmpeg`, `deno`, `gh`, `rclone` and `yt-dlp`
+- faster-whisper `base` weights, so the agent can transcribe audio offline
+
+## Desktop
+
+A full Ubuntu desktop with VNC streaming, Chrome, Firefox and VS Code. The agent drives it through screenshot, mouse and keyboard tools, for GUI interaction, visual verification and computer use.
+
+<Note>
+  The `base` and `browser` images from earlier versions are retired. Nothing provisions them.
+</Note>
+
+## Custom templates
+
+**Capsule** → **Templates** → **New Template** builds a custom image from a base image and a setup command, up to five per agent.
+
+<Warning>
+  No agent runs on a custom template yet. The sandbox environment is always chosen by the tool, as described above.
+</Warning>

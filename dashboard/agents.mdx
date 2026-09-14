@@ -1,27 +1,47 @@
 ---
 title: "Agents"
-description: "Configure your AI through agents — each with its own conversation model, skills, connectors, and tools."
+description: "An agent is your workspace: one runnable agent with its own instructions, skills, connectors, memory, sandbox and permissions."
 ---
 
 ## Overview
 
-Agents are the central building block in Astralform. Every project has a **Main Agent** that handles all requests by default. You can create additional specialized agents and use a supervisor to route messages automatically.
+An agent is the workspace you open in the dashboard, and the thing that runs. Its instructions, skills, connectors, memory, sandbox and permissions all belong to it. Agents are independent of each other: there is no main agent, no routing between agents, and no supervisor. To give a different job a different setup, create another agent.
 
-All configuration — the conversation model, skills, connectors, and platform tools — is managed through agent detail pages. Model provider keys are the exception: they belong to the team, on [Model Providers](/dashboard/llm-providers).
+Switch agents with the **agent switcher** at the top of the sidebar.
 
-## Main Agent
+Agents belong to a [team](/dashboard/teams). Model provider keys are the one team-wide setting, on [Model Providers](/dashboard/llm-providers); everything else on this page is per agent.
 
-Every project starts with a **Main Agent**. It auto-inherits all project resources (skills, connectors, tools), so single-agent setups require no extra configuration.
+## Creating an agent
 
-- The Main Agent cannot be deleted
-- New resources added to the project are automatically available to the Main Agent
-- When no `agent_name` is specified in a chat request, the Main Agent handles it
+1. Open the agent switcher at the top of the sidebar → **New agent**.
+2. Enter an **Agent name**: lowercase letters and numbers, separated by single hyphens, such as `support-bot`. It must be unique in the team.
+3. Create the agent, then save the **encryption key** it shows you. It is displayed only once.
 
-## Agent Detail Page
+You land on the new agent's **Instructions** page, where you set its display name, avatar and system instructions.
 
-Click any agent from the agents list to open its detail page.
+Any team member can create an agent, and its creator owns it. Team owners and admins see and manage every agent in the team; members see the agents they created.
 
-Approval behavior — whether the agent runs tools on its own or asks first — is set separately on the agent's [Permissions](/dashboard/permissions) page.
+## What an agent configures
+
+Everything lives in the agent's sidebar:
+
+| Group | Page | What it sets |
+|-------|------|--------------|
+| **Build** | **Instructions** | Name, display name, avatar, and the agent's system instructions |
+| | **Routines** | Scheduled runs |
+| | **Tasks** | Long-running goals and their live status |
+| | **Skills** | Installed skills, and recommended ones to install. See [Skills](/dashboard/skills). |
+| | **Connectors** | The external services the agent can use. See [Connectors](/dashboard/connectors). |
+| | **Search**, **Images**, **Video** | The web search, image generation and [video generation](/dashboard/video-generation) providers |
+| | **Voice** | Voice input. See [Voice](/dashboard/voice). |
+| **Intelligence** | **Memory** | What the agent remembers, where, and what it learns. See [Memory Providers](/dashboard/memory-providers). |
+| | **Knowledge** | Documents the agent can search |
+| **Capsule** | **Pods**, **Templates**, **Settings** | The agent's sandboxes and their network access. See [Pods](/dashboard/capsule/pods). |
+| **Observe** | **Analytics**, **Audit Log** | Usage, and a record of changes |
+| **Settings** | **Permissions** | Whether the agent runs tools on its own or asks first, and tool rules. See [Permissions](/dashboard/permissions). |
+| | **Environment** | Environment variables and secrets |
+| | **API Keys** | Keys your app uses to call this agent. See [API Keys](/dashboard/api-keys). |
+| | **Agent settings** | The conversation model, streaming thresholds, conversation titles, and deleting the agent |
 
 ### Conversation model
 
@@ -35,125 +55,19 @@ The model an agent uses when a request doesn't name one is its **conversation mo
 
 Only providers the team has connected appear here. See [Model Providers](/dashboard/llm-providers) for connecting providers and for how a turn picks its model.
 
-#### Auto-Capsule
+### Sandbox
 
-Agents with non-system skills automatically get a Capsule sandbox -- no manual sandbox configuration needed. The sandbox is an isolated Firecracker microVM.
+Every agent can run code in an isolated Capsule sandbox, with nothing to switch on. A sandbox starts the first time a run calls a code or desktop tool, in the environment that tool needs. See [Pods](/dashboard/capsule/pods) for how sandboxes start and stop, and [Templates](/dashboard/capsule/templates) for the two environments.
 
-See [Templates](/dashboard/capsule/templates) for the template catalog and [Pods](/dashboard/capsule/pods) for sandbox lifecycle.
+## Calling the agent from your app
 
-### Skills Tab
+Your app authenticates with one of the agent's [API keys](/dashboard/api-keys), and the key already identifies the agent. `agent_name` on [`POST /v1/jobs`](/api-reference/chat/stream) is therefore optional; if you send it, it must be the agent's own name, and any other name returns `404`. [`GET /v1/agents`](/api-reference/agents/list) returns the one agent the key belongs to.
 
-Assign skills so the agent has access to specialized capabilities.
+## Deleting an agent
 
-1. On the **Skills** tab, see assigned and available skills
-2. Click **Assign** to add a skill, or **Unassign** to remove one
-3. Click **Add New Skill** to create a skill and assign it in one step
+Open **Settings** → **Agent settings** → **Danger zone**, or the agent's menu in the agent switcher, and type the agent's name to confirm. The dialog lists what will be removed.
 
-For the Main Agent, all project skills are auto-assigned.
-
-See [Skills](/dashboard/skills) for the SKILL.md format and best practices.
-
-### Tools Tab
-
-Assign platform tools (e.g., web search) to the agent.
-
-1. On the **Tools** tab, see assigned and available tools
-2. Toggle tools on or off for this agent
-
-For the Main Agent, all project tools are auto-assigned.
-
-See [Platform Tools](/dashboard/platform-tools) for available tools.
-
-### Connectors Tab
-
-Assign connectors so the agent can access external data sources and services.
-
-1. On the **Connectors** tab, see assigned and available connectors
-2. Click **Assign** or **Unassign** to manage connector assignments
-3. Each connector provides the agent with access to a specific integration (e.g., Google Drive, Notion, Slack)
-
-Connectors are configured at the project level and then assigned per agent, allowing you to control which agents have access to which integrations.
-
-See [Connectors](/dashboard/connectors) for available connectors and setup instructions.
-
-## Creating an Agent
-
-1. Go to **Agents**
-2. Click **Add Agent**
-3. Fill in the details:
-
-| Field | Required | Description |
-|-------|----------|-------------|
-| Name | Yes | Unique identifier (lowercase, hyphens allowed, e.g., `support-agent`) |
-| Display Name | No | Human-readable name shown in UI |
-| Description | No | What this agent specializes in (used for supervisor routing) |
-| System Prompt | No | Custom instructions for this agent |
-
-4. Click **Create**, then configure the agent via its detail page
-
-## Orchestration
-
-Orchestration controls how multiple agents work together.
-
-### Single (Default)
-
-Only the Main Agent handles all requests. Other agents can be addressed directly by name via the SDK.
-
-### Supervisor
-
-A supervisor agent automatically routes user messages to the best specialist:
-
-1. Go to **Agents**
-2. In the **Orchestration** section, select **Supervisor**
-3. Pick a supervisor agent from the dropdown
-4. Save
-
-```
-User: "Help me with my billing issue"
-
-Supervisor: [Analyzes request]
-            [Routes to support-agent]
-
-support-agent: "I'd be happy to help with your billing..."
-```
-
-The supervisor uses agent descriptions to decide routing, so write clear descriptions for each agent.
-
-## Managing Agents
-
-### Enable/Disable
-
-Toggle agents on/off without deleting them. Disabled agents are excluded from routing and cannot be addressed by name.
-
-### Delete
-
-Click **Delete** on an agent card and confirm.
-
-<Warning>
-  The Main Agent cannot be deleted. Deleting an agent removes all its resource assignments.
-</Warning>
-
-## SDK Integration
-
-Route a message to a specific agent by setting `agentName` on `SendOptions`. [`GET /v1/agents`](/api-reference/agents/list) lists the names, and `session.agents` exposes the same list in the iOS SDK.
-
-```swift
-// Route a message to a specific agent by name
-var options = SendOptions()
-options.agentName = "code-reviewer"
-try await session.send("Review this code", options: options)
-```
-
-See the [Agents API](/api-reference/agents/list) for details.
-
-## Best Practices
-
-| Do | Don't |
-|----|-------|
-| Write clear agent descriptions for routing | Leave descriptions empty |
-| Assign only relevant resources to each agent | Give every agent all resources |
-| Use supervisor for 3+ specialized agents | Use supervisor for a single agent |
-| Test routing with different message types | Assume routing works without testing |
+Deleting an agent stops its running jobs and sandboxes and removes the agent together with everything that belongs to it. It can't be undone. Only the agent's creator or a team owner or admin can delete it.
 
 ## Next Steps
 

@@ -1,10 +1,10 @@
 ---
 title: "List Agents"
 api: "GET /v1/agents"
-description: "Get available agents for the project."
+description: "Get the agent an API key belongs to."
 ---
 
-Returns the agents configured for this project. Use the `name` of one as `agent_name` when [creating a job](/api-reference/chat/stream) to route a message to it.
+Returns the agent this API key belongs to, as a one-element array. Its `name` is the only value `agent_name` accepts when [creating a job](/api-reference/chat/stream), and since the key already identifies the agent, you can leave `agent_name` out.
 
 ## Authentication
 
@@ -67,9 +67,7 @@ curl -X GET https://api.astralform.ai/v1/agents \
 ## Usage Notes
 
 <Note>
-  The response carries **one entry today** — the project's own agent row. Multi-agent discovery through this endpoint is not implemented; a client that needs to offer a choice cannot build it from here yet.
+  The response always carries **one entry**: an agent is a workspace, and an API key belongs to exactly one. There is no multi-agent routing to discover.
 </Note>
 
-- No enabled filter is applied — the row is selected by project id, not by enablement
-- Use `agent_name` in [Stream a Chat](/api-reference/chat/stream) to route to a specific agent
-- If no `agent_name` is provided, the default agent (or supervisor) handles the request
+- Sending `agent_name` in [Stream a Chat](/api-reference/chat/stream) is optional. If you send it, it must be this agent's `name`; any other name returns `404`.
