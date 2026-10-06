@@ -1,6 +1,6 @@
 ---
 title: "Video Generation"
-description: "Give an agent a generate_video tool that animates an image into a short clip through any ComfyUI host you can reach — a box you run, a RunPod pod, a ComfyUI behind a proxy — or Astralform's own media service."
+description: "Give an agent a generate_video tool that animates an image into a short clip through any ComfyUI host you can reach — a box you run, a RunPod pod, a GPU rented on Vast.ai, a ComfyUI behind a proxy — or Astralform's own media service."
 ---
 
 ## Overview
@@ -19,6 +19,8 @@ Video generation is a per-agent capability. When it is on, the agent gets a `gen
 | **Astral Media (self-hosted)** | Astralform's own media service (`infra/astral-media/` in the main repository), which owns the workflow and a queue in front of one GPU. | Endpoint URL and its bearer token. |
 
 Pick **ComfyUI** unless you are running the astral-media service yourself.
+
+Within the **ComfyUI** provider you also choose which *service* the row points at. Besides your own box, that list includes **Vast.ai** — a GPU you rent by the hour (see [Renting a GPU on Vast.ai](#renting-a-gpu-on-vastai)).
 
 ## Setting up a ComfyUI host
 
@@ -77,6 +79,41 @@ A clip takes a few minutes and holds the GPU for its whole duration, so clips ge
 
 <Note>
 Every clip leaves its first frame on the host as `input/astral_*.png`. ComfyUI has no route for deleting inputs, so prune that directory on the host from time to time.
+</Note>
+
+## Renting a GPU on Vast.ai
+
+[Vast.ai](https://vast.ai) rents GPUs by the hour, which is often the cheapest way to get a card with the ~22 GB of VRAM a clip needs. Astralform does not rent or manage the machine for you — you create the instance, and Astralform talks to the ComfyUI running on it.
+
+<Steps>
+  <Step title="Rent an instance that runs ComfyUI">
+    Choose a GPU with at least 22 GB of VRAM and either a template whose image already runs ComfyUI or a plain CUDA image you launch it from. Expose ComfyUI's port (`8188` by default) and note the mapped `http://<ip>:<port>` address.
+  </Step>
+  <Step title="Stage the weights and launch the server">
+    The six files below have to be on the instance — a fresh rental starts from the template's image, so attach a [volume](https://docs.vast.ai/api-reference/creating-instances-with-api) or bake them into a template if you do not want to re-download them each time. Then start ComfyUI so it answers on the mapped port.
+  </Step>
+  <Step title="Choose Vast.ai as the service">
+    On the agent's **Video** page pick **ComfyUI** as the provider, **Vast.ai** as the service, and paste the instance address. Nothing needs installing in front of ComfyUI: a rented instance runs stock ComfyUI, and Astralform speaks its own protocol to it.
+
+    The address must be `https` unless the backend operator has listed the host — see [Private hosts](#private-or-plain-http-hosts).
+  </Step>
+</Steps>
+
+<Warning>
+**A rented instance is a public `ip:port` with no authentication.** Stock ComfyUI checks
+no key, so anyone holding the address can use the GPU you are paying for. Put the instance
+behind an HTTPS tunnel and send the key it wants from the **API key** field, or have the
+operator list the host in `COMFY_TRUSTED_HOSTS` and accept that the port is open.
+</Warning>
+
+<Note>
+**The address changes every time you rent.** A new instance gets a new `ip:port`, so this
+is not a set-and-forget endpoint: when you rent a new box, update the endpoint URL on the
+Video page — and re-enter the API key, because a stored key is only ever sent to the
+endpoint it was saved for (see [Changing the endpoint or the key](#changing-the-endpoint-or-the-key)).
+
+The weights are the bigger cost: the two expert files alone are around 28 GB, so a cold
+instance spends longer fetching them than rendering the clip.
 </Note>
 
 ## Private or plain-http hosts
