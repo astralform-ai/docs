@@ -41,11 +41,21 @@ Everything lives in the agent's sidebar:
 | **Settings** | **Permissions** | Whether the agent runs tools on its own or asks first, and tool rules. See [Permissions](/dashboard/permissions). |
 | | **Environment** | Environment variables and secrets |
 | | **API Keys** | Keys your app uses to call this agent. See [API Keys](/dashboard/api-keys). |
+| | **Models** | Which providers and models this agent may use |
 | | **Agent settings** | Streaming thresholds, conversation titles, and deleting the agent |
 
 ### Models
 
-An agent has no model of its own. Each place that runs it names the model it runs on: the chat's model picker or the API request, a routine or reminder, a [Telegram](/dashboard/telegram) or [GitHub](/dashboard/github) connector, and a curated knowledge ingest. See [Choose the model](/dashboard/llm-providers#choose-the-model).
+An agent has no model of its own — each place that runs it names the model it runs on: the chat's model picker or the API request, a routine or reminder, a [Telegram](/dashboard/telegram) or [GitHub](/dashboard/github) connector, and a curated knowledge ingest. See [Choose the model](/dashboard/llm-providers#choose-the-model).
+
+**Models** is where you limit which of those the agent may pick from. The page lists the team's connected providers with a switch each, and their models with a checkbox each:
+
+- A **provider** switch covers the whole provider, including models added to the catalog later.
+- A **model** checkbox pins that one model. Unchecking one model under an enabled provider leaves the rest of that provider's models enabled.
+- **Self-hosted endpoints** appear in their own block — they are not catalog providers, so they have no model list.
+- Providers the team hasn't connected appear in a **Not connected** block, switched off and inert until you connect them on the [Model providers](/dashboard/llm-providers) page.
+
+The list is what the agent may use, so **an agent with nothing enabled is not ready**: its pickers are empty and its runs are refused until at least one model is enabled. Deleting a provider key, or a model registration, removes it from every agent's list on the team in the same action. If a saved model falls outside the list — a routine pinned to a model you just switched off — the page lists it under **Saved models outside this scope**, and that routine fails its next run with a message naming the model until you re-point it.
 
 ### Sandbox
 

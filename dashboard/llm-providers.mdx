@@ -5,7 +5,7 @@ description: "Connect model providers with your team's own keys, choose the mode
 
 ## Overview
 
-Astralform runs every model on **your own provider key**. A team owner or admin connects each provider once, on the team's **Model providers** page. The key is encrypted and stored for the whole team, not per agent, and it is never shown again: the page only displays a hint of it. Every agent in the team can then use the models of any connected provider.
+Astralform runs every model on **your own provider key**. A team owner or admin connects each provider once, on the team's **Model providers** page. The key is encrypted and stored for the whole team, not per agent, and it is never shown again: the page only displays a hint of it. Each agent then uses the models of the connected providers **that its own model list allows** — see [Limit an agent's models](#limit-an-agents-models).
 
 Which model a turn runs on is a separate decision, made where the turn starts: an agent has no model of its own. See [Choose the model](#choose-the-model).
 
@@ -72,7 +72,7 @@ Where a surface offers a model picker, it has the same three fields:
 
 | Field | What it sets |
 |-------|--------------|
-| **Model** | The provider and model. Only providers the team has connected appear. |
+| **Model** | The provider and model. Only providers the team has connected **and the agent's model list allows** appear. |
 | **Reasoning effort** | How hard the model reasons. See [Reasoning effort](#reasoning-effort). |
 | **Temperature** | 0–2. Leave it empty for the provider's default. Some models don't accept a temperature, and on those it is ignored. |
 
@@ -84,6 +84,19 @@ Each chat or API turn resolves its model in this order:
 2. **The conversation.** The model the conversation's previous turn used. A `reasoning_effort` or `temperature` sent with this turn still applies.
 
 A new conversation has no previous turn, so its first message must name its model. One that doesn't is refused with `400` before the conversation is created: `A new conversation must name its model: pass provider and model. Later messages in the conversation may omit them and reuse its model.`
+
+A model outside the agent's list is refused with `400` too, whether it was requested or inherited from the conversation: `'<provider>/<model>' is not enabled for this agent. Enable that provider or model on the agent's Models tab.`
+
+## Limit an agent's models
+
+Every agent has its own model list, on its **Settings › Models** page. It decides both what the agent's pickers offer — the chat's model picker, [`GET /v1/models`](#for-api-clients), a routine's editor, a channel's **Model** card, a curated ingest — and what its runs may use: a run asking for a model outside the list is refused before it starts.
+
+- A **provider** switch enables the whole provider, including models added to the catalog later.
+- A **model** checkbox pins that one model; unchecking one model under an enabled provider leaves the rest enabled.
+- Providers the team hasn't connected appear switched off and inert until you connect them.
+- **Self-hosted endpoints** have their own block, since they are not catalog providers.
+
+An agent with nothing enabled is not ready: its pickers are empty, and chat is blocked with `No models are enabled for this agent. Enable models in the agent's Models tab.` Deleting a provider key, or a model registration, removes it from every agent's list on the team in the same action, and any routine or channel pinned to a model that is no longer listed is shown on the page so you can re-point it.
 
 ## Reasoning effort
 
