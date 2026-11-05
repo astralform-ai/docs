@@ -157,6 +157,38 @@ HARNESS_SMOKE_PROJECT=harness-smoke-my-branch bash scripts/harness-smoke.sh down
 
 Cleanup requires this checkout's owned containers or recorded project state. It refuses foreign checkout containers and unowned orphan volumes; no global prune or unrelated dev-stack shutdown is performed.
 
+### Harness catalog and team enablement
+
+Run this section **before the `down` step above** — the isolated database must
+still be up. Delegation runs against immutable releases, not mutable catalog
+rows. The operator flow (all commands from `backend/` with an explicit
+`DATABASE_URL`):
+
+```bash
+# 1. Publish a digest-bound release — the real image gate must pass first.
+#    The release manifest (image digest, adapter/profile, capabilities,
+#    configuration schema, provenance) is a separate contract from the schema
+#    baseline manifest above.
+uv run python scripts/publish_harness_release.py \
+  --slug deepseek-harness --version 2026.11.06 --manifest /path/to/release-manifest.json
+
+# 2. Reconcile legacy visibility into explicit team enablement (create-only,
+#    never broadens: legacy agent allowlists stay enforced).
+uv run python scripts/reconcile_harness_admission.py
+```
+
+Team admins manage visibility through the catalog API: `GET /v1/harness-releases`
+(operator), `GET /v1/teams/{team}/harness-catalog` (member), and
+`PUT /v1/teams/{team}/harness-releases/{release}/enablement` (team admin). The
+enablement body cannot carry an image or capabilities — those come only from the
+release manifest — and every change is audit-logged.
+
+Admission is a dual gate: a delegation needs a published release, an enabled
+team-release row, and (for harnesses with a legacy allowlist) the requesting
+agent in that allowlist. An empty allowlist remains *nobody* for external
+harnesses; team enablement alone never grants one. `seed_harness.py --image`
+refuses to move a published release's image (publish a new release instead).
+
 ## Stop the full dev stack
 
 ```bash
