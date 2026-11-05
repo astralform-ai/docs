@@ -1,11 +1,15 @@
 ---
 title: "Local Docker Stack"
-description: "Run the full Astralform platform — backend, auth, dashboard, chat, gateway, Redis — on your laptop with one command. Hot reload across all services."
+description: "Run the full development stack, or use isolated PostgreSQL, Redis and S3 storage for Harness acceptance without the production database tunnel."
 ---
 
 The local development stack runs every Astralform service in Docker, wired
 together by a single `docker-compose.dev.yml`. One command brings the whole
 platform up; source changes hot-reload without a rebuild.
+
+<Warning>
+The full `docker-compose.dev.yml` stack opens an SSH tunnel to the **production database**. Local HTTP ports do not mean local data. Do not use this stack for migration or integration acceptance; use [isolated Harness acceptance](#isolated-harness-acceptance) below.
+</Warning>
 
 ## What you get
 
@@ -16,7 +20,7 @@ platform up; source changes hot-reload without a rebuild.
 | `auth-spa` | `http://localhost:5175` | OAuth consent + login UI |
 | `api-gateway` | `http://localhost:8000` | nginx — mirrors prod Traefik path routing |
 | `auth-backend` | `http://localhost:8090` | FastAPI — OAuth 2.1 Authorization Server + identity |
-| `backend` | (internal) | FastAPI + LangGraph — `/v1/*` routed by the gateway |
+| `backend` | (internal) | FastAPI + native agent loop — `/v1/*` routed by the gateway |
 | `redis` | `127.0.0.1:6379` | SSE event distribution (TCP — not an HTTP endpoint) |
 
 The gateway at `:8000` mirrors what `api.astralform.ai` does in production:
@@ -85,19 +89,75 @@ docker compose -f docker-compose.dev.yml restart backend
 
 ## Run tests
 
-```bash
-# Inside the container — exactly what CI runs
-docker compose -f docker-compose.dev.yml exec backend uv run pytest tests/ -v
+Run the repository's offline backend gate from the repository root:
 
-# On the host — faster iteration, requires `cd backend && uv sync --extra dev` once
-cd backend && uv run pytest tests/ -v
+```bash
+bash scripts/ci-local.sh backend
 ```
 
-Both paths read the same source tree (the container bind-mounts
-`backend/`). Use the host-side version for tight feedback loops; use the
-container version before pushing if you've changed runtime deps.
+The gate selects `not integration` and supplies safe CI settings. Do not run an unfiltered `pytest tests/` against the full dev stack or a production `.env`: existing integration tests may reach production. Real datastore acceptance uses the separate stack below.
 
-## Stop the stack
+## Isolated Harness acceptance
+
+`docker-compose.harness-smoke.yml` starts only PostgreSQL 17, Redis and MinIO. It does not start the SSH tunnel, auth services, dashboard, cloud Actor or Harness. All published ports are ephemeral and loopback-only.
+
+### Prepare the worktree
+
+- Use a dedicated worktree and a **local** Docker context. Remote Docker endpoints are refused.
+- Ensure this worktree contains no root or `backend/.env`. Preserve any existing file under an ignored backup name; do not delete or change the shared checkout's configuration. Clearing process environment alone does not disable the backend's dotenv loading.
+- Install the backend environment with `uv sync --locked --extra dev` from `backend/`.
+- Obtain the approved MinIO image from the operator's trusted image store. The stack checks the exact digest pinned in the compose file; it does not substitute a floating image if that pin is absent.
+
+### Obtain the complete schema baseline
+
+An operator supplies `.harness-smoke/baseline/public.sql` and `manifest.json`. They are local inputs, not committed fixtures:
+
+- Export PostgreSQL 17 **schema only**, with `pg_dump --schema-only --no-owner --no-acl --schema=public`, through a read-only source operation. Never export customer rows or a full production dump.
+- The manifest has `format_version: 1`, `schema_sha256`, the complete `migrations` list of actual `public.schema_migrations.version` filename stems, and a `source` object with `database`, `server_version` and `exported_at`.
+- Record the ledger around the export and refuse a changed source ledger. The SHA256 covers the original SQL bytes. Do not infer applied migrations from a numeric prefix or construct a small substitute schema.
+
+The importer verifies provenance, this checkout's exact compose ownership and a fresh empty target before writing. It runs the existing PostgreSQL bootstrap plus the complete schema transactionally, then records exactly the manifest ledger. Unknown or incomplete history is refused; newer local files remain unapplied for the forward migration runner. A failed or repeated import is not a request to wipe the database: use this project's `down`, then `up` and import again.
+
+### Run the datastore proof
+
+From the repository root, choose a project name unique to this worktree:
+
+```bash
+export HARNESS_SMOKE_PROJECT=harness-smoke-my-branch
+bash scripts/harness-smoke.sh up
+bash scripts/harness-smoke.sh import-schema
+bash scripts/harness-smoke.sh check --json
+```
+
+`up` discovers actual published ports; it never assumes the full dev stack's ports. `check` verifies the real PostgreSQL ledger/tables, performs unique-key Redis and object-storage round trips, and deletes only its probe key/object. A failure returns nonzero. The redacted report is `.harness-smoke/check-report.json`; local credentials and state also remain ignored under `.harness-smoke/`.
+
+### Start the real backend
+
+From `backend/`, use the same project name and a free API port. The clean environment prevents ambient production tokens from being inherited; the worktree must still have no dotenv file:
+
+```bash
+env -i PATH="$PATH" HOME="$HOME" \
+  HARNESS_SMOKE_PROJECT=harness-smoke-my-branch \
+  bash --noprofile --norc -c '
+    set -euo pipefail
+    test ! -e ../.env && test ! -e .env
+    eval "$(bash ../scripts/harness-smoke.sh env)"
+    export API_BASE_URL=http://127.0.0.1:18090
+    exec uv run uvicorn src.main:app --host 127.0.0.1 --port 18090
+  '
+```
+
+In another terminal, `curl --fail http://127.0.0.1:18090/v1/health` must return HTTP 200. This is backend/datastore startup proof, not proof of a cloud Actor or model invocation. `env` intentionally contains local credentials: capture it in the launching shell, never paste it into issue reports.
+
+Stop the backend before removing its datastores, then run from the repository root:
+
+```bash
+HARNESS_SMOKE_PROJECT=harness-smoke-my-branch bash scripts/harness-smoke.sh down
+```
+
+Cleanup requires this checkout's owned containers or recorded project state. It refuses foreign checkout containers and unowned orphan volumes; no global prune or unrelated dev-stack shutdown is performed.
+
+## Stop the full dev stack
 
 ```bash
 docker compose -f docker-compose.dev.yml down
