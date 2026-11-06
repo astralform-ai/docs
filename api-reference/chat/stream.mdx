@@ -65,6 +65,8 @@ POST https://api.astralform.ai/v1/jobs
 | `mcp_manifest` | array | No | Tool definitions the client can execute itself. See [Client tools](#client-tools). |
 | `enabled_mcp` | string[] | No | Which of the client's MCP tools the end user has switched on. |
 | `repository` | string | No | `owner/repo` the task belongs to. Required on the first turn of a conversation on a code-mode agent; ignored on chat-mode agents. |
+| `harness_release_id` | string | No | Initial Harness release for a **new** conversation, by release id — one of the entries on [`GET /v1/me/harness-catalog`](#harness-catalog). Immutable once the conversation's first turn pins it: naming a different release later is refused with `409` — create a new conversation to switch. Omitted, the agent's [default release](#choosing-the-harness) applies. |
+| `harness_configuration` | object | No | Initial configuration for the release, validated against the release manifest's schema at admission. The pinned value is kept for every later turn; a different one is refused with `409`, like the release. Never echoed back: responses carry the admitted identity, not the configuration. |
 
 ¹ Either `message` or `continue_from_message` — a request with neither returns `400`.
 
@@ -79,11 +81,20 @@ A message that begins with a slash is a [slash command](/api-reference/skills/co
   "job_id": "0b7c9d2e-5f13-4a86-b0c4-7e2d9a1f3b55",
   "conversation_id": "8f2b1c04-3a5e-4d21-9b77-0c6e1f4a2d38",
   "message_id": "c41d7e69-8b02-4f5a-91d3-6a0e8c2b7f14",
-  "status": "queued"
+  "status": "queued",
+  "harness": {
+    "session_id": "54bfd7c2-6ec2-4d24-a1e5-7ee1b1d1b06a",
+    "release_id": "3f9a2c11-7d4e-4b6a-9c1e-5f0a8b2d4e77",
+    "profile": "astralform",
+    "legacy_native": false
+  },
+  "supported_features": ["attachments", "client_tools", "filesystem_restore", "goal", "image", "native_web_search", "plan", "regeneration", "resume", "structured_output", "video"]
 }
 ```
 
 It returns as soon as the job is queued — the agent has not run yet. `message_id` identifies the user message this turn was created for; keep it for `continue_from_message` and for submitting tool results.
+
+`harness` is the admitted identity — the executor this job actually runs on, which is what the conversation pinned, not necessarily what the request named. `supported_features` is the feature set recorded on that identity's release at admission. A server from before Harness selection omits both fields; read an absent `harness` as "unknown", not as any particular release. A pre-selection conversation answers `legacy_native: true` with `release_id: null` (its release was never recorded) and a null `supported_features` — likewise "unknown", never inferred from the profile. See [Choosing the Harness](#choosing-the-harness).
 
 ## Step 2 — stream the events
 
@@ -157,12 +168,48 @@ Declare the tools your app can run in `mcp_manifest`, and switch them on per end
 
 Execute the tool, then post the result to [Tool Result](/api-reference/chat/tool-result) with the `call_id` from the block's `final`. The job resumes on its own and the events continue on the same stream — do not create a second job. The same block path receives another `block_stop` with a terminal status once the result lands.
 
+## Choosing the Harness
+
+Every conversation runs on one Harness release, pinned by its first turn. The request's `harness_release_id` and `harness_configuration` are honored only while the conversation has no pin: the first turn admits them (a release that is unknown, unpublished, disabled, or not enabled for this team and agent is refused), and every later turn keeps the pinned values. Naming a different release or configuration on a pinned conversation is refused with `409` ("Harness session is pinned; create another conversation to change its release or configuration") — to switch, start a new conversation. Repeating the same values is accepted, as is omitting both. What the request names is a choice, not an identity: the admitted identity is what the job responses carry, and a defaulted request's identity is the release it defaulted to.
+
+When the request names no release, the agent's default applies: the release set with `PUT /v1/dashboard/agents/{agent_id}/harness-default` when one is set, else the newest published `astralform` release. The default covers future conversations only — existing pins never move when it changes. Configuration follows the same rule: the pinned value for a pinned conversation, else the request's value, else the agent default's value when the request rode the explicit default, else the team enablement's value.
+
+A release supports only the execution features its manifest declares. A turn that needs one it lacks — `goal`, `plan`, `image`, `video`, `attachments`, `client_tools`, `regeneration`, `structured_output`, `native_web_search`, `resume`, `filesystem_restore` — is refused before anything billable runs (`harness profile … cannot satisfy requested features`), naming the missing features. This is per-release, not per-profile: the same profile at two revisions may declare different sets. The coarse `capabilities` on the catalog (`llm`, `tools`, `blocks`, `workspace`) are hosting capabilities of the release's profile, a different axis from these execution features — gate a mode on `supported_features`, not on them.
+
+No parity is promised across profiles: releases differ in which features they declare, and nothing here claims one profile's tools, skills, memory, continuation, or recovery behave like another's. Profiles other than `astralform` are execution targets with their own semantics, and their release images are not published artifacts this documentation can point at.
+
+### Harness catalog
+
+```
+GET https://api.astralform.ai/v1/me/harness-catalog
+```
+
+Lists the published releases this credential's agent may actually admit, using the same auth as the job routes (an API key, or an end-user OAuth token with `X-Agent-ID`). The choice the client offers must come from here: a catalog the client invents can name a release admission refuses. Each entry carries `slug`, `release_id`, `profile`, `image_digest`, `capabilities`, `supported_features`, and `is_default`:
+
+```json
+[
+  {
+    "slug": "astralform",
+    "release_id": "3f9a2c11-7d4e-4b6a-9c1e-5f0a8b2d4e77",
+    "profile": "astralform",
+    "image_digest": "sha256:9c1e5f0a8b2d4e773f9a2c117d4e4b6a9c1e5f0a8b2d4e773f9a2c117d4e4b6a",
+    "capabilities": ["blocks", "llm", "tools", "workspace"],
+    "supported_features": ["attachments", "client_tools", "filesystem_restore", "goal", "image", "native_web_search", "plan", "regeneration", "resume", "structured_output", "video"],
+    "is_default": true
+  }
+]
+```
+
+`supported_features` is the authoritative per-release set from the release manifest, revision-aware — a revision-2 release declares its own, while a revision-1 release keeps its recorded profile-derived meaning. `is_default` marks the agent's default release (explicit, or the newest published `astralform` release when none is set). The catalog admits only runnable entries, so it may carry no default at all: when neither the explicit default nor the `astralform` fallback is admittable, nothing is marked, and a read of the list must not infer one from position or from the largest feature set. The projection carries no configuration, no image location, and no credentials — the digest identifies the image without locating it.
+
 ## Job control
 
 | Endpoint | Purpose |
 |----------|---------|
-| `GET /v1/jobs/{job_id}` | Poll status: `status`, timestamps, `error_message`, and `input_tokens` / `output_tokens`. |
+| `GET /v1/jobs/{job_id}` | Poll status: `status`, timestamps, `error_message`, `input_tokens` / `output_tokens`, and the admitted `harness` identity with its `supported_features`. |
 | `POST /v1/jobs/{job_id}/cancel` | Stop a running job. Returns `400` if it already finished, and `503` if the cancel was dispatched but no worker confirmed it — retry rather than assuming it stopped. |
+
+A job's `status` is `queued` (accepted, waiting to run), `in_progress` (the turn is running), or `awaiting_tool_result` (paused for a client tool result) while live; `completed`, `failed`, or `cancelled` once terminal. There is no separate "cancel requested" state on the wire: `POST …/cancel` either confirms the run stopped — the row reads `cancelled` or, when the cancel raced normal completion, `completed` — or it answers `503` and the status you poll afterwards is the honest one. A `503` leaves the outcome unknown rather than recording a request: observe `cancelled` via `GET /v1/jobs/{job_id}` instead of assuming the dispatch took effect. A `cancelled` row whose message is "The backend restarted before this run finished." is a deploy preemption, not a user's Stop — the platform stopped the run, not anything the client asked for.
 
 ## Example
 
@@ -205,6 +252,102 @@ for await (const event of parseSSE(res.body)) {
   }
 }
 ```
+
+### Choosing a release
+
+List what the agent may run on, then name one on the conversation's first turn. The creation response carries the admitted identity back — check it rather than assuming the pin landed where asked:
+
+<CodeGroup>
+```javascript JavaScript
+import { AstralformClient } from "@astralform/js";
+
+const client = new AstralformClient({
+  apiKey: "sk_xxxxxxxxxxxx",
+  userId: "user-42",
+});
+
+interface CatalogEntry {
+  slug: string;
+  release_id: string;
+  profile: string;
+  image_digest: string;
+  capabilities: string[];
+  supported_features: string[];
+  is_default: boolean;
+}
+
+const catalog = await client.get<CatalogEntry[]>("/v1/me/harness-catalog");
+const release = catalog.find((entry) => entry.is_default) ?? catalog[0];
+if (!release) {
+  throw new Error("The catalog admits no release for this agent.");
+}
+
+const job = await client.createJob({
+  message: "Hello, how are you?",
+  provider: "anthropic",
+  model: "claude-sonnet-5",
+  harness_release_id: release.release_id,
+});
+
+// The admitted identity — what the conversation pinned, not what was asked.
+console.log(job.harness?.release_id, job.harness?.profile);
+
+const polled = await client.getJob(job.job_id);
+console.log(polled.status, polled.harness?.session_id);
+```
+
+```swift Swift
+let client = session.client
+
+struct CatalogEntry: Decodable, Sendable {
+    let slug: String
+    let releaseId: String
+    let profile: String
+    let imageDigest: String
+    let capabilities: [String]
+    let supportedFeatures: [String]
+    let isDefault: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case slug, profile, capabilities
+        case releaseId = "release_id"
+        case imageDigest = "image_digest"
+        case supportedFeatures = "supported_features"
+        case isDefault = "is_default"
+    }
+}
+
+let catalog: [CatalogEntry] = try await client.get("/v1/me/harness-catalog")
+guard let fallback = catalog.first else {
+    throw AstralformError(code: "no_harness", message: "The catalog admits no release for this agent.")
+}
+let release = catalog.first(where: \.isDefault) ?? fallback
+
+// Gate the turn on the release's declared features, not on the profile name.
+guard release.supportedFeatures.contains("image") else {
+    throw AstralformError(code: "unsupported", message: "This release cannot run image turns.")
+}
+
+let created: JobCreateResponse = try await client.post(
+    "/v1/jobs",
+    body: ChatStreamRequest(
+        message: "Hello, how are you?",
+        provider: "anthropic",
+        model: "claude-sonnet-5",
+        harnessReleaseId: release.releaseId
+    )
+)
+
+// The admitted identity — what the conversation pinned, not what was asked.
+print(created.harness?.releaseId as Any, created.harness?.profile as Any)
+
+let polled: JobStatus = try await client.get("/v1/jobs/\(created.jobId)")
+print(polled.status, polled.harness?.sessionId as Any)
+```
 </CodeGroup>
+
+<Note>
+  The SDK surfaces above are the job API: the JavaScript client's `createJob` / `getJob` and the Swift client's generic `get` / `post` with the `ChatStreamRequest`, `JobCreateResponse`, and `JobStatus` types. The session-level `send` helpers do not take a Harness selection — create the job through the client for a pinned conversation, then stream its events. Older servers ignore the selection fields and omit `harness` from the responses; treat both absences as "unknown".
+</Note>
 
 The SDKs do both steps for you: [`Astralform-iOS-SDK`](https://github.com/astralform-ai/Astralform-iOS-SDK) and [`@astralform/js`](https://github.com/astralform-ai/Astralform-JS-SDK) create the job, subscribe, and reconnect with `after` on their own.
