@@ -351,7 +351,7 @@ print(polled.status, polled.harness?.sessionId as Any)
 </CodeGroup>
 
 <Note>
-  The SDK surfaces above are the job API: the JavaScript client's `createJob` / `getJob` and the Swift client's generic `get` / `post` with the `ChatStreamRequest`, `JobCreateResponse`, and `JobStatus` types. The session-level `send` helpers do not take a Harness selection — create the job through the client for a pinned conversation, then stream its events. Older servers ignore the selection fields and omit `harness` from the responses; treat both absences as "unknown".
+  The SDK surfaces above are the job API: the JavaScript client's `createJob` / `getJob` and the Swift client's generic `get` / `post` with the `ChatStreamRequest`, `JobCreateResponse`, and `JobStatus` types. The JavaScript SDK's `SendOptions` takes `harnessReleaseId` / `harnessConfiguration` on `session.send`; the Swift SDK's session-level `send` does not carry a Harness selection yet — create the job through the client for a pinned conversation, then stream its events. Older servers ignore the selection fields and omit `harness` from the responses; treat both absences as "unknown".
 </Note>
 
 The SDKs do both steps for you: [`Astralform-iOS-SDK`](https://github.com/astralform-ai/Astralform-iOS-SDK) and [`@astralform/js`](https://github.com/astralform-ai/Astralform-JS-SDK) create the job, subscribe, and reconnect with `after` on their own.
