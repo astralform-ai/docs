@@ -298,6 +298,9 @@ console.log(polled.status, polled.harness?.session_id);
 ```
 
 ```swift Swift
+// `session` is the ChatSession the iOS SDK guide establishes
+// (see the iOS SDK's Conversations guide); this fragment only shows
+// the harness-selection calls on its client.
 let client = session.client
 
 struct CatalogEntry: Decodable, Sendable {
