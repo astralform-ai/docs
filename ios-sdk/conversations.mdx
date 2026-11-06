@@ -64,6 +64,32 @@ try await session.send(
 | `goal` | Start a long-horizon goal and run this turn under it. |
 | `agentName` | The agent's own name. Optional: the key already identifies the agent. |
 
+`ChatStreamRequest` (via `session.client`, not `send`) additionally takes `harnessReleaseId` and `harnessConfiguration`: the Harness release and configuration for a **new** conversation, by release id — pinned immutably by the first turn. See [Harness selection](#harness-selection).
+
+## Harness selection
+
+Every conversation runs on one Harness release, pinned by its first turn. Pass the selection on `ChatStreamRequest` through the session's client — `SendOptions` carries no Harness fields, so `send` cannot name one:
+
+```swift
+let created: JobCreateResponse = try await session.client.post(
+    "/v1/jobs",
+    body: ChatStreamRequest(
+        message: "What's the weather like today?",
+        provider: "anthropic",
+        model: "claude-sonnet-5",
+        harnessReleaseId: "2578998f-f236-4edf-8721-8c7138db4e01",
+        harnessConfiguration: ["mode": .string("edit")]
+    )
+)
+
+// The admitted identity — what the conversation pinned, not what was asked.
+print(created.harness?.releaseId as Any, created.harness?.profile as Any)
+```
+
+Offer the choice from [`GET /v1/me/harness-catalog`](/api-reference/chat/stream#harness-catalog), which lists the published releases this agent may actually admit with their `supported_features` and `is_default`. Naming a different release or configuration on a pinned conversation is refused with `409` — start a new conversation to switch. Omitted, the agent's default release applies (explicit, else the newest published `astralform` release); the configuration defaults the same way, and neither response ever echoes it back. Gate a mode on the release's declared `supported_features`, not on the profile name or the coarse `capabilities` — a turn needing an undeclared feature is refused before anything billable runs. No profile parity is promised: releases differ in which features they declare, and nothing here claims one profile's tools, skills, memory, continuation, or recovery behave like another's.
+
+The admitted identity comes back on `JobCreateResponse.harness` and `JobStatus.harness` (`sessionId`, nullable `releaseId`, `profile`, `legacyNative`). A server from before Harness selection omits it — `harness` decodes as `nil`, and the selection fields are ignored. Read both absences as "unknown": a pre-selection conversation answers `legacyNative: true` with a `nil` release, and its historical release is never inferred from the profile.
+
 ## Event Types
 
 `ChatEvent` mirrors the wire protocol one-for-one — see [Stream a Chat](/api-reference/chat/stream#the-block-protocol) for what each carries.
